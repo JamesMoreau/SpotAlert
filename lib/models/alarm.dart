@@ -27,7 +27,7 @@ Map<String, dynamic> alarmToMap(Alarm alarm) {
   return {
     'id': alarm.id,
     'name': alarm.name,
-    'color': alarm.color.value,
+    'color': alarm.color.toARGB32(),
     'position': {
       'latitude': alarm.position.latitude,
       'longitude': alarm.position.longitude,

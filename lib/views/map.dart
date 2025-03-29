@@ -90,7 +90,7 @@ class MapView extends StatelessWidget {
                       constraints: const BoxConstraints(maxWidth: 100),
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       decoration: BoxDecoration(
-                        color: paleBlue.withOpacity(0.7),
+                        color: paleBlue.withValues(alpha: 0.7),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -111,7 +111,7 @@ class MapView extends StatelessWidget {
           for (var alarm in state.alarms) {
             var circle = CircleMarker(
               point: alarm.position,
-              color: alarm.color.withOpacity(0.5),
+              color: alarm.color.withValues(alpha: 0.5),
               borderColor: const Color(0xff2b2b2b),
               borderStrokeWidth: 2,
               radius: alarm.radius,
@@ -129,7 +129,7 @@ class MapView extends StatelessWidget {
           alarmPlacementCircle = CircleMarker(
             point: alarmPlacementPosition,
             radius: state.alarmPlacementRadius,
-            color: Colors.redAccent.withOpacity(0.5),
+            color: Colors.redAccent.withValues(alpha: 0.5),
             borderColor: Colors.black,
             borderStrokeWidth: 2,
             useRadiusInMeter: true,
@@ -199,7 +199,7 @@ class MapView extends StatelessWidget {
                           constraints: const BoxConstraints(maxWidth: 100),
                           padding: const EdgeInsets.symmetric(horizontal: 2),
                           decoration: BoxDecoration(
-                            color: paleBlue.withOpacity(0.7),
+                            color: paleBlue.withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -222,7 +222,7 @@ class MapView extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text(
@@ -340,7 +340,7 @@ class MapView extends StatelessWidget {
                     borderRadius: const BorderRadius.all(Radius.circular(15)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
+                        color: Colors.grey.withValues(alpha: 0.5),
                         spreadRadius: 2,
                         blurRadius: 5,
                         offset: const Offset(0, 3),
