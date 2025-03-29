@@ -18,7 +18,7 @@ class MapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => LocaAlertState(),
+      () => LocaAlert(),
       builder: (state) {
         var mapTileCacheStoreReference = state.mapTileCacheStore;
         if (mapTileCacheStoreReference == null) {
@@ -378,7 +378,7 @@ class MapView extends StatelessWidget {
   }
 
   void myOnMapEvent(MapEvent event) {
-    var state = June.getState(() => LocaAlertState());
+    var state = June.getState(() => LocaAlert());
 
     var centerOfMap = state.mapController.camera.center;
 
@@ -403,7 +403,7 @@ class MapView extends StatelessWidget {
   }
 
   Future<void> myOnMapReady() async {
-    var state = June.getState(() => LocaAlertState());
+    var state = June.getState(() => LocaAlert());
     
     var initialCenterReference = state.initialCenter;
     var shouldMoveToInitialCenter = initialCenterReference != null;
@@ -448,7 +448,7 @@ class MapView extends StatelessWidget {
   }
 
   void followOrUnfollowUserLocation() {
-    var state = June.getState(() => LocaAlertState());
+    var state = June.getState(() => LocaAlert());
     if (state.followUserLocation) {
       state.followUserLocation = false;
       state.setState();
@@ -478,7 +478,7 @@ class MapView extends StatelessWidget {
 }
 
 Future<void> moveMapToUserLocation() async {
-  var state = June.getState(() => LocaAlertState());
+  var state = June.getState(() => LocaAlert());
 
   var currentViewIsMap = state.currentView != ProximityAlarmViews.map;
   if (currentViewIsMap) {
@@ -500,7 +500,7 @@ Future<void> moveMapToUserLocation() async {
 double getAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
 
 Future<void> navigateToAlarm(Alarm alarm) async {
-  var state = June.getState(() => LocaAlertState());
+  var state = June.getState(() => LocaAlert());
   state.initialCenter = alarm.position;
   navigateToView(ProximityAlarmViews.map);
 }

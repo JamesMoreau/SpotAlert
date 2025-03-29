@@ -18,7 +18,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vibration/vibration.dart';
 
-class LocaAlertState extends JuneState {
+class LocaAlert extends JuneState {
 	List<Alarm> alarms = <Alarm>[];
 
 	LatLng? userLocation;
@@ -77,7 +77,7 @@ class LocaAlertState extends JuneState {
 const Uuid idGenerator = Uuid();
 
 bool deleteAlarmById(String id) {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 	for (var i = 0; i < state.alarms.length; i++) {
 		if (state.alarms[i].id == id) {
 			state.alarms.removeAt(i);
@@ -91,7 +91,7 @@ bool deleteAlarmById(String id) {
 }
 
 Alarm? getAlarmById(String id) {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 
 	for (var alarm in state.alarms) {
 		if (alarm.id == id) return alarm;
@@ -102,7 +102,7 @@ Alarm? getAlarmById(String id) {
 
 // Pass the new alarm data here to update proxalarm state. The id field in newAlarmData is ignored. returns success.
 bool updateAlarmById(String id, Alarm newAlarmData) {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 
 	for (var alarm in state.alarms) {
 		if (alarm.id == id) {
@@ -121,7 +121,7 @@ bool updateAlarmById(String id, Alarm newAlarmData) {
 }
 
 void addAlarm(Alarm alarm) {
-	var state = June.getState(() =>LocaAlertState());
+	var state = June.getState(() =>LocaAlert());
 
 	state.alarms.add(alarm);
 	state.setState();
@@ -130,7 +130,7 @@ void addAlarm(Alarm alarm) {
 
 // This saves all current alarms to shared preferences. Should be called everytime the alarms state is changed.
 Future<void> saveAlarmsToStorage() async {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 	
 	var directory = await getApplicationDocumentsDirectory();
 	var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
@@ -149,7 +149,7 @@ Future<void> saveAlarmsToStorage() async {
 }
 
 Future<void> loadAlarmsFromStorage() async {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 
 	var directory = await getApplicationDocumentsDirectory();
 	var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
@@ -178,7 +178,7 @@ Future<void> loadAlarmsFromStorage() async {
 }
 
 Future<void> loadSettingsFromStorage() async {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 
 	var directory = await getApplicationDocumentsDirectory();
 	var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
@@ -216,27 +216,27 @@ Future<void> clearAlarmsFromStorage() async {
 }
 
 void resetAlarmPlacementUIState() {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 	state.isPlacingAlarm = false;
 	state.alarmPlacementRadius = 100;
 }
 
 void changeVibration({required bool newValue}) {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 	state.vibration = newValue;
 	state.setState();
 	saveSettingsToStorage();
 }
 
 void changeShowClosestOffScreenAlarm({required bool newValue}) {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 	state.showClosestOffScreenAlarm = newValue;
 	state.setState();
 	saveSettingsToStorage();
 }
 
 Future<void> saveSettingsToStorage() async {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 	var directory = await getApplicationDocumentsDirectory();
 	var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
 	var settingsFile = File(settingsPath);
@@ -253,7 +253,7 @@ Future<void> saveSettingsToStorage() async {
 }
 
 Future<void> checkAlarms() async {
-  var state = June.getState(() => LocaAlertState());
+  var state = June.getState(() => LocaAlert());
   var activeAlarms = state.alarms.where((alarm) => alarm.active).toList();
 
   var permission = await location.hasPermission();

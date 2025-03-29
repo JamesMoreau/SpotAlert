@@ -15,7 +15,7 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => LocaAlertState(),
+      () => LocaAlert(),
       builder: (state) {
         return SafeArea(
           child: Scrollbar(

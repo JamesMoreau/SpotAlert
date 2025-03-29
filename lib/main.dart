@@ -29,7 +29,7 @@ void main() async {
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-  var state = June.getState(() => LocaAlertState());
+  var state = June.getState(() => LocaAlert());
 
   var initializationSettings = const InitializationSettings(iOS: DarwinInitializationSettings());
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
@@ -40,7 +40,7 @@ void main() async {
     var longitude = location.longitude;
     if (latitude == null || longitude == null) return; // This shouldn't happen, but just in case.
 
-    var state = June.getState(() => LocaAlertState());
+    var state = June.getState(() => LocaAlert());
     state.userLocation = LatLng(latitude, longitude);
     state.setState();
 
@@ -53,7 +53,7 @@ void main() async {
   // Check periodically if the location permission has been denied. If so, cancel the location updates.
   var locationPermissionCheckInterval = const Duration(seconds: 20);
   Timer.periodic(locationPermissionCheckInterval, (timer) async {
-    var state = June.getState(() => LocaAlertState());
+    var state = June.getState(() => LocaAlert());
     var permission = await location.hasPermission();
 
     if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
@@ -84,7 +84,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: JuneBuilder(
-        () => LocaAlertState(),
+        () => LocaAlert(),
         builder: (state) {
           // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
           var appIsInitialized = state.mapTileCacheStore != null;
@@ -160,7 +160,7 @@ class MainApp extends StatelessWidget {
 }
 
 void navigateToView(ProximityAlarmViews view) {
-  var state = June.getState(() => LocaAlertState());
+  var state = June.getState(() => LocaAlert());
   
   state.currentView = view;
   state.pageController.jumpToPage(view.index);

@@ -6,7 +6,7 @@ import 'package:loca_alert/models/alarm.dart';
 import 'package:vibration/vibration.dart';
 
 void showAlarmDialog(BuildContext context, String alarmId) {
-	var state = June.getState(() => LocaAlertState());
+	var state = June.getState(() => LocaAlert());
 	var alarm = getAlarmById(alarmId);
 
 	if (alarm == null) {
