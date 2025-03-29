@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
 import 'package:loca_alert/constants.dart';
-import 'package:loca_alert/loca_alert_state.dart';
+import 'package:loca_alert/loca_alert.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -37,7 +37,7 @@ class SettingsView extends StatelessWidget {
                       value: state.vibration,
                       thumbIcon: thumbIcon,
                       onChanged: (value) {
-                        changeVibration(newValue: value);
+                        changeVibration(state, newValue: value);
                       },
                     ),
                   ),
@@ -49,7 +49,7 @@ class SettingsView extends StatelessWidget {
                     trailing: Switch(
                       value: state.showClosestOffScreenAlarm,
                       onChanged: (value) {
-                        changeShowClosestOffScreenAlarm(newValue: value);
+                        changeShowClosestOffScreenAlarm(state, newValue: value);
                       },
                       thumbIcon: thumbIcon,
                     ),

@@ -7,7 +7,7 @@ import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:loca_alert/constants.dart';
-import 'package:loca_alert/loca_alert_state.dart';
+import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/main.dart';
 import 'package:loca_alert/models/alarm.dart';
 import 'package:location/location.dart';
@@ -299,8 +299,8 @@ class MapView extends StatelessWidget {
                         var centerOfMap = state.mapController.camera.center;
                         var alarmPlacementPosition = centerOfMap;
                         var alarm = Alarm(name: 'Alarm', position: alarmPlacementPosition, radius: state.alarmPlacementRadius);
-                        addAlarm(alarm);
-                        resetAlarmPlacementUIState();
+                        addAlarm(state, alarm);
+                        resetAlarmPlacementUIState(state);
                         state.setState();
                       },
                       elevation: 4,
@@ -309,7 +309,7 @@ class MapView extends StatelessWidget {
                     const SizedBox(height: 10),
                     FloatingActionButton(
                       onPressed: () {
-                        resetAlarmPlacementUIState();
+                        resetAlarmPlacementUIState(state);
                         state.setState();
                       },
                       elevation: 4,
@@ -499,8 +499,7 @@ Future<void> moveMapToUserLocation() async {
 
 double getAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
 
-Future<void> navigateToAlarm(Alarm alarm) async {
-  var state = June.getState(() => LocaAlert());
-  state.initialCenter = alarm.position;
-  navigateToView(ProximityAlarmViews.map);
+Future<void> navigateToAlarm(LocaAlert locaAlert, Alarm alarm) async {
+  locaAlert.initialCenter = alarm.position;
+  navigateToView(locaAlert, ProximityAlarmViews.map);
 }

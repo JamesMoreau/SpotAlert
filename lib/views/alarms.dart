@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:loca_alert/constants.dart';
-import 'package:loca_alert/loca_alert_state.dart';
+import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/models/alarm.dart';
 import 'package:loca_alert/views/map.dart';
 
@@ -23,15 +23,20 @@ class AlarmsView extends StatelessWidget {
       builder: (context) {
         return EditAlarmDialog(alarmId: alarm.id);
       },
-    ).whenComplete(resetEditAlarmState);
+    ).whenComplete(() {
+        // Reset the edit alarm state.
+        state.bufferAlarm = null;
+        state.nameInputController.clear();
+        state.setState();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
       () => LocaAlert(),
-      builder: (state) {
-        if (state.alarms.isEmpty) {
+      builder: (locaAlert) {
+        if (locaAlert.alarms.isEmpty) {
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -42,11 +47,11 @@ class AlarmsView extends StatelessWidget {
                     backgroundColor: Theme.of(context).colorScheme.primary,
                   ),
                   onPressed: () {
-                    addAlarm(Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value));
-                    addAlarm(Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value));
-                    addAlarm(Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AvailableAlarmColors.purple.value));
-                    addAlarm(Alarm(name: 'Saint Petersburg', position: const LatLng(59.9310, 30.3609), radius: 2000, color: AvailableAlarmColors.redAccent.value));
-                    addAlarm(Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value));
+                    addAlarm(locaAlert, Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value));
+                    addAlarm(locaAlert, Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value));
+                    addAlarm(locaAlert, Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AvailableAlarmColors.purple.value));
+                    addAlarm(locaAlert, Alarm(name: 'Saint Petersburg', position: const LatLng(59.9310, 30.3609), radius: 2000, color: AvailableAlarmColors.redAccent.value));
+                    addAlarm(locaAlert, Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value));
                   },
                   child: const Text('Add Some Alarms', style: TextStyle(color: Colors.white)),
                 ),
@@ -58,9 +63,9 @@ class AlarmsView extends StatelessWidget {
         return SafeArea(
           child: Scrollbar(
             child: ListView.builder(
-              itemCount: state.alarms.length,
+              itemCount: locaAlert.alarms.length,
               itemBuilder: (context, index) {
-                var alarm = state.alarms[index];
+                var alarm = locaAlert.alarms[index];
                 return Padding(
                   padding: const EdgeInsets.all(8),
                   child: ListTile(
@@ -75,7 +80,7 @@ class AlarmsView extends StatelessWidget {
                       thumbIcon: thumbIcon,
                       onChanged: (value) {
                         var updatedAlarmData = Alarm(name: alarm.name, position: alarm.position, radius: alarm.radius, color: alarm.color, active: value);
-                        updateAlarmById(alarm.id, updatedAlarmData);
+                        updateAlarmById(locaAlert, alarm.id, updatedAlarmData);
                       },
                     ),
                   ),
@@ -95,31 +100,31 @@ class EditAlarmDialog extends StatelessWidget {
   const EditAlarmDialog({required this.alarmId, super.key});
 
   void saveBufferToAlarm() {
-    var state = June.getState(() => LocaAlert());
+    var locaAlert = June.getState(() => LocaAlert());
 
     // Replace the actual alarm data with the buffer alarm.
-    var alarm = getAlarmById(alarmId);
+    var alarm = getAlarmById(locaAlert, alarmId);
     if (alarm == null) {
       debugPrintError('Cannot save alarm since no alarm exists with id $alarmId');
       return;
     }
 
-    var bufferAlarmReference = state.bufferAlarm;
+    var bufferAlarmReference = locaAlert.bufferAlarm;
     if (bufferAlarmReference == null) {
       debugPrintError('Cannot save buffer alarm since it is null.');
       return;
     }
 
-    bufferAlarmReference.name = state.nameInputController.text.trim();
-    updateAlarmById(alarmId, bufferAlarmReference);
+    bufferAlarmReference.name = locaAlert.nameInputController.text.trim();
+    updateAlarmById(locaAlert, alarmId, bufferAlarmReference);
   }
 
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
       () => LocaAlert(),
-      builder: (state) {
-        var bufferAlarmReference = state.bufferAlarm;
+      builder: (locaAlert) {
+        var bufferAlarmReference = locaAlert.bufferAlarm;
         if (bufferAlarmReference == null) {
           return const SizedBox.shrink();
         }
@@ -159,14 +164,14 @@ class EditAlarmDialog extends StatelessWidget {
                       Text('Name', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
                       TextFormField(
                         textAlign: TextAlign.center,
-                        controller: state.nameInputController,
-                        onChanged: (value) => state.setState(),
+                        controller: locaAlert.nameInputController,
+                        onChanged: (value) => locaAlert.setState(),
                         decoration: InputDecoration(
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.clear_rounded),
                             onPressed: () {
-                              state.nameInputController.clear();
-                              state.setState();
+                              locaAlert.nameInputController.clear();
+                              locaAlert.setState();
                             },
                           ),
                         ),
@@ -191,7 +196,7 @@ class EditAlarmDialog extends StatelessWidget {
                                 child: GestureDetector(
                                   onTap: () {
                                     bufferAlarmReference.color = color.value;
-                                    state.setState();
+                                    locaAlert.setState();
                                   },
                                   child: CircleAvatar(
                                     backgroundColor: color.value,
@@ -215,7 +220,7 @@ class EditAlarmDialog extends StatelessWidget {
                           ),
                           onPressed: () async {
                             Navigator.pop(context);
-                            await navigateToAlarm(bufferAlarmReference);
+                            await navigateToAlarm(locaAlert, bufferAlarmReference);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
                           label: const Text('Go To Alarm', style: TextStyle(color: Colors.white)),
@@ -235,12 +240,12 @@ class EditAlarmDialog extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            var ok = deleteAlarmById(alarmId);
+                            var ok = deleteAlarmById(locaAlert, alarmId);
                             if (!ok) {
                               debugPrintError('Alarm $id could not be deleted.');
                             }
                             // In case this alarm we just deleted happens to be the closest alarm, we need to make sure it doesn't show up.
-                            state.closestAlarm = null;
+                            locaAlert.closestAlarm = null;
                             Navigator.pop(context);
                           },
                           child: const Text('Delete Alarm', style: TextStyle(color: Colors.redAccent)),
@@ -256,11 +261,4 @@ class EditAlarmDialog extends StatelessWidget {
       },
     );
   }
-}
-
-void resetEditAlarmState() {
-  var state = June.getState(() => LocaAlert());
-  state.bufferAlarm = null;
-  state.nameInputController.clear();
-  state.setState();
 }

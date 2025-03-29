@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
 import 'package:loca_alert/constants.dart';
-import 'package:loca_alert/loca_alert_state.dart';
+import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/models/alarm.dart';
 import 'package:vibration/vibration.dart';
 
 void showAlarmDialog(BuildContext context, String alarmId) {
 	var state = June.getState(() => LocaAlert());
-	var alarm = getAlarmById(alarmId);
+	var alarm = getAlarmById(state, alarmId);
 
 	if (alarm == null) {
 		debugPrintError('Unable to retrieve triggered alarm.');
@@ -23,7 +23,7 @@ void showAlarmDialog(BuildContext context, String alarmId) {
 			color: alarm.color,
 			active: false, // deactivate the alarm
 		);
-		updateAlarmById(alarmId, dismissedAlarm);
+		updateAlarmById(state, alarmId, dismissedAlarm);
 		if (state.vibration) Vibration.cancel();
 		Navigator.pop(context);
 		state.alarmIsCurrentlyTriggered = false;

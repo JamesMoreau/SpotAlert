@@ -76,13 +76,12 @@ class LocaAlert extends JuneState {
 // This is used to produce unique ids. Only one instantiation is needed.
 const Uuid idGenerator = Uuid();
 
-bool deleteAlarmById(String id) {
-	var state = June.getState(() => LocaAlert());
-	for (var i = 0; i < state.alarms.length; i++) {
-		if (state.alarms[i].id == id) {
-			state.alarms.removeAt(i);
-			state.setState();
-			saveAlarmsToStorage();
+bool deleteAlarmById(LocaAlert locaAlert, String id) {
+	for (var i = 0; i < locaAlert.alarms.length; i++) {
+		if (locaAlert.alarms[i].id == id) {
+			locaAlert.alarms.removeAt(i);
+			locaAlert.setState();
+			saveAlarmsToStorage(locaAlert);
 			return true;
 		}
 	}
@@ -90,10 +89,8 @@ bool deleteAlarmById(String id) {
 	return false;
 }
 
-Alarm? getAlarmById(String id) {
-	var state = June.getState(() => LocaAlert());
-
-	for (var alarm in state.alarms) {
+Alarm? getAlarmById(LocaAlert locaAlert, String id) {
+	for (var alarm in locaAlert.alarms) {
 		if (alarm.id == id) return alarm;
 	}
 
@@ -101,18 +98,16 @@ Alarm? getAlarmById(String id) {
 }
 
 // Pass the new alarm data here to update proxalarm state. The id field in newAlarmData is ignored. returns success.
-bool updateAlarmById(String id, Alarm newAlarmData) {
-	var state = June.getState(() => LocaAlert());
-
-	for (var alarm in state.alarms) {
+bool updateAlarmById(LocaAlert locaAlert, String id, Alarm newAlarmData) {
+	for (var alarm in locaAlert.alarms) {
 		if (alarm.id == id) {
 			alarm.name     = newAlarmData.name;
 			alarm.position = newAlarmData.position;
 			alarm.radius   = newAlarmData.radius;
 			alarm.color    = newAlarmData.color;
 			alarm.active   = newAlarmData.active;
-			state.setState();
-			saveAlarmsToStorage();
+			locaAlert.setState();
+			saveAlarmsToStorage(locaAlert);
 			return true;
 		}
 	}
@@ -120,24 +115,20 @@ bool updateAlarmById(String id, Alarm newAlarmData) {
 	return false;
 }
 
-void addAlarm(Alarm alarm) {
-	var state = June.getState(() =>LocaAlert());
-
-	state.alarms.add(alarm);
-	state.setState();
-	saveAlarmsToStorage();
+void addAlarm(LocaAlert locaAlert, Alarm alarm) {
+	locaAlert.alarms.add(alarm);
+	locaAlert.setState();
+	saveAlarmsToStorage(locaAlert);
 }
 
 // This saves all current alarms to shared preferences. Should be called everytime the alarms state is changed.
-Future<void> saveAlarmsToStorage() async {
-	var state = June.getState(() => LocaAlert());
-	
+Future<void> saveAlarmsToStorage(LocaAlert locaAlert) async {
 	var directory = await getApplicationDocumentsDirectory();
 	var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
 	var file = File(alarmsPath);
 
 	var alarmJsons = List<String>.empty(growable: true);
-	for (var alarm in state.alarms) {
+	for (var alarm in locaAlert.alarms) {
 		var alarmMap = alarmToMap(alarm);
 		var alarmJson = jsonEncode(alarmMap);
 		alarmJsons.add(alarmJson);
@@ -148,9 +139,7 @@ Future<void> saveAlarmsToStorage() async {
 	debugPrintSuccess('Saved alarms to storage: $alarmJsons.');
 }
 
-Future<void> loadAlarmsFromStorage() async {
-	var state = June.getState(() => LocaAlert());
-
+Future<void> loadAlarmsFromStorage(LocaAlert locaAlert) async {
 	var directory = await getApplicationDocumentsDirectory();
 	var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
 	var file = File(alarmsPath);
@@ -170,16 +159,14 @@ Future<void> loadAlarmsFromStorage() async {
 	for (var alarmJson in alarmJsonsList) {
 		var alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
 		var alarm = alarmFromMap(alarmMap);
-		state.alarms.add(alarm);
+		locaAlert.alarms.add(alarm);
 	}
 
-	state.setState();
+	locaAlert.setState();
 	debugPrintSuccess('Loaded alarms from storage.');
 }
 
-Future<void> loadSettingsFromStorage() async {
-	var state = June.getState(() => LocaAlert());
-
+Future<void> loadSettingsFromStorage(LocaAlert locaAlert) async {
 	var directory = await getApplicationDocumentsDirectory();
 	var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
 	var settingsFile = File(settingsPath);
@@ -196,8 +183,8 @@ Future<void> loadSettingsFromStorage() async {
 	}
 
 	var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
-	state.vibration = settingsMap[settingsAlarmVibrationKey] as bool;
-	state.showClosestOffScreenAlarm = settingsMap[settingsShowClosestOffScreenAlarmKey] as bool;
+	locaAlert.vibration = settingsMap[settingsAlarmVibrationKey] as bool;
+	locaAlert.showClosestOffScreenAlarm = settingsMap[settingsShowClosestOffScreenAlarmKey] as bool;
 	debugPrintSuccess('Loaded settings from storage.');
 }
 
@@ -215,35 +202,31 @@ Future<void> clearAlarmsFromStorage() async {
 	debugPrintSuccess('Cleared alarms from storage.');
 }
 
-void resetAlarmPlacementUIState() {
-	var state = June.getState(() => LocaAlert());
-	state.isPlacingAlarm = false;
-	state.alarmPlacementRadius = 100;
+void resetAlarmPlacementUIState(LocaAlert locaAlert) {
+	locaAlert.isPlacingAlarm = false;
+	locaAlert.alarmPlacementRadius = 100;
 }
 
-void changeVibration({required bool newValue}) {
-	var state = June.getState(() => LocaAlert());
-	state.vibration = newValue;
-	state.setState();
-	saveSettingsToStorage();
+void changeVibration(LocaAlert locaAlert, {required bool newValue}) {
+	locaAlert.vibration = newValue;
+	locaAlert.setState();
+	saveSettingsToStorage(locaAlert);
 }
 
-void changeShowClosestOffScreenAlarm({required bool newValue}) {
-	var state = June.getState(() => LocaAlert());
-	state.showClosestOffScreenAlarm = newValue;
-	state.setState();
-	saveSettingsToStorage();
+void changeShowClosestOffScreenAlarm(LocaAlert locaAlert, {required bool newValue}) {
+	locaAlert.showClosestOffScreenAlarm = newValue;
+	locaAlert.setState();
+	saveSettingsToStorage(locaAlert);
 }
 
-Future<void> saveSettingsToStorage() async {
-	var state = June.getState(() => LocaAlert());
+Future<void> saveSettingsToStorage(LocaAlert locaAlert) async {
 	var directory = await getApplicationDocumentsDirectory();
 	var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
 	var settingsFile = File(settingsPath);
 
 	var settingsMap = <String, dynamic>{
-		settingsAlarmVibrationKey:            state.vibration,
-		settingsShowClosestOffScreenAlarmKey: state.showClosestOffScreenAlarm,
+		settingsAlarmVibrationKey:            locaAlert.vibration,
+		settingsShowClosestOffScreenAlarmKey: locaAlert.showClosestOffScreenAlarm,
 	};
 
 	var settingsJson = jsonEncode(settingsMap);
@@ -293,6 +276,7 @@ Future<void> checkAlarms() async {
   showAlarmDialog(NavigationService.navigatorKey.currentContext!, triggeredAlarm.id);
 
   if (state.vibration) {
+    debugPrintInfo('Vibrating.');
     for (var i = 0; i < numberOfTriggeredAlarmVibrations; i++) {
       await Vibration.vibrate(duration: 1000);
       await Future<void>.delayed(const Duration(milliseconds: 1000));
