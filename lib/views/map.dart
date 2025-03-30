@@ -445,31 +445,31 @@ class MapView extends StatelessWidget {
 
     // The remaining case is that the user has granted location permissions, so we do nothing.
   }
+}
 
-  void followOrUnfollowUserLocation(LocaAlert locaAlert) {
-    if (locaAlert.followUserLocation) {
-      locaAlert.followUserLocation = false;
-      locaAlert.setState();
-    } else {
-      // Check if we actually can follow the user's location. If not, show a snackbar.
-      if (locaAlert.userLocation == null) {
-        debugPrintError("Unable to follow the user's location.");
-        ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!).showSnackBar(
-          SnackBar(
-            behavior: SnackBarBehavior.floating,
-            content: Container(
-              padding: const EdgeInsets.all(8),
-              child: const Text('Unable to follow your location. Are location services permitted?'),
-            ),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+void followOrUnfollowUserLocation(LocaAlert locaAlert) {
+  if (locaAlert.followUserLocation) {
+    locaAlert.followUserLocation = false;
+    locaAlert.setState();
+  } else {
+    // Check if we actually can follow the user's location. If not, show a snackbar.
+    if (locaAlert.userLocation == null) {
+      debugPrintError("Unable to follow the user's location.");
+      ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Container(
+            padding: const EdgeInsets.all(8),
+            child: const Text('Unable to follow your location. Are location services permitted?'),
           ),
-        );
-        
-      } else {
-        locaAlert.followUserLocation = true;
-        moveMapToUserLocation(locaAlert);
-        locaAlert.setState();
-      }
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+      
+    } else {
+      locaAlert.followUserLocation = true;
+      moveMapToUserLocation(locaAlert);
+      locaAlert.setState();
     }
   }
 }
