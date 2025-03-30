@@ -24,8 +24,8 @@ class SettingsView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: ListTile(
-                    title: Text(state.appName),
-                    subtitle: Text('Version: ${state.version}'),
+                    title: Text(state.packageInfo.appName),
+                    subtitle: Text('Version: ${state.packageInfo.version}'),
                     trailing: const Icon(Icons.info_rounded),
                   ),
                 ),

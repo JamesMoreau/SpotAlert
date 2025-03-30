@@ -44,21 +44,12 @@ class LocaAlert extends JuneState {
   bool vibration = true;
   bool showClosestOffScreenAlarm = true;
 
-  late String appName;
-  late String packageName;
-  late String version;
-  late String buildNumber;
+  late PackageInfo packageInfo;
 
   @override
   Future<void> onInit() async {
     pageController = PageController(initialPage: currentView.index);
-
-    var packageInfo = await PackageInfo.fromPlatform();
-    appName = packageInfo.appName;
-    packageName = packageInfo.packageName;
-    version = packageInfo.version;
-    buildNumber = packageInfo.buildNumber;
-
+    packageInfo = await PackageInfo.fromPlatform();
     super.onInit();
   }
 

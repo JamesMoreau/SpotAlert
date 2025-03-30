@@ -155,7 +155,7 @@ class MapView extends StatelessWidget {
               children: [
                 TileLayer(
                   urlTemplate: openStreetMapTemplateUrl,
-                  userAgentPackageName: state.packageName,
+                  userAgentPackageName: state.packageInfo.packageName,
                   tileProvider: CachedTileProvider(
                     maxStale: const Duration(days: 30),
                     store: mapTileCacheStoreReference,
