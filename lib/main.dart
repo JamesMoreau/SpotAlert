@@ -17,7 +17,6 @@ import 'package:path_provider/path_provider.dart';
 
 /*
 TODO:
- try an get rid of package info state variables.
 */
 
 const author = 'James Moreau';
