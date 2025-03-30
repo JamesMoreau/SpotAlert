@@ -17,6 +17,11 @@ import 'package:path_provider/path_provider.dart';
 
 /*
 TODO:
+  remove cache variables in app state:
+    Alarm? closestAlarm;
+    bool closestAlarmIsInView = false;
+  
+  Figure out a way around: "Another exception was thrown: Exception: You need to have the FlutterMap widget rendered at least once before using the MapController."
 */
 
 const author = 'James Moreau';
