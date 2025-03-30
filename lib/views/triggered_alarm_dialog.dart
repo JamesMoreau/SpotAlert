@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
-import 'package:loca_alert/constants_and_globals.dart';
 import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/main.dart';
 import 'package:loca_alert/models/alarm.dart';
