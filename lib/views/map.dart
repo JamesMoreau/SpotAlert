@@ -279,14 +279,14 @@ class MapView extends StatelessWidget {
                   const SizedBox(height: 10),
                   if (state.followUserLocation) ...[
                     FloatingActionButton(
-                      onPressed: followOrUnfollowUserLocation,
+                      onPressed: () => followOrUnfollowUserLocation(state),
                       elevation: 4,
                       backgroundColor: const Color.fromARGB(255, 216, 255, 218),
                       child: const Icon(Icons.near_me_rounded),
                     ),
                   ] else ...[
                     FloatingActionButton(
-                      onPressed: followOrUnfollowUserLocation,
+                      onPressed: () => followOrUnfollowUserLocation(state),
                       elevation: 4,
                       child: const Icon(Icons.lock_rounded),
                     ),
@@ -446,52 +446,48 @@ class MapView extends StatelessWidget {
     // The remaining case is that the user has granted location permissions, so we do nothing.
   }
 
-  void followOrUnfollowUserLocation() {
-    var state = June.getState(() => LocaAlert());
-    if (state.followUserLocation) {
-      state.followUserLocation = false;
-      state.setState();
-      return;
-    }
-
-    // Check if we actually can follow the user's location. If not, show a snackbar.
-    if (state.userLocation == null) {
-      debugPrintError("Unable to follow the user's location.");
-      ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Container(
-            padding: const EdgeInsets.all(8),
-            child: const Text('Unable to follow your location. Are location services permitted?'),
+  void followOrUnfollowUserLocation(LocaAlert locaAlert) {
+    if (locaAlert.followUserLocation) {
+      locaAlert.followUserLocation = false;
+      locaAlert.setState();
+    } else {
+      // Check if we actually can follow the user's location. If not, show a snackbar.
+      if (locaAlert.userLocation == null) {
+        debugPrintError("Unable to follow the user's location.");
+        ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            content: Container(
+              padding: const EdgeInsets.all(8),
+              child: const Text('Unable to follow your location. Are location services permitted?'),
+            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-      );
-      return;
+        );
+        
+      } else {
+        locaAlert.followUserLocation = true;
+        moveMapToUserLocation(locaAlert);
+        locaAlert.setState();
+      }
     }
-
-    state.followUserLocation = true;
-    moveMapToUserLocation();
-    state.setState();
   }
 }
 
-Future<void> moveMapToUserLocation() async {
-  var state = June.getState(() => LocaAlert());
-
-  var currentViewIsMap = state.view != LocaAlertView.map;
+Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
+  var currentViewIsMap = locaAlert.view != LocaAlertView.map;
   if (currentViewIsMap) {
     return;
   }
 
-  var userPosition = state.userLocation;
+  var userPosition = locaAlert.userLocation;
   if (userPosition == null) {
     debugPrintError('Unable to move map to user location.');
     return;
   }
 
-  var currentZoom = state.mapController.camera.zoom;
-  state.mapController.move(userPosition, currentZoom);
+  var currentZoom = locaAlert.mapController.camera.zoom;
+  locaAlert.mapController.move(userPosition, currentZoom);
 
   debugPrintInfo('Moving map to user location.');
 }

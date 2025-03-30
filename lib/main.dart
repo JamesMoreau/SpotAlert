@@ -159,7 +159,7 @@ void main() async {
     await checkAlarms(locaAlert);
 
     var shouldMoveMapToUserLocation = locaAlert.followUserLocation && locaAlert.view == LocaAlertView.map;
-    if (shouldMoveMapToUserLocation) await moveMapToUserLocation();
+    if (shouldMoveMapToUserLocation) await moveMapToUserLocation(locaAlert);
   });
 
   // Check periodically if the location permission has been denied. If so, cancel the location updates.
