@@ -61,7 +61,7 @@ class MapView extends StatelessWidget {
           indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
 
           var centerOfMap = state.mapController.camera.center;
-          arrowRotation = angle = getAngleBetweenTwoPositions(centerOfMap, closestAlarmReference.position);
+          arrowRotation = angle = calculateAngleBetweenTwoPositions(centerOfMap, closestAlarmReference.position);
           angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
           angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
 
@@ -402,6 +402,7 @@ class MapView extends StatelessWidget {
   }
 
   Future<void> myOnMapReady() async {
+    // TODO: refactor. maybe use a switch?
     var state = June.getState(() => LocaAlert());
 
     var initialCenterReference = state.initialCenter;
@@ -465,7 +466,6 @@ void followOrUnfollowUserLocation(LocaAlert locaAlert) {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
-      
     } else {
       locaAlert.followUserLocation = true;
       moveMapToUserLocation(locaAlert);
@@ -492,7 +492,7 @@ Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
   debugPrintInfo('Moving map to user location.');
 }
 
-double getAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
+double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
 
 Future<void> navigateToAlarm(LocaAlert locaAlert, Alarm alarm) async {
   locaAlert.initialCenter = alarm.position;
