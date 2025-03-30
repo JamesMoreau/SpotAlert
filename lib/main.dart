@@ -54,7 +54,7 @@ enum AvailableAlarmColors {
   amber(Colors.amber),
   grey(Colors.grey),
   black(Colors.black);
-  
+
   const AvailableAlarmColors(this.value);
   final Color value;
 }
@@ -271,7 +271,7 @@ void navigateToView(LocaAlert locaAlert, ProximityAlarmViews view) {
   locaAlert.currentView = view;
   locaAlert.pageController.jumpToPage(view.index);
   locaAlert.setState();
-  
+
   debugPrintInfo('Navigating to $view.');
 }
 

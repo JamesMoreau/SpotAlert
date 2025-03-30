@@ -145,7 +145,7 @@ class MapView extends StatelessWidget {
             FlutterMap(
               mapController: state.mapController,
               options: MapOptions(
-                initialCenter: state.initialCenter ?? const LatLng(0,0),
+                initialCenter: state.initialCenter ?? const LatLng(0, 0),
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
                 // keepAlive: true, // Keep the map alive when it is not visible. This uses more battery.
@@ -403,7 +403,7 @@ class MapView extends StatelessWidget {
 
   Future<void> myOnMapReady() async {
     var state = June.getState(() => LocaAlert());
-    
+
     var initialCenterReference = state.initialCenter;
     var shouldMoveToInitialCenter = initialCenterReference != null;
     if (shouldMoveToInitialCenter) {

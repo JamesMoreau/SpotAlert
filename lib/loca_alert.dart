@@ -18,220 +18,219 @@ import 'package:uuid/uuid.dart';
 import 'package:vibration/vibration.dart';
 
 class LocaAlert extends JuneState {
-	List<Alarm> alarms = <Alarm>[];
+  List<Alarm> alarms = <Alarm>[];
+  LatLng? userLocation;
 
-	LatLng? userLocation;
+  // EditAlarmDialog Stuff
+  Alarm? bufferAlarm;
+  TextEditingController nameInputController = TextEditingController();
 
-	// EditAlarmDialog Stuff
-	Alarm? bufferAlarm;
-	TextEditingController nameInputController = TextEditingController();
+  ProximityAlarmViews currentView = ProximityAlarmViews.alarms;
+  late PageController pageController;
+  bool alarmIsCurrentlyTriggered = false;
 
-	ProximityAlarmViews currentView = ProximityAlarmViews.alarms;
-	late PageController pageController;
-	bool alarmIsCurrentlyTriggered = false;
-
-	// MapView stuff. The booleans such as showMarkersInsteadOfCircles and closestAlarmIsInView are necessary because mapController
+  // MapView stuff. The booleans such as showMarkersInsteadOfCircles and closestAlarmIsInView are necessary because mapController
   // cannot be accessed within the build method of the map view. So instead we update these booleans using myOnMapEvent.
-	MapController mapController = MapController();
+  MapController mapController = MapController();
   LatLng? initialCenter = const LatLng(0, 0);
-	bool isPlacingAlarm = false;
-	double alarmPlacementRadius = 100;
-	bool showMarkersInsteadOfCircles = false; 
-	Alarm? closestAlarm;
-	bool closestAlarmIsInView = false;
-	CacheStore? mapTileCacheStore;
-	bool followUserLocation = false;
+  bool isPlacingAlarm = false;
+  double alarmPlacementRadius = 100;
+  bool showMarkersInsteadOfCircles = false;
+  Alarm? closestAlarm;
+  bool closestAlarmIsInView = false;
+  CacheStore? mapTileCacheStore;
+  bool followUserLocation = false;
 
-	bool vibration = true;
-	bool showClosestOffScreenAlarm = true;
+  bool vibration = true;
+  bool showClosestOffScreenAlarm = true;
 
   late String appName;
   late String packageName;
   late String version;
   late String buildNumber;
 
-	@override
-	Future<void> onInit() async {
-		pageController = PageController(initialPage: currentView.index);
-    
+  @override
+  Future<void> onInit() async {
+    pageController = PageController(initialPage: currentView.index);
+
     var packageInfo = await PackageInfo.fromPlatform();
-    appName     = packageInfo.appName;
+    appName = packageInfo.appName;
     packageName = packageInfo.packageName;
-    version     = packageInfo.version;
+    version = packageInfo.version;
     buildNumber = packageInfo.buildNumber;
 
-		super.onInit();
-	}
+    super.onInit();
+  }
 
-	@override
-	void onClose() {
-		pageController.dispose();
-		mapController.dispose();
+  @override
+  void onClose() {
+    pageController.dispose();
+    mapController.dispose();
     mapTileCacheStore?.close();
-		super.onClose();
-	}
+    super.onClose();
+  }
 }
 
 // This is used to produce unique ids. Only one instantiation is needed.
 const Uuid idGenerator = Uuid();
 
 bool deleteAlarmById(LocaAlert locaAlert, String id) {
-	for (var i = 0; i < locaAlert.alarms.length; i++) {
-		if (locaAlert.alarms[i].id == id) {
-			locaAlert.alarms.removeAt(i);
-			locaAlert.setState();
-			saveAlarmsToStorage(locaAlert);
-			return true;
-		}
-	}
+  for (var i = 0; i < locaAlert.alarms.length; i++) {
+    if (locaAlert.alarms[i].id == id) {
+      locaAlert.alarms.removeAt(i);
+      locaAlert.setState();
+      saveAlarmsToStorage(locaAlert);
+      return true;
+    }
+  }
 
-	return false;
+  return false;
 }
 
 Alarm? getAlarmById(LocaAlert locaAlert, String id) {
-	for (var alarm in locaAlert.alarms) {
-		if (alarm.id == id) return alarm;
-	}
+  for (var alarm in locaAlert.alarms) {
+    if (alarm.id == id) return alarm;
+  }
 
-	return null;
+  return null;
 }
 
 // Pass the new alarm data here to update proxalarm state. The id field in newAlarmData is ignored. returns success.
 bool updateAlarmById(LocaAlert locaAlert, String id, Alarm newAlarmData) {
-	for (var alarm in locaAlert.alarms) {
-		if (alarm.id == id) {
-			alarm.name     = newAlarmData.name;
-			alarm.position = newAlarmData.position;
-			alarm.radius   = newAlarmData.radius;
-			alarm.color    = newAlarmData.color;
-			alarm.active   = newAlarmData.active;
-			locaAlert.setState();
-			saveAlarmsToStorage(locaAlert);
-			return true;
-		}
-	}
+  for (var alarm in locaAlert.alarms) {
+    if (alarm.id == id) {
+      alarm.name = newAlarmData.name;
+      alarm.position = newAlarmData.position;
+      alarm.radius = newAlarmData.radius;
+      alarm.color = newAlarmData.color;
+      alarm.active = newAlarmData.active;
+      locaAlert.setState();
+      saveAlarmsToStorage(locaAlert);
+      return true;
+    }
+  }
 
-	return false;
+  return false;
 }
 
 void addAlarm(LocaAlert locaAlert, Alarm alarm) {
-	locaAlert.alarms.add(alarm);
-	locaAlert.setState();
-	saveAlarmsToStorage(locaAlert);
+  locaAlert.alarms.add(alarm);
+  locaAlert.setState();
+  saveAlarmsToStorage(locaAlert);
 }
 
 // This saves all current alarms to shared preferences. Should be called everytime the alarms state is changed.
 Future<void> saveAlarmsToStorage(LocaAlert locaAlert) async {
-	var directory = await getApplicationDocumentsDirectory();
-	var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-	var file = File(alarmsPath);
+  var directory = await getApplicationDocumentsDirectory();
+  var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+  var file = File(alarmsPath);
 
-	var alarmJsons = List<String>.empty(growable: true);
-	for (var alarm in locaAlert.alarms) {
-		var alarmMap = alarmToMap(alarm);
-		var alarmJson = jsonEncode(alarmMap);
-		alarmJsons.add(alarmJson);
-	}
+  var alarmJsons = List<String>.empty(growable: true);
+  for (var alarm in locaAlert.alarms) {
+    var alarmMap = alarmToMap(alarm);
+    var alarmJson = jsonEncode(alarmMap);
+    alarmJsons.add(alarmJson);
+  }
 
-	var json = jsonEncode(alarmJsons);
-	await file.writeAsString(json);
-	debugPrintInfo('Saved alarms to storage: $alarmJsons.');
+  var json = jsonEncode(alarmJsons);
+  await file.writeAsString(json);
+  debugPrintInfo('Saved alarms to storage: $alarmJsons.');
 }
 
 Future<void> loadAlarmsFromStorage(LocaAlert locaAlert) async {
-	var directory = await getApplicationDocumentsDirectory();
-	var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-	var file = File(alarmsPath);
+  var directory = await getApplicationDocumentsDirectory();
+  var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+  var file = File(alarmsPath);
 
-	if (!file.existsSync()) {
-		debugPrintWarning('No alarms file found in storage.');
-		return;
-	}
+  if (!file.existsSync()) {
+    debugPrintWarning('No alarms file found in storage.');
+    return;
+  }
 
-	var alarmJsons = await file.readAsString();
-	if (alarmJsons.isEmpty) {
-		debugPrintWarning('No alarms found in storage.');
-		return;
-	}
+  var alarmJsons = await file.readAsString();
+  if (alarmJsons.isEmpty) {
+    debugPrintWarning('No alarms found in storage.');
+    return;
+  }
 
-	var alarmJsonsList = jsonDecode(alarmJsons) as List;
-	for (var alarmJson in alarmJsonsList) {
-		var alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
-		var alarm = alarmFromMap(alarmMap);
-		locaAlert.alarms.add(alarm);
-	}
+  var alarmJsonsList = jsonDecode(alarmJsons) as List;
+  for (var alarmJson in alarmJsonsList) {
+    var alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
+    var alarm = alarmFromMap(alarmMap);
+    locaAlert.alarms.add(alarm);
+  }
 
-	locaAlert.setState();
-	debugPrintInfo('Loaded alarms from storage.');
+  locaAlert.setState();
+  debugPrintInfo('Loaded alarms from storage.');
 }
 
 Future<void> loadSettingsFromStorage(LocaAlert locaAlert) async {
-	var directory = await getApplicationDocumentsDirectory();
-	var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
-	var settingsFile = File(settingsPath);
+  var directory = await getApplicationDocumentsDirectory();
+  var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
+  var settingsFile = File(settingsPath);
 
-	if (!settingsFile.existsSync()) {
-		debugPrintWarning('No settings file found in storage.');
-		return;
-	}
+  if (!settingsFile.existsSync()) {
+    debugPrintWarning('No settings file found in storage.');
+    return;
+  }
 
-	var settingsJson = await settingsFile.readAsString();
-	if (settingsJson.isEmpty) {
-		debugPrintError('No settings found in storage.');
-		return;
-	}
+  var settingsJson = await settingsFile.readAsString();
+  if (settingsJson.isEmpty) {
+    debugPrintError('No settings found in storage.');
+    return;
+  }
 
-	var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
-	locaAlert.vibration = settingsMap[settingsAlarmVibrationKey] as bool;
-	locaAlert.showClosestOffScreenAlarm = settingsMap[settingsShowClosestOffScreenAlarmKey] as bool;
-	debugPrintInfo('Loaded settings from storage.');
+  var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
+  locaAlert.vibration = settingsMap[settingsAlarmVibrationKey] as bool;
+  locaAlert.showClosestOffScreenAlarm = settingsMap[settingsShowClosestOffScreenAlarmKey] as bool;
+  debugPrintInfo('Loaded settings from storage.');
 }
 
 Future<void> clearAlarmsFromStorage() async {
-	var directory = await getApplicationDocumentsDirectory();
-	var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-	var alarmsFile = File(alarmsPath);
+  var directory = await getApplicationDocumentsDirectory();
+  var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+  var alarmsFile = File(alarmsPath);
 
-	if (!alarmsFile.existsSync()) {
-		debugPrintWarning('No alarms file found in storage. Cannot clear alarms.');
-		return;
-	}
+  if (!alarmsFile.existsSync()) {
+    debugPrintWarning('No alarms file found in storage. Cannot clear alarms.');
+    return;
+  }
 
-	await alarmsFile.delete();
-	debugPrintInfo('Cleared alarms from storage.');
+  await alarmsFile.delete();
+  debugPrintInfo('Cleared alarms from storage.');
 }
 
 void resetAlarmPlacementUIState(LocaAlert locaAlert) {
-	locaAlert.isPlacingAlarm = false;
-	locaAlert.alarmPlacementRadius = 100;
+  locaAlert.isPlacingAlarm = false;
+  locaAlert.alarmPlacementRadius = 100;
 }
 
 void changeVibration(LocaAlert locaAlert, {required bool newValue}) {
-	locaAlert.vibration = newValue;
-	locaAlert.setState();
-	saveSettingsToStorage(locaAlert);
+  locaAlert.vibration = newValue;
+  locaAlert.setState();
+  saveSettingsToStorage(locaAlert);
 }
 
 void changeShowClosestOffScreenAlarm(LocaAlert locaAlert, {required bool newValue}) {
-	locaAlert.showClosestOffScreenAlarm = newValue;
-	locaAlert.setState();
-	saveSettingsToStorage(locaAlert);
+  locaAlert.showClosestOffScreenAlarm = newValue;
+  locaAlert.setState();
+  saveSettingsToStorage(locaAlert);
 }
 
 Future<void> saveSettingsToStorage(LocaAlert locaAlert) async {
-	var directory = await getApplicationDocumentsDirectory();
-	var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
-	var settingsFile = File(settingsPath);
+  var directory = await getApplicationDocumentsDirectory();
+  var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
+  var settingsFile = File(settingsPath);
 
-	var settingsMap = <String, dynamic>{
-		settingsAlarmVibrationKey:            locaAlert.vibration,
-		settingsShowClosestOffScreenAlarmKey: locaAlert.showClosestOffScreenAlarm,
-	};
+  var settingsMap = <String, dynamic>{
+    settingsAlarmVibrationKey: locaAlert.vibration,
+    settingsShowClosestOffScreenAlarmKey: locaAlert.showClosestOffScreenAlarm,
+  };
 
-	var settingsJson = jsonEncode(settingsMap);
-	await settingsFile.writeAsString(settingsJson);
+  var settingsJson = jsonEncode(settingsMap);
+  await settingsFile.writeAsString(settingsJson);
 
-	debugPrintInfo('Saved settings to storage.');
+  debugPrintInfo('Saved settings to storage.');
 }
 
 Future<void> checkAlarms(LocaAlert locaAlert) async {
@@ -260,7 +259,8 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
   // If another alarm is already triggered, ignore the new alarm.
   if (locaAlert.alarmIsCurrentlyTriggered) return;
 
-  var triggeredAlarm = triggeredAlarms[0]; // For now, we only handle one triggered alarm at a time. Although it is possible to have multiple alarms triggered at the same time.
+  var triggeredAlarm =
+      triggeredAlarms[0]; // For now, we only handle one triggered alarm at a time. Although it is possible to have multiple alarms triggered at the same time.
   triggeredAlarm.active = false; // Deactivate the alarm so it doesn't trigger again upon user location changing.
 
   debugPrintInfo('Alarm Check: Sending the user a notification for alarm ${triggeredAlarm.name}.');
@@ -283,29 +283,29 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
 }
 
 List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
-	var triggeredAlarms = <Alarm>[];
+  var triggeredAlarms = <Alarm>[];
 
-	for (var alarm in alarms) {
+  for (var alarm in alarms) {
     var distance = const Distance().as(LengthUnit.Meter, alarm.position, position);
-		if (distance <= alarm.radius) triggeredAlarms.add(alarm);
-	}
+    if (distance <= alarm.radius) triggeredAlarms.add(alarm);
+  }
 
-	return triggeredAlarms;
+  return triggeredAlarms;
 }
 
 Alarm? getClosestAlarmToPosition(LatLng position, List<Alarm> alarms) {
-	Alarm? closestAlarm;
-	var closestDistance = double.infinity;
+  Alarm? closestAlarm;
+  var closestDistance = double.infinity;
 
-	if (alarms.isEmpty) return null;
+  if (alarms.isEmpty) return null;
 
-	for (var alarm in alarms) {
+  for (var alarm in alarms) {
     var distance = const Distance().as(LengthUnit.Meter, alarm.position, position);
-		if (distance < closestDistance) {
-			closestAlarm = alarm;
-			closestDistance = distance;
-		}
-	}
+    if (distance < closestDistance) {
+      closestAlarm = alarm;
+      closestDistance = distance;
+    }
+  }
 
-	return closestAlarm;
+  return closestAlarm;
 }

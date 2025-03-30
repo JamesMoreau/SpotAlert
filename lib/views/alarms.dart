@@ -24,10 +24,10 @@ class AlarmsView extends StatelessWidget {
         return EditAlarmDialog(alarmId: alarm.id);
       },
     ).whenComplete(() {
-        // Reset the edit alarm state.
-        state.bufferAlarm = null;
-        state.nameInputController.clear();
-        state.setState();
+      // Reset the edit alarm state.
+      state.bufferAlarm = null;
+      state.nameInputController.clear();
+      state.setState();
     });
   }
 
@@ -50,7 +50,8 @@ class AlarmsView extends StatelessWidget {
                     addAlarm(locaAlert, Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value));
                     addAlarm(locaAlert, Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value));
                     addAlarm(locaAlert, Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AvailableAlarmColors.purple.value));
-                    addAlarm(locaAlert, Alarm(name: 'Saint Petersburg', position: const LatLng(59.9310, 30.3609), radius: 2000, color: AvailableAlarmColors.redAccent.value));
+                    addAlarm(
+                        locaAlert, Alarm(name: 'Saint Petersburg', position: const LatLng(59.9310, 30.3609), radius: 2000, color: AvailableAlarmColors.redAccent.value));
                     addAlarm(locaAlert, Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value));
                   },
                   child: const Text('Add Some Alarms', style: TextStyle(color: Colors.white)),
