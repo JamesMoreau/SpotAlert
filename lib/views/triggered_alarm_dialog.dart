@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
-import 'package:loca_alert/constants.dart';
+import 'package:loca_alert/constants_and_globals.dart';
 import 'package:loca_alert/loca_alert.dart';
+import 'package:loca_alert/main.dart';
 import 'package:loca_alert/models/alarm.dart';
 import 'package:vibration/vibration.dart';
 
@@ -21,7 +22,7 @@ void showAlarmDialog(BuildContext context, String alarmId) {
 			position: alarm.position,
 			radius: alarm.radius,
 			color: alarm.color,
-			active: false, // deactivate the alarm
+			active: false,
 		);
 		updateAlarmById(state, alarmId, dismissedAlarm);
 		if (state.vibration) Vibration.cancel();

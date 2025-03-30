@@ -8,7 +8,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/constants.dart';
+import 'package:loca_alert/constants_and_globals.dart';
 import 'package:loca_alert/main.dart';
 import 'package:loca_alert/models/alarm.dart';
 import 'package:loca_alert/views/triggered_alarm_dialog.dart';
@@ -136,7 +136,7 @@ Future<void> saveAlarmsToStorage(LocaAlert locaAlert) async {
 
 	var json = jsonEncode(alarmJsons);
 	await file.writeAsString(json);
-	debugPrintSuccess('Saved alarms to storage: $alarmJsons.');
+	debugPrintInfo('Saved alarms to storage: $alarmJsons.');
 }
 
 Future<void> loadAlarmsFromStorage(LocaAlert locaAlert) async {
@@ -163,7 +163,7 @@ Future<void> loadAlarmsFromStorage(LocaAlert locaAlert) async {
 	}
 
 	locaAlert.setState();
-	debugPrintSuccess('Loaded alarms from storage.');
+	debugPrintInfo('Loaded alarms from storage.');
 }
 
 Future<void> loadSettingsFromStorage(LocaAlert locaAlert) async {
@@ -185,7 +185,7 @@ Future<void> loadSettingsFromStorage(LocaAlert locaAlert) async {
 	var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
 	locaAlert.vibration = settingsMap[settingsAlarmVibrationKey] as bool;
 	locaAlert.showClosestOffScreenAlarm = settingsMap[settingsShowClosestOffScreenAlarmKey] as bool;
-	debugPrintSuccess('Loaded settings from storage.');
+	debugPrintInfo('Loaded settings from storage.');
 }
 
 Future<void> clearAlarmsFromStorage() async {
@@ -199,7 +199,7 @@ Future<void> clearAlarmsFromStorage() async {
 	}
 
 	await alarmsFile.delete();
-	debugPrintSuccess('Cleared alarms from storage.');
+	debugPrintInfo('Cleared alarms from storage.');
 }
 
 void resetAlarmPlacementUIState(LocaAlert locaAlert) {
@@ -232,12 +232,11 @@ Future<void> saveSettingsToStorage(LocaAlert locaAlert) async {
 	var settingsJson = jsonEncode(settingsMap);
 	await settingsFile.writeAsString(settingsJson);
 
-	debugPrintSuccess('Saved settings to storage.');
+	debugPrintInfo('Saved settings to storage.');
 }
 
-Future<void> checkAlarms() async {
-  var state = June.getState(() => LocaAlert());
-  var activeAlarms = state.alarms.where((alarm) => alarm.active).toList();
+Future<void> checkAlarms(LocaAlert locaAlert) async {
+  var activeAlarms = locaAlert.alarms.where((alarm) => alarm.active).toList();
 
   var permission = await location.hasPermission();
   if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
@@ -245,13 +244,13 @@ Future<void> checkAlarms() async {
     return;
   }
 
-  var userPositionReference = state.userLocation;
+  var userPositionReference = locaAlert.userLocation;
   if (userPositionReference == null) {
     debugPrintWarning('Alarm Check: No user position found.');
     return;
   }
 
-  var triggeredAlarms = checkIfUserTriggersAlarms(userPositionReference, activeAlarms);
+  var triggeredAlarms = detectTriggeredAlarms(userPositionReference, activeAlarms);
   if (triggeredAlarms.isEmpty) {
     debugPrintInfo('Alarm Check: No alarms triggered.');
     return;
@@ -260,7 +259,7 @@ Future<void> checkAlarms() async {
   for (var alarm in triggeredAlarms) debugPrintInfo('Alarm Check: Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
 
   // If another alarm is already triggered, ignore the new alarm.
-  if (state.alarmIsCurrentlyTriggered) return;
+  if (locaAlert.alarmIsCurrentlyTriggered) return;
 
   var triggeredAlarm = triggeredAlarms[0]; // For now, we only handle one triggered alarm at a time. Although it is possible to have multiple alarms triggered at the same time.
   triggeredAlarm.active = false; // Deactivate the alarm so it doesn't trigger again upon user location changing.
@@ -272,10 +271,10 @@ Future<void> checkAlarms() async {
   await flutterLocalNotificationsPlugin.show(id++, 'Alarm Triggered', 'You have entered the radius of alarm: ${triggeredAlarm.name}.', notificationDetails);
 
   // No alarm is currently triggered, so we can show the dialog.
-  state.alarmIsCurrentlyTriggered = true;
+  locaAlert.alarmIsCurrentlyTriggered = true;
   showAlarmDialog(NavigationService.navigatorKey.currentContext!, triggeredAlarm.id);
 
-  if (state.vibration) {
+  if (locaAlert.vibration) {
     debugPrintInfo('Vibrating.');
     for (var i = 0; i < numberOfTriggeredAlarmVibrations; i++) {
       await Vibration.vibrate(duration: 1000);
@@ -284,11 +283,11 @@ Future<void> checkAlarms() async {
   }
 }
 
-List<Alarm> checkIfUserTriggersAlarms(LatLng userPosition, List<Alarm> alarms) {
+List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
 	var triggeredAlarms = <Alarm>[];
 
 	for (var alarm in alarms) {
-    var distance = const Distance().as(LengthUnit.Meter, alarm.position, userPosition);
+    var distance = const Distance().as(LengthUnit.Meter, alarm.position, position);
 		if (distance <= alarm.radius) triggeredAlarms.add(alarm);
 	}
 

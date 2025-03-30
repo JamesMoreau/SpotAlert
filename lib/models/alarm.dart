@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/constants.dart';
+import 'package:loca_alert/constants_and_globals.dart';
 import 'package:loca_alert/loca_alert.dart';
 
 class Alarm {

@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/constants.dart';
+import 'package:loca_alert/constants_and_globals.dart';
 import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/views/alarms.dart';
 import 'package:loca_alert/views/map.dart';
@@ -39,13 +40,12 @@ void main() async {
   location.onLocationChanged.listen((location) async {
     if (location.latitude == null || location.longitude == null) return;
 
-    var state = June.getState(() => LocaAlert());
-    state.userLocation = LatLng(location.latitude!, location.longitude!);
-    state.setState();
+    locaAlert.userLocation = LatLng(location.latitude!, location.longitude!);
+    locaAlert.setState();
 
-    await checkAlarms();
+    await checkAlarms(locaAlert);
 
-    var shouldMoveMapToUserLocation = state.followUserLocation && state.currentView == ProximityAlarmViews.map;
+    var shouldMoveMapToUserLocation = locaAlert.followUserLocation && locaAlert.currentView == ProximityAlarmViews.map;
     if (shouldMoveMapToUserLocation) await moveMapToUserLocation();
   });
 
@@ -165,3 +165,12 @@ void navigateToView(LocaAlert locaAlert, ProximityAlarmViews view) {
   
   debugPrintInfo('Navigating to $view.');
 }
+
+
+void debugPrintMessage(String message) {
+  if (kDebugMode) debugPrint(message);
+}
+
+void debugPrintInfo(String message) => debugPrintMessage('ℹ️ $message');
+void debugPrintWarning(String message) => debugPrintMessage('⚠️ $message');
+void debugPrintError(String message) => debugPrintMessage('❌ $message');

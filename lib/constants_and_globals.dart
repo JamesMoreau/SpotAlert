@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location/location.dart';
@@ -108,14 +107,6 @@ ThemeData locationAlarmTheme = ThemeData(
 );
 
 const paleBlue = Color(0xffeaf0f5);
-
-void debugPrintInfo(String message) {
-  if (kDebugMode) debugPrint(message);
-}
-
-void debugPrintWarning(String message) => debugPrintInfo('📙 $message');
-void debugPrintError(String message) => debugPrintInfo('📕 $message');
-void debugPrintSuccess(String message) => debugPrintInfo('📗 $message');
 
 // for switch icons.
 final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Icon?>((states) {

@@ -4,8 +4,9 @@ import 'package:app_settings/app_settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
-import 'package:loca_alert/constants.dart';
+import 'package:loca_alert/constants_and_globals.dart';
 import 'package:loca_alert/loca_alert.dart';
+import 'package:loca_alert/main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -92,7 +93,7 @@ class SettingsView extends StatelessWidget {
                       var scaffoldMessenger = ScaffoldMessenger.of(context); // Don't use Scaffold.of(context) across async gaps (according to flutter).
 
                       await state.mapTileCacheStore?.clean();
-                      debugPrintSuccess('Map tile cache cleared.');
+                      debugPrintInfo('Map tile cache cleared.');
 
                       scaffoldMessenger.showSnackBar(
                         SnackBar(
