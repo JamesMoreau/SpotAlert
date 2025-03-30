@@ -154,7 +154,7 @@ void main() async {
 
     await checkAlarms(locaAlert);
 
-    var shouldMoveMapToUserLocation = locaAlert.followUserLocation && locaAlert.currentView == ProximityAlarmViews.map;
+    var shouldMoveMapToUserLocation = locaAlert.followUserLocation && locaAlert.view == LocaAlertView.map;
     if (shouldMoveMapToUserLocation) await moveMapToUserLocation();
   });
 
@@ -183,7 +183,7 @@ void main() async {
   locaAlert.setState(); // Notify the ui that the map tile cache is loaded.
 }
 
-enum ProximityAlarmViews { alarms, map, settings }
+enum LocaAlertView { alarms, map, settings }
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -237,10 +237,10 @@ class MainApp extends StatelessWidget {
                 child: NavigationBar(
                   elevation: 3,
                   onDestinationSelected: (int index) {
-                    var newView = ProximityAlarmViews.values[index];
+                    var newView = LocaAlertView.values[index];
                     navigateToView(state, newView);
                   },
-                  selectedIndex: state.currentView.index,
+                  selectedIndex: state.view.index,
                   destinations: const [
                     NavigationDestination(
                       icon: Icon(Icons.pin_drop_rounded),
@@ -267,9 +267,9 @@ class MainApp extends StatelessWidget {
   }
 }
 
-void navigateToView(LocaAlert locaAlert, ProximityAlarmViews view) {
-  locaAlert.currentView = view;
-  locaAlert.pageController.jumpToPage(view.index);
+void navigateToView(LocaAlert locaAlert, LocaAlertView view) {
+  locaAlert.view = view;
+  locaAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
   locaAlert.setState();
 
   debugPrintInfo('Navigating to $view.');

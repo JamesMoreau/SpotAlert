@@ -25,7 +25,7 @@ class LocaAlert extends JuneState {
   Alarm? bufferAlarm;
   TextEditingController nameInputController = TextEditingController();
 
-  ProximityAlarmViews currentView = ProximityAlarmViews.alarms;
+  LocaAlertView view = LocaAlertView.alarms;
   late PageController pageController;
   bool alarmIsCurrentlyTriggered = false;
 
@@ -48,7 +48,7 @@ class LocaAlert extends JuneState {
 
   @override
   Future<void> onInit() async {
-    pageController = PageController(initialPage: currentView.index);
+    pageController = PageController(initialPage: view.index);
     packageInfo = await PackageInfo.fromPlatform();
     super.onInit();
   }

@@ -479,7 +479,7 @@ class MapView extends StatelessWidget {
 Future<void> moveMapToUserLocation() async {
   var state = June.getState(() => LocaAlert());
 
-  var currentViewIsMap = state.currentView != ProximityAlarmViews.map;
+  var currentViewIsMap = state.view != LocaAlertView.map;
   if (currentViewIsMap) {
     return;
   }
@@ -500,5 +500,5 @@ double getAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude
 
 Future<void> navigateToAlarm(LocaAlert locaAlert, Alarm alarm) async {
   locaAlert.initialCenter = alarm.position;
-  navigateToView(locaAlert, ProximityAlarmViews.map);
+  navigateToView(locaAlert, LocaAlertView.map);
 }
