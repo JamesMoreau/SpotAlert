@@ -155,12 +155,9 @@ class MapView extends StatelessWidget {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
                     Alarm? closestAlarm;
                     var closestAlarmIsVisible = false;
-                    if (state.visibleCenter != null) {
-                      closestAlarm = getClosestAlarmToPosition(state.visibleCenter!, state.alarms);
-
-                      if (state.visibleBounds != null) {
-                        closestAlarmIsVisible = state.visibleBounds!.contains(closestAlarm!.position);
-                      }
+                    closestAlarm = getClosestAlarmToPosition(MapCamera.of(context).center, state.alarms);
+                    if (state.visibleBounds != null) {
+                      closestAlarmIsVisible = state.visibleBounds!.contains(closestAlarm!.position);
                     }
 
                     var showClosestAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
@@ -394,7 +391,6 @@ class MapView extends StatelessWidget {
 
   void myOnMapEvent(MapEvent event, LocaAlert state) {
     state.visibleBounds = state.mapController.camera.visibleBounds;
-    state.visibleCenter = state.mapController.camera.center;
     state.setState();
   }
 
