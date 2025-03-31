@@ -18,6 +18,9 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO:
+  Try using OnMapReady() to update a state variable that let's us know if the mapcontroller is ready to use. Or maybe there is a way
+  to put the arrow logic as a child of the map widget?
+
   remove cache variables in app state:
     Alarm? closestAlarm;
     bool closestAlarmIsInView = false;
