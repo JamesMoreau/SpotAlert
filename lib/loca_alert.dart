@@ -278,11 +278,11 @@ List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
 }
 
 Alarm? getClosestAlarmToPosition(LatLng position, List<Alarm> alarms) {
+  if (alarms.isEmpty) return null;
+  
   Alarm? closestAlarm;
   var closestDistance = double.infinity;
-
-  if (alarms.isEmpty) return null;
-
+  
   for (var alarm in alarms) {
     var distance = const Distance().as(LengthUnit.Meter, alarm.position, position);
     if (distance < closestDistance) {
