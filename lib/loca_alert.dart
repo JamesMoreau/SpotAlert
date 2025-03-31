@@ -254,7 +254,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
   var triggeredAlarm = triggeredAlarms.first;
   triggeredAlarm.active = false; // Deactivate the alarm so it doesn't trigger again upon user location changing.
   locaAlert.triggeredAlarmId = triggeredAlarm.id;
-  showAlarmDialog(NavigationService.navigatorKey.currentContext!, locaAlert);
+  showAlarmDialog(NavigationService.navigatorKey.currentContext!, triggeredAlarm);
 
   debugPrintInfo('Alarm Check: Sending the user a notification for alarm ${triggeredAlarm.name}.');
   var notificationDetails = const NotificationDetails(

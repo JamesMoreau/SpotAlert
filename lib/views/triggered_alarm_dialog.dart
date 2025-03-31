@@ -1,20 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/main.dart';
+import 'package:loca_alert/models/alarm.dart';
 
-void showAlarmDialog(BuildContext context, LocaAlert state) {
-  if (state.triggeredAlarmId == null) {
-    debugPrintError('showAlarmDialog() was called but there is no triggered alarm id.');
-    return;
-  }
-  
-  var alarm = getAlarmById(state, state.triggeredAlarmId!);
-  if (alarm == null) {
-    debugPrintError('Unable to retrieve triggered alarm with id: ${state.triggeredAlarmId}.');
-    state.triggeredAlarmId = null;
-    return;
-  }
-
+void showAlarmDialog(BuildContext context, Alarm triggeredAlarm) {
   showGeneralDialog<void>(
     context: context,
     pageBuilder: (context, a1, a2) => Dialog.fullscreen(
@@ -45,7 +33,7 @@ void showAlarmDialog(BuildContext context, LocaAlert state) {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Icon(Icons.alarm, size: 100, color: alarm.color),
+                    Icon(Icons.alarm, size: 100, color: triggeredAlarm.color),
                   ],
                 ),
               ),
@@ -53,12 +41,11 @@ void showAlarmDialog(BuildContext context, LocaAlert state) {
                 flex: 2,
                 child: Column(
                   children: [
-                    Text(alarm.name, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                    Text(triggeredAlarm.name, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
                         // Close the dialog
-                        state.triggeredAlarmId = null;
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
