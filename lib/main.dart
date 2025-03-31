@@ -18,7 +18,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO:
-  check that we aren't actally allowing rotation on the map widget.
   Should opening map view immedietly move to user (when not locked on)?
   Check that we are actually saving the settings to file.
   Move loca_alert.dart to main.dart .

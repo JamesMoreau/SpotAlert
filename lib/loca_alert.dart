@@ -76,23 +76,27 @@ Alarm? getAlarmById(LocaAlert locaAlert, String id) {
   return null;
 }
 
-// TODO(james): is there a better way to do this? in order to call this you need to create a new Alarm, which assigns a new id.
-// maybe multiple optional parameters?
-// Pass the new alarm data here to update LocaAlert state. The id field in newAlarmData is ignored. returns success.
-bool updateAlarmById(LocaAlert locaAlert, String id, Alarm newAlarmData) {
+bool updateAlarmById(
+  LocaAlert locaAlert,
+  String id, {
+  String? name,
+  LatLng? position,
+  double? radius,
+  Color? color,
+  bool? active,
+}) {
   for (var alarm in locaAlert.alarms) {
     if (alarm.id == id) {
-      alarm.name = newAlarmData.name;
-      alarm.position = newAlarmData.position;
-      alarm.radius = newAlarmData.radius;
-      alarm.color = newAlarmData.color;
-      alarm.active = newAlarmData.active;
+      if (name != null) alarm.name = name;
+      if (position != null) alarm.position = position;
+      if (radius != null) alarm.radius = radius;
+      if (color != null) alarm.color = color;
+      if (active != null) alarm.active = active;
       locaAlert.setState();
       saveAlarmsToStorage(locaAlert);
       return true;
     }
   }
-
   return false;
 }
 
@@ -241,8 +245,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     debugPrintInfo('Alarm Check: Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
 
     // Deactivate the alarm so it doesn't trigger again upon next call to checkAlarms.
-    var updatedAlarmData = Alarm(name: alarm.name, position: alarm.position, radius: alarm.radius, color: alarm.color, active: false);
-    updateAlarmById(locaAlert, alarm.id, updatedAlarmData);
+    updateAlarmById(locaAlert, alarm.id, active: false);
 
     var notificationDetails = const NotificationDetails(
       iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentBanner: true, presentSound: true),

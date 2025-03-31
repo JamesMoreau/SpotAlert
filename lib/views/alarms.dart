@@ -78,10 +78,7 @@ class AlarmsView extends StatelessWidget {
                       value: alarm.active,
                       activeColor: alarm.color,
                       thumbIcon: thumbIcon,
-                      onChanged: (value) {
-                        var updatedAlarmData = Alarm(name: alarm.name, position: alarm.position, radius: alarm.radius, color: alarm.color, active: value);
-                        updateAlarmById(locaAlert, alarm.id, updatedAlarmData);
-                      },
+                      onChanged: (value) => updateAlarmById(locaAlert, alarm.id, active: value),
                     ),
                   ),
                 );
@@ -241,7 +238,7 @@ class EditAlarmDialog extends StatelessWidget {
   }
 }
 
-void saveBufferToAlarm(LocaAlert locaAlert, String alarmId) {
+void saveBufferToAlarm(LocaAlert locaAlert, String alarmId) { // TODO(james) Cleanup. should we even be passing alarm id. or have reference? inline?
   // Replace the actual alarm data with the buffer alarm.
   var alarm = getAlarmById(locaAlert, alarmId);
   if (alarm == null) {
@@ -256,5 +253,14 @@ void saveBufferToAlarm(LocaAlert locaAlert, String alarmId) {
   }
 
   bufferAlarmReference.name = locaAlert.nameInputController.text.trim();
-  updateAlarmById(locaAlert, alarmId, bufferAlarmReference);
+  
+  updateAlarmById(
+    locaAlert,
+    alarmId,
+    name: bufferAlarmReference.name,
+    position: bufferAlarmReference.position,
+    radius: bufferAlarmReference.radius,
+    color: bufferAlarmReference.color,
+    active: bufferAlarmReference.active,
+  );
 }
