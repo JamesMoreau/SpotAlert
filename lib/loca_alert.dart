@@ -29,9 +29,8 @@ class LocaAlert extends JuneState {
 
   // Map View
   MapController mapController = MapController();
-
-  LatLng? initialCenter = const LatLng(0, 0); // TODO(james): maybe try to get rid of optional?
   CacheStore? mapTileCacheStore;
+  LatLng? initialCenter = const LatLng(0, 0); // TODO(james): maybe try to get rid of optional?
   bool isPlacingAlarm = false; // TODO(james): try to make optional so that this and alarmPlacementRadius are combined.
   double alarmPlacementRadius = 100;
   bool followUserLocation = false;
