@@ -82,7 +82,6 @@ class MapView extends StatelessWidget {
                     store: mapTileCacheStoreReference,
                   ),
                 ),
-                // if (showMarkersInsteadOfCircles) MarkerLayer(markers: alarmMarkers) else CircleLayer(circles: alarmCircles),
                 Builder(
                   builder: (context) {
                     // Display the alarms as circles or markers on the map. We create a set of markers or circles
@@ -158,15 +157,11 @@ class MapView extends StatelessWidget {
                       closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
                     }
 
-                    var showClosestAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
-                    if (!showClosestAlarm) return const SizedBox.shrink();
+                    var showClosestNonVisibleAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestNonVisibleAlarmSetting;
+                    if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
 
-                    // TODO(james): reduce / organize
                     var ellipseWidth = screenSize.width * 0.8;
                     var ellipseHeight = screenSize.height * 0.65;
-                    var indicatorColor = closestAlarm.color;
-                    var arrow = Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: indicatorColor, size: 28));
-                    var indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
                     var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
                     var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
                     var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
@@ -179,7 +174,7 @@ class MapView extends StatelessWidget {
                               offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
                               child: Transform.rotate(
                                 angle: arrowRotation,
-                                child: arrow,
+                                child: Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28)),
                               ),
                             ),
                           ),
@@ -188,7 +183,7 @@ class MapView extends StatelessWidget {
                           child: Center(
                             child: Transform.translate(
                               offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                              child: indicatorAlarmIcon,
+                              child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
                             ),
                           ),
                         ),

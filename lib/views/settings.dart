@@ -47,9 +47,9 @@ class SettingsView extends StatelessWidget {
                   child: ListTile(
                     title: const Text('Show Closest Off-Screen Alarm'),
                     trailing: Switch(
-                      value: state.showClosestOffScreenAlarmSetting,
+                      value: state.showClosestNonVisibleAlarmSetting,
                       onChanged: (value) {
-                        changeShowClosestOffScreenAlarm(state, newValue: value);
+                        changeShowClosestNonVisibleAlarm(state, newValue: value);
                       },
                       thumbIcon: thumbIcon,
                     ),

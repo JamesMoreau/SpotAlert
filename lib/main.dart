@@ -18,16 +18,9 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO:
-  Try using OnMapReady() to update a state variable that let's us know if the mapcontroller is ready to use. Or maybe there is a way
-  to put the arrow logic as a child of the map widget?
-
-  remove cache variables in app state:
-    Alarm? closestAlarm;
-    bool closestAlarmIsInView = false;
-  
-  Figure out a way around: "Another exception was thrown: Exception: You need to have the FlutterMap widget rendered at least once before using the MapController."
-
+  check that we aren't actally allowing rotation on the map widget.
   Should opening map view immedietly move to user (when not locked on)?
+  Check that we are actually saving the settings to file.
 */
 
 const author = 'James Moreau';
@@ -47,7 +40,7 @@ const numberOfTriggeredAlarmVibrations = 6;
 
 const settingsAlarmVibrationKey = 'alarmVibration';
 const settingsAlarmNotificationKey = 'alarmNotification';
-const settingsShowClosestOffScreenAlarmKey = 'showClosestOffScreenAlarm';
+const settingsShowClosestNonVisibleAlarmKey = 'showClosestNonVisibleAlarm';
 const settingsFilename = 'settings.json';
 const alarmsFilename = 'alarms.json';
 

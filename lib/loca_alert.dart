@@ -38,7 +38,7 @@ class LocaAlert extends JuneState {
 
   late PackageInfo packageInfo;
   bool vibrationSetting = true;
-  bool showClosestOffScreenAlarmSetting = true;
+  bool showClosestNonVisibleAlarmSetting = true;
 
   @override
   Future<void> onInit() async {
@@ -166,7 +166,7 @@ Future<void> loadSettingsFromStorage(LocaAlert locaAlert) async {
 
   var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
   locaAlert.vibrationSetting = settingsMap[settingsAlarmVibrationKey] as bool;
-  locaAlert.showClosestOffScreenAlarmSetting = settingsMap[settingsShowClosestOffScreenAlarmKey] as bool;
+  locaAlert.showClosestNonVisibleAlarmSetting = settingsMap[settingsShowClosestNonVisibleAlarmKey] as bool;
   debugPrintInfo('Loaded settings from storage.');
 }
 
@@ -195,8 +195,8 @@ void changeVibration(LocaAlert locaAlert, {required bool newValue}) {
   saveSettingsToStorage(locaAlert);
 }
 
-void changeShowClosestOffScreenAlarm(LocaAlert locaAlert, {required bool newValue}) {
-  locaAlert.showClosestOffScreenAlarmSetting = newValue;
+void changeShowClosestNonVisibleAlarm(LocaAlert locaAlert, {required bool newValue}) { //TODO(james): change this to a toggle? or maybe just inline?
+  locaAlert.showClosestNonVisibleAlarmSetting = newValue;
   locaAlert.setState();
   saveSettingsToStorage(locaAlert);
 }
@@ -208,7 +208,7 @@ Future<void> saveSettingsToStorage(LocaAlert locaAlert) async {
 
   var settingsMap = <String, dynamic>{
     settingsAlarmVibrationKey: locaAlert.vibrationSetting,
-    settingsShowClosestOffScreenAlarmKey: locaAlert.showClosestOffScreenAlarmSetting,
+    settingsShowClosestNonVisibleAlarmKey: locaAlert.showClosestNonVisibleAlarmSetting,
   };
 
   var settingsJson = jsonEncode(settingsMap);
