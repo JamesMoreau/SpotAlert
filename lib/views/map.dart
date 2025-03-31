@@ -82,7 +82,12 @@ class MapView extends StatelessWidget {
         // beyond (below) circleToMarkerZoomThreshold.
         var alarmCircles = <CircleMarker>[];
         var alarmMarkers = <Marker>[];
-        if (state.showMarkersInsteadOfCircles) {
+        var showMarkersInsteadOfCircles = false;
+        if (state.cameraZoom != null) {
+          showMarkersInsteadOfCircles = state.cameraZoom! < circleToMarkerZoomThreshold;
+        }
+
+        if (showMarkersInsteadOfCircles) {
           for (var alarm in state.alarms) {
             var marker = Marker(
               width: 100,
@@ -170,7 +175,7 @@ class MapView extends StatelessWidget {
                     store: mapTileCacheStoreReference,
                   ),
                 ),
-                if (state.showMarkersInsteadOfCircles) MarkerLayer(markers: alarmMarkers) else CircleLayer(circles: alarmCircles),
+                if (showMarkersInsteadOfCircles) MarkerLayer(markers: alarmMarkers) else CircleLayer(circles: alarmCircles),
                 if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
                 if (state.userLocation != null) MarkerLayer(markers: userLocationMarker),
               ],
@@ -388,18 +393,12 @@ class MapView extends StatelessWidget {
   void myOnMapEvent(MapEvent event, LocaAlert state) {
     state.visibleBounds = state.mapController.camera.visibleBounds;
     state.visibleCenter = state.mapController.camera.center;
-
-    if (state.mapController.camera.zoom < circleToMarkerZoomThreshold)
-      state.showMarkersInsteadOfCircles = true;
-    else
-      state.showMarkersInsteadOfCircles = false;
-
+    state.cameraZoom = state.mapController.camera.zoom;
     state.setState();
   }
 
   Future<void> myOnMapReady(LocaAlert state) async {
     // TODO(james): refactor. maybe use a switch?
-
     var initialCenterReference = state.initialCenter;
     var shouldMoveToInitialCenter = initialCenterReference != null;
     if (shouldMoveToInitialCenter) {
@@ -476,14 +475,13 @@ Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
   }
 
   var userPosition = locaAlert.userLocation;
-  if (userPosition == null) {
+  var cameraZoom = locaAlert.cameraZoom;
+  if (userPosition == null || cameraZoom == null) {
     debugPrintError('Unable to move map to user location.');
     return;
   }
 
-  var currentZoom = locaAlert.mapController.camera.zoom;
-  locaAlert.mapController.move(userPosition, currentZoom);
-
+  locaAlert.mapController.move(userPosition, cameraZoom);
   debugPrintInfo('Moving map to user location.');
 }
 

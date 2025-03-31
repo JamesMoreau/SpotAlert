@@ -31,11 +31,12 @@ class LocaAlert extends JuneState {
   MapController mapController = MapController();
   LatLng? visibleCenter;
   LatLngBounds? visibleBounds;
+  double? cameraZoom;
+
   LatLng? initialCenter = const LatLng(0, 0); // TODO(james): maybe try to get rid of optional?
   CacheStore? mapTileCacheStore;
   bool isPlacingAlarm = false; // TODO(james): try to make optional so that this and alarmPlacementRadius are combined.
   double alarmPlacementRadius = 100;
-  bool showMarkersInsteadOfCircles = false; // TODO(james): replace with current camera zoom. determine showMarkersInsteadOfCircles in build function.
   bool followUserLocation = false;
 
   late PackageInfo packageInfo;
