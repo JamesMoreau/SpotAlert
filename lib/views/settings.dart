@@ -34,7 +34,7 @@ class SettingsView extends StatelessWidget {
                   child: ListTile(
                     title: const Text('Vibration'),
                     trailing: Switch(
-                      value: state.vibration,
+                      value: state.vibrationSetting,
                       thumbIcon: thumbIcon,
                       onChanged: (value) {
                         changeVibration(state, newValue: value);
@@ -47,7 +47,7 @@ class SettingsView extends StatelessWidget {
                   child: ListTile(
                     title: const Text('Show Closest Off-Screen Alarm'),
                     trailing: Switch(
-                      value: state.showClosestOffScreenAlarm,
+                      value: state.showClosestOffScreenAlarmSetting,
                       onChanged: (value) {
                         changeShowClosestOffScreenAlarm(state, newValue: value);
                       },

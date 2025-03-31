@@ -40,8 +40,8 @@ class LocaAlert extends JuneState {
   bool followUserLocation = false;
 
   late PackageInfo packageInfo;
-  bool vibration = true;
-  bool showClosestOffScreenAlarm = true;
+  bool vibrationSetting = true;
+  bool showClosestOffScreenAlarmSetting = true;
 
   @override
   Future<void> onInit() async {
@@ -168,8 +168,8 @@ Future<void> loadSettingsFromStorage(LocaAlert locaAlert) async {
   }
 
   var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
-  locaAlert.vibration = settingsMap[settingsAlarmVibrationKey] as bool;
-  locaAlert.showClosestOffScreenAlarm = settingsMap[settingsShowClosestOffScreenAlarmKey] as bool;
+  locaAlert.vibrationSetting = settingsMap[settingsAlarmVibrationKey] as bool;
+  locaAlert.showClosestOffScreenAlarmSetting = settingsMap[settingsShowClosestOffScreenAlarmKey] as bool;
   debugPrintInfo('Loaded settings from storage.');
 }
 
@@ -193,13 +193,13 @@ void resetAlarmPlacementUIState(LocaAlert locaAlert) {
 }
 
 void changeVibration(LocaAlert locaAlert, {required bool newValue}) {
-  locaAlert.vibration = newValue;
+  locaAlert.vibrationSetting = newValue;
   locaAlert.setState();
   saveSettingsToStorage(locaAlert);
 }
 
 void changeShowClosestOffScreenAlarm(LocaAlert locaAlert, {required bool newValue}) {
-  locaAlert.showClosestOffScreenAlarm = newValue;
+  locaAlert.showClosestOffScreenAlarmSetting = newValue;
   locaAlert.setState();
   saveSettingsToStorage(locaAlert);
 }
@@ -210,8 +210,8 @@ Future<void> saveSettingsToStorage(LocaAlert locaAlert) async {
   var settingsFile = File(settingsPath);
 
   var settingsMap = <String, dynamic>{
-    settingsAlarmVibrationKey: locaAlert.vibration,
-    settingsShowClosestOffScreenAlarmKey: locaAlert.showClosestOffScreenAlarm,
+    settingsAlarmVibrationKey: locaAlert.vibrationSetting,
+    settingsShowClosestOffScreenAlarmKey: locaAlert.showClosestOffScreenAlarmSetting,
   };
 
   var settingsJson = jsonEncode(settingsMap);
@@ -256,7 +256,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     showAlarmDialog(NavigationService.navigatorKey.currentContext!, alarm);
   }
 
-  if (locaAlert.vibration) {
+  if (locaAlert.vibrationSetting) {
     debugPrintInfo('Vibrating.');
     for (var i = 0; i < numberOfTriggeredAlarmVibrations; i++) {
       await Vibration.vibrate(duration: 1000);
