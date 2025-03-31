@@ -14,6 +14,7 @@ import 'package:loca_alert/views/map.dart';
 import 'package:loca_alert/views/settings.dart';
 import 'package:location/location.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 /*
 TODO:
@@ -133,6 +134,9 @@ class MyHttpOverrides extends HttpOverrides {
     return client;
   }
 }
+
+// This is used to produce unique ids. Only one instantiation is needed.
+const Uuid idGenerator = Uuid();
 
 void main() async {
   if (!(Platform.isIOS || Platform.isAndroid)) {

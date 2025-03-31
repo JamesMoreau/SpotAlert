@@ -14,7 +14,6 @@ import 'package:loca_alert/views/triggered_alarm_dialog.dart';
 import 'package:location/location.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:uuid/uuid.dart';
 import 'package:vibration/vibration.dart';
 
 class LocaAlert extends JuneState {
@@ -60,9 +59,6 @@ class LocaAlert extends JuneState {
     super.onClose();
   }
 }
-
-// This is used to produce unique ids. Only one instantiation is needed.
-const Uuid idGenerator = Uuid();
 
 bool deleteAlarmById(LocaAlert locaAlert, String id) {
   for (var i = 0; i < locaAlert.alarms.length; i++) {
