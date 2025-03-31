@@ -132,7 +132,6 @@ class MapView extends StatelessWidget {
                     }
                   },
                 ),
-                if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
                 Builder( // TODO(james): unecessary builder since we don't access the context.
                   builder: (context) {
                     if (locaAlert.userLocation == null) return const SizedBox.shrink();
@@ -152,6 +151,7 @@ class MapView extends StatelessWidget {
                     return MarkerLayer(markers: userLocationMarker);
                   },
                 ),
+                if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
                 Builder(
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
