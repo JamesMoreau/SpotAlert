@@ -29,20 +29,6 @@ class MapView extends StatelessWidget {
         var statusBarHeight = MediaQuery.of(context).padding.top;
         var screenSize = MediaQuery.of(context).size;
 
-        var userLocationReference = locaAlert.userLocation;
-        var userLocationMarker = <Marker>[];
-        if (userLocationReference != null)
-          userLocationMarker.addAll([
-            Marker(
-              point: userLocationReference,
-              child: const Icon(Icons.circle, color: Colors.blue),
-            ),
-            Marker(
-              point: userLocationReference,
-              child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
-            ),
-          ]);
-
         CircleMarker? alarmPlacementCircle;
         if (locaAlert.isPlacingAlarm) {
           var centerOfMap = locaAlert.mapController.camera.center;
@@ -147,7 +133,25 @@ class MapView extends StatelessWidget {
                   },
                 ),
                 if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
-                if (locaAlert.userLocation != null) MarkerLayer(markers: userLocationMarker),
+                Builder(
+                  builder: (context) {
+                    if (locaAlert.userLocation == null) return const SizedBox.shrink();
+
+                    var userLocationMarker = <Marker>[];
+                    userLocationMarker.addAll([
+                      Marker(
+                        point: locaAlert.userLocation!,
+                        child: const Icon(Icons.circle, color: Colors.blue),
+                      ),
+                      Marker(
+                        point: locaAlert.userLocation!,
+                        child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
+                      ),
+                    ]);
+
+                    return MarkerLayer(markers: userLocationMarker);
+                  },
+                ),
                 Builder(
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
