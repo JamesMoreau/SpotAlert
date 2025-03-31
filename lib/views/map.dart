@@ -74,7 +74,6 @@ class MapView extends StatelessWidget {
                     // representing the same alarms. The markers are only visible when the user is zoomed out
                     // beyond (below) circleToMarkerZoomThreshold.
                     var showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
-
                     if (showMarkersInsteadOfCircles) {
                       var alarmMarkers = <Marker>[];
 
