@@ -71,7 +71,6 @@ class MapView extends StatelessWidget {
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
                 keepAlive: true,
-                onMapEvent: (event) => myOnMapEvent(event, state),
                 onMapReady: () => myOnMapReady(state),
               ),
               children: [
@@ -153,11 +152,10 @@ class MapView extends StatelessWidget {
                 Builder(
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-                    Alarm? closestAlarm;
                     var closestAlarmIsVisible = false;
-                    closestAlarm = getClosestAlarmToPosition(MapCamera.of(context).center, state.alarms);
-                    if (state.visibleBounds != null) {
-                      closestAlarmIsVisible = state.visibleBounds!.contains(closestAlarm!.position);
+                    var closestAlarm = getClosestAlarmToPosition(MapCamera.of(context).center, state.alarms);
+                    if (closestAlarm != null) {
+                      closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
                     }
 
                     var showClosestAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
@@ -387,11 +385,6 @@ class MapView extends StatelessWidget {
         );
       },
     );
-  }
-
-  void myOnMapEvent(MapEvent event, LocaAlert state) {
-    state.visibleBounds = state.mapController.camera.visibleBounds;
-    state.setState();
   }
 
   Future<void> myOnMapReady(LocaAlert state) async {

@@ -29,7 +29,6 @@ class LocaAlert extends JuneState {
 
   // Map View
   MapController mapController = MapController();
-  LatLngBounds? visibleBounds;
 
   LatLng? initialCenter = const LatLng(0, 0); // TODO(james): maybe try to get rid of optional?
   CacheStore? mapTileCacheStore;
@@ -274,7 +273,7 @@ List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
   return triggeredAlarms;
 }
 
-Alarm? getClosestAlarmToPosition(LatLng position, List<Alarm> alarms) {
+Alarm? getClosestAlarmToPosition(LatLng position, List<Alarm> alarms) { // TODO(james): can this be refactored to operate on a list of positions?
   Alarm? closestAlarm;
   var closestDistance = double.infinity;
 
