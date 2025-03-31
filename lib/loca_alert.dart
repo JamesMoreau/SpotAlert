@@ -151,7 +151,7 @@ Future<void> loadAlarmsFromStorage(LocaAlert locaAlert) async {
   debugPrintInfo('Loaded alarms from storage.');
 }
 
-Future<void> loadSettingsFromStorage(LocaAlert locaAlert) async {
+Future<void> loadSettings(LocaAlert locaAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
   var settingsFile = File(settingsPath);
@@ -173,26 +173,12 @@ Future<void> loadSettingsFromStorage(LocaAlert locaAlert) async {
   debugPrintInfo('Loaded settings from storage.');
 }
 
-Future<void> clearAlarmsFromStorage() async {
-  var directory = await getApplicationDocumentsDirectory();
-  var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-  var alarmsFile = File(alarmsPath);
-
-  if (!alarmsFile.existsSync()) {
-    debugPrintWarning('No alarms file found in storage. Cannot clear alarms.');
-    return;
-  }
-
-  await alarmsFile.delete();
-  debugPrintInfo('Cleared alarms from storage.');
-}
-
 void resetAlarmPlacementUIState(LocaAlert locaAlert) {
   locaAlert.isPlacingAlarm = false;
   locaAlert.alarmPlacementRadius = 100;
 }
 
-Future<void> saveSettingsToStorage(LocaAlert locaAlert) async {
+Future<void> saveSettings(LocaAlert locaAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
   var settingsFile = File(settingsPath);
@@ -263,17 +249,17 @@ List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
   return triggeredAlarms;
 }
 
-Alarm? getClosestAlarmToPosition(LatLng position, List<Alarm> alarms) { // TODO(james): can this be refactored to operate on a list of positions?
-  Alarm? closestAlarm;
+T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
+  T? closestItem;
   var closestDistance = double.infinity;
 
-  for (var alarm in alarms) {
-    var distance = const Distance().as(LengthUnit.Meter, alarm.position, position);
-    if (distance < closestDistance) {
-      closestAlarm = alarm;
-      closestDistance = distance;
+  for (var item in items) {
+    final d = const Distance().as(LengthUnit.Meter, getPosition(item), target);
+    if (d < closestDistance) {
+      closestDistance = d;
+      closestItem = item;
     }
   }
 
-  return closestAlarm;
+  return closestItem;
 }

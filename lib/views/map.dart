@@ -152,7 +152,7 @@ class MapView extends StatelessWidget {
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
                     var closestAlarmIsVisible = false;
-                    var closestAlarm = getClosestAlarmToPosition(MapCamera.of(context).center, state.alarms);
+                    var closestAlarm = getClosest(MapCamera.of(context).center, state.alarms, (alarm) => alarm.position);
                     if (closestAlarm != null) {
                       closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
                     }

@@ -19,7 +19,7 @@ import 'package:uuid/uuid.dart';
 /*
 TODO:
   Should opening map view immedietly move to user (when not locked on)?
-  Check that we are actually saving the settings to file.
+  Check that we are actually saving the settings to file. Also have default value if failed to load.
   Move loca_alert.dart to main.dart .
   change "state" to locaAlert
 */
@@ -178,7 +178,7 @@ void main() async {
     }
   });
 
-  await loadSettingsFromStorage(locaAlert);
+  await loadSettings(locaAlert);
   await loadAlarmsFromStorage(locaAlert);
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.

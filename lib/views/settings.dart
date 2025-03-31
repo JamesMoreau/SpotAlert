@@ -39,7 +39,7 @@ class SettingsView extends StatelessWidget {
                       onChanged: (value) {
                           state.vibrationSetting = value;
                           state.setState();
-                          saveSettingsToStorage(state);
+                          saveSettings(state);
                       },
                     ),
                   ),
@@ -53,7 +53,7 @@ class SettingsView extends StatelessWidget {
                       onChanged: (value) {
                           state.showClosestNonVisibleAlarmSetting = value;
                           state.setState();
-                          saveSettingsToStorage(state);
+                          saveSettings(state);
                       },
                       thumbIcon: thumbIcon,
                     ),
