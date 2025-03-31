@@ -29,20 +29,6 @@ class MapView extends StatelessWidget {
         var statusBarHeight = MediaQuery.of(context).padding.top;
         var screenSize = MediaQuery.of(context).size;
 
-        CircleMarker? alarmPlacementCircle;
-        if (locaAlert.isPlacingAlarm) { //TODO(james): placement ui is not updating every frame like it should.
-          var centerOfMap = locaAlert.mapController.camera.center;
-          var alarmPlacementPosition = centerOfMap;
-          alarmPlacementCircle = CircleMarker(
-            point: alarmPlacementPosition,
-            radius: locaAlert.alarmPlacementRadius,
-            color: Colors.redAccent.withValues(alpha: 0.5),
-            borderColor: Colors.black,
-            borderStrokeWidth: 2,
-            useRadiusInMeter: true,
-          );
-        }
-
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
         if (locaAlert.followUserLocation) myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
@@ -131,12 +117,9 @@ class MapView extends StatelessWidget {
                     }
                   },
                 ),
-                Builder( // TODO(james): unecessary builder since we don't access the context.
-                  builder: (context) {
-                    if (locaAlert.userLocation == null) return const SizedBox.shrink();
-
-                    var userLocationMarker = <Marker>[];
-                    userLocationMarker.addAll([
+                if (locaAlert.userLocation != null) ...[
+                  MarkerLayer(
+                    markers: [
                       Marker(
                         point: locaAlert.userLocation!,
                         child: const Icon(Icons.circle, color: Colors.blue),
@@ -145,12 +128,28 @@ class MapView extends StatelessWidget {
                         point: locaAlert.userLocation!,
                         child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
                       ),
-                    ]);
+                    ],
+                  ),
+                ],
+                Builder(
+                  builder: (context) {
+                    if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
 
-                    return MarkerLayer(markers: userLocationMarker);
+                    //TODO(james): placement ui is not updating every frame like it should.
+                    return CircleLayer(
+                      circles: [
+                        CircleMarker(
+                          point: locaAlert.mapController.camera.center,
+                          radius: locaAlert.alarmPlacementRadius,
+                          color: Colors.redAccent.withValues(alpha: 0.5),
+                          borderColor: Colors.black,
+                          borderStrokeWidth: 2,
+                          useRadiusInMeter: true,
+                        ),
+                      ],
+                    );
                   },
                 ),
-                if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
                 Builder(
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
