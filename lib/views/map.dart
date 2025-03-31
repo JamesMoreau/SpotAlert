@@ -302,9 +302,7 @@ class MapView extends StatelessWidget {
                   if (locaAlert.isPlacingAlarm) ...[
                     FloatingActionButton(
                       onPressed: () {
-                        var centerOfMap = locaAlert.mapController.camera.center;
-                        var alarmPlacementPosition = centerOfMap;
-                        var alarm = Alarm(name: 'Alarm', position: alarmPlacementPosition, radius: locaAlert.alarmPlacementRadius);
+                        var alarm = Alarm(name: 'Alarm', position: locaAlert.mapController.camera.center, radius: locaAlert.alarmPlacementRadius);
                         addAlarm(locaAlert, alarm);
                         resetAlarmPlacementUIState(locaAlert);
                         locaAlert.setState();
