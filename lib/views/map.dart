@@ -166,8 +166,7 @@ class MapView extends StatelessWidget {
                     var indicatorColor = closestAlarm.color;
                     var arrow = Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: indicatorColor, size: 28));
                     var indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
-                    var centerOfMap = state.mapController.camera.center; // TODO(james): remove.
-                    var arrowRotation = calculateAngleBetweenTwoPositions(centerOfMap, closestAlarm.position);
+                    var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
                     var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
                     var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
 
