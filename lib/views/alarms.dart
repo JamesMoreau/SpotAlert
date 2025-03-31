@@ -20,9 +20,7 @@ class AlarmsView extends StatelessWidget {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) {
-        return EditAlarmDialog(alarmId: alarm.id);
-      },
+      builder: (context) => EditAlarmDialog(alarmId: alarm.id),
     ).whenComplete(() {
       // Reset the edit alarm state.
       state.bufferAlarm = null;
@@ -102,26 +100,6 @@ class EditAlarmDialog extends StatelessWidget {
 
   const EditAlarmDialog({required this.alarmId, super.key});
 
-  void saveBufferToAlarm() {
-    var locaAlert = June.getState(() => LocaAlert());
-
-    // Replace the actual alarm data with the buffer alarm.
-    var alarm = getAlarmById(locaAlert, alarmId);
-    if (alarm == null) {
-      debugPrintError('Cannot save alarm since no alarm exists with id $alarmId');
-      return;
-    }
-
-    var bufferAlarmReference = locaAlert.bufferAlarm;
-    if (bufferAlarmReference == null) {
-      debugPrintError('Cannot save buffer alarm since it is null.');
-      return;
-    }
-
-    bufferAlarmReference.name = locaAlert.nameInputController.text.trim();
-    updateAlarmById(locaAlert, alarmId, bufferAlarmReference);
-  }
-
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
@@ -154,7 +132,7 @@ class EditAlarmDialog extends StatelessWidget {
                     TextButton(
                       child: const Text('Save'),
                       onPressed: () {
-                        saveBufferToAlarm();
+                        saveBufferToAlarm(locaAlert, alarmId);
                         Navigator.pop(context);
                       },
                     ),
@@ -264,4 +242,22 @@ class EditAlarmDialog extends StatelessWidget {
       },
     );
   }
+}
+
+void saveBufferToAlarm(LocaAlert locaAlert, String alarmId) {
+  // Replace the actual alarm data with the buffer alarm.
+  var alarm = getAlarmById(locaAlert, alarmId);
+  if (alarm == null) {
+    debugPrintError('Cannot save alarm since no alarm exists with id $alarmId');
+    return;
+  }
+
+  var bufferAlarmReference = locaAlert.bufferAlarm;
+  if (bufferAlarmReference == null) {
+    debugPrintError('Cannot save buffer alarm since it is null.');
+    return;
+  }
+
+  bufferAlarmReference.name = locaAlert.nameInputController.text.trim();
+  updateAlarmById(locaAlert, alarmId, bufferAlarmReference);
 }
