@@ -251,7 +251,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
   if (locaAlert.alarmIsCurrentlyTriggered) return;
 
   var triggeredAlarm =
-      triggeredAlarms[0]; // For now, we only handle one triggered alarm at a time. Although it is possible to have multiple alarms triggered at the same time.
+      triggeredAlarms.first; // For now, we only handle one triggered alarm at a time. Although it is possible to have multiple alarms triggered at the same time.
   triggeredAlarm.active = false; // Deactivate the alarm so it doesn't trigger again upon user location changing.
 
   debugPrintInfo('Alarm Check: Sending the user a notification for alarm ${triggeredAlarm.name}.');
