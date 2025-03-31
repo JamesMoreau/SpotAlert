@@ -30,7 +30,7 @@ class MapView extends StatelessWidget {
         var screenSize = MediaQuery.of(context).size;
 
         CircleMarker? alarmPlacementCircle;
-        if (locaAlert.isPlacingAlarm) {
+        if (locaAlert.isPlacingAlarm) { //TODO(james): placement ui is not updating every frame like it should.
           var centerOfMap = locaAlert.mapController.camera.center;
           var alarmPlacementPosition = centerOfMap;
           alarmPlacementCircle = CircleMarker(
@@ -133,7 +133,7 @@ class MapView extends StatelessWidget {
                   },
                 ),
                 if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
-                Builder(
+                Builder( // TODO(james): unecessary builder since we don't access the context.
                   builder: (context) {
                     if (locaAlert.userLocation == null) return const SizedBox.shrink();
 
