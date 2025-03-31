@@ -43,40 +43,6 @@ class MapView extends StatelessWidget {
             ),
           ]);
 
-        // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-        Alarm? closestAlarm;
-        var closestAlarmIsVisible = false;
-        if (state.visibleCenter != null) {
-          closestAlarm = getClosestAlarmToPosition(state.visibleCenter!, state.alarms);
-
-          if (state.visibleBounds != null) {
-            closestAlarmIsVisible = state.visibleBounds!.contains(closestAlarm!.position);
-          }
-        }
-
-        var arrow = const SizedBox.shrink() as Widget;
-        var indicatorAlarmIcon = const SizedBox.shrink() as Widget;
-        var angle = 0.0;
-        var angleIs9to3 = false;
-        var arrowRotation = 0.0;
-        var ellipseWidth = screenSize.width * 0.8;
-        var ellipseHeight = screenSize.height * 0.65;
-        var closestAlarmName = '';
-
-        var showClosestAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
-        if (showClosestAlarm) {
-          var indicatorColor = closestAlarm.color;
-          arrow = Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: indicatorColor, size: 28));
-          indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
-
-          var centerOfMap = state.mapController.camera.center;
-          arrowRotation = angle = calculateAngleBetweenTwoPositions(centerOfMap, closestAlarm.position);
-          angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-          angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
-
-          closestAlarmName = closestAlarm.name;
-        }
-
         // Display the alarms as circles or markers on the map. We create a set of markers or circles
         // representing the same alarms. The markers are only visible when the user is zoomed out
         // beyond (below) circleToMarkerZoomThreshold.
@@ -180,53 +146,93 @@ class MapView extends StatelessWidget {
                 if (state.userLocation != null) MarkerLayer(markers: userLocationMarker),
               ],
             ),
-            if (showClosestAlarm) ...[
-              IgnorePointer(
-                child: Center(
-                  child: Transform.translate(
-                    offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                    child: Transform.rotate(
-                      angle: arrowRotation,
-                      child: arrow,
-                    ),
-                  ),
-                ),
-              ),
-              IgnorePointer(
-                child: Center(
-                  child: Transform.translate(
-                    offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                    child: indicatorAlarmIcon,
-                  ),
-                ),
-              ),
-              if (closestAlarmName.isNotEmpty)
-                IgnorePointer(
-                  child: Center(
-                    child: Transform.translate(
-                      offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
-                      child: Transform.translate(
-                        // Move the text up or down depending on the angle to now overlap with the arrow.
-                        offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
-                        child: Container(
-                          constraints: const BoxConstraints(maxWidth: 100),
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          decoration: BoxDecoration(
-                            color: paleBlue.withValues(alpha: 0.7),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            closestAlarmName,
-                            style: const TextStyle(fontSize: 10),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
+            Builder(
+              builder: (context) {
+                // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
+                Alarm? closestAlarm;
+                var closestAlarmIsVisible = false;
+                if (state.visibleCenter != null) {
+                  closestAlarm = getClosestAlarmToPosition(state.visibleCenter!, state.alarms);
+
+                  if (state.visibleBounds != null) {
+                    closestAlarmIsVisible = state.visibleBounds!.contains(closestAlarm!.position);
+                  }
+                }
+
+                var arrow = const SizedBox.shrink() as Widget;
+                var indicatorAlarmIcon = const SizedBox.shrink() as Widget;
+                var angle = 0.0;
+                var angleIs9to3 = false;
+                var arrowRotation = 0.0;
+                var ellipseWidth = screenSize.width * 0.8;
+                var ellipseHeight = screenSize.height * 0.65;
+                var closestAlarmName = '';
+
+                var showClosestAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
+                if (showClosestAlarm) {
+                  var indicatorColor = closestAlarm.color;
+                  arrow = Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: indicatorColor, size: 28));
+                  indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
+
+                  var centerOfMap = state.mapController.camera.center;
+                  arrowRotation = angle = calculateAngleBetweenTwoPositions(centerOfMap, closestAlarm.position);
+                  angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+                  angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
+
+                  closestAlarmName = closestAlarm.name;
+                }
+
+                return Stack(
+                  children: [
+                    IgnorePointer(
+                      child: Center(
+                        child: Transform.translate(
+                          offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+                          child: Transform.rotate(
+                            angle: arrowRotation,
+                            child: arrow,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-            ],
+                    IgnorePointer(
+                      child: Center(
+                        child: Transform.translate(
+                          offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+                          child: indicatorAlarmIcon,
+                        ),
+                      ),
+                    ),
+                    if (closestAlarmName.isNotEmpty)
+                      IgnorePointer(
+                        child: Center(
+                          child: Transform.translate(
+                            offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
+                            child: Transform.translate(
+                              // Move the text up or down depending on the angle to now overlap with the arrow.
+                              offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
+                              child: Container(
+                                constraints: const BoxConstraints(maxWidth: 100),
+                                padding: const EdgeInsets.symmetric(horizontal: 2),
+                                decoration: BoxDecoration(
+                                  color: paleBlue.withValues(alpha: 0.7),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  closestAlarmName,
+                                  style: const TextStyle(fontSize: 10),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
             // Attribution to OpenStreetMap
             Positioned(
               top: statusBarHeight + 5,
