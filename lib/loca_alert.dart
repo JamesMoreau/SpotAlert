@@ -20,30 +20,28 @@ import 'package:vibration/vibration.dart';
 class LocaAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
   LatLng? userLocation;
-
-  // EditAlarmDialog Stuff
-  Alarm? bufferAlarm;
-  TextEditingController nameInputController = TextEditingController();
-
+  
   LocaAlertView view = LocaAlertView.alarms;
   late PageController pageController;
 
-  // MapView stuff. The booleans such as showMarkersInsteadOfCircles and closestAlarmIsInView are necessary because mapController
-  // cannot be accessed within the build method of the map view. So instead we update these booleans using myOnMapEvent.
+  // Alarm View
+  Alarm? bufferAlarm;
+  TextEditingController nameInputController = TextEditingController();
+
+  // Map View
   MapController mapController = MapController();
   LatLng? initialCenter = const LatLng(0, 0);
+  CacheStore? mapTileCacheStore;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = 100;
   bool showMarkersInsteadOfCircles = false;
+  bool followUserLocation = false;
   Alarm? closestAlarm;
   bool closestAlarmIsInView = false;
-  CacheStore? mapTileCacheStore;
-  bool followUserLocation = false;
-
-  bool vibration = true;
-  bool showClosestOffScreenAlarm = true;
 
   late PackageInfo packageInfo;
+  bool vibration = true;
+  bool showClosestOffScreenAlarm = true;
 
   @override
   Future<void> onInit() async {
