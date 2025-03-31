@@ -29,7 +29,6 @@ class LocaAlert extends JuneState {
 
   // Map View
   MapController mapController = MapController();
-  LatLng? visibleCenter;
   LatLngBounds? visibleBounds;
 
   LatLng? initialCenter = const LatLng(0, 0); // TODO(james): maybe try to get rid of optional?
