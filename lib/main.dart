@@ -23,6 +23,8 @@ TODO:
     bool closestAlarmIsInView = false;
   
   Figure out a way around: "Another exception was thrown: Exception: You need to have the FlutterMap widget rendered at least once before using the MapController."
+
+  Should opening map view immedietly move to user (when not locked on)?
 */
 
 const author = 'James Moreau';

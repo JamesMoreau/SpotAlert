@@ -31,13 +31,13 @@ class LocaAlert extends JuneState {
   // Booleans showMarkersInsteadOfCircles and closestAlarmIsInView are necessary because mapController
   // cannot be accessed within the build method of the map view.
   MapController mapController = MapController();
-  LatLng? initialCenter = const LatLng(0, 0);
+  LatLng? initialCenter = const LatLng(0, 0); // TODO(james): maybe try to get rid of optional?
   CacheStore? mapTileCacheStore;
-  bool isPlacingAlarm = false;
+  bool isPlacingAlarm = false; // TODO(james): try to make optional so that this and alarmPlacementRadius are combined.
   double alarmPlacementRadius = 100;
-  bool showMarkersInsteadOfCircles = false;
+  bool showMarkersInsteadOfCircles = false; // TODO(james): replace with current camera zoom. determine showMarkersInsteadOfCircles in build function.
   bool followUserLocation = false;
-  Alarm? closestAlarm;
+  Alarm? closestAlarm; // TODO(james): replace with camera bounds. calculate closest alarm in build function.
   bool closestAlarmIsInView = false;
 
   late PackageInfo packageInfo;

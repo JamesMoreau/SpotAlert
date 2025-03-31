@@ -148,9 +148,9 @@ class MapView extends StatelessWidget {
                 initialCenter: state.initialCenter ?? const LatLng(0, 0),
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
-                // keepAlive: true, // Keep the map alive when it is not visible. This uses more battery.
-                onMapEvent: myOnMapEvent,
-                onMapReady: myOnMapReady,
+                keepAlive: true,
+                onMapEvent: (event) => myOnMapEvent(event, state),
+                onMapReady: () => myOnMapReady(state),
               ),
               children: [
                 TileLayer(
@@ -376,9 +376,7 @@ class MapView extends StatelessWidget {
     );
   }
 
-  void myOnMapEvent(MapEvent event) {
-    var state = June.getState(() => LocaAlert());
-
+  void myOnMapEvent(MapEvent event, LocaAlert state) {
     var centerOfMap = state.mapController.camera.center;
 
     var alarms = state.alarms;
@@ -401,9 +399,8 @@ class MapView extends StatelessWidget {
     state.setState();
   }
 
-  Future<void> myOnMapReady() async {
-    // TODO: refactor. maybe use a switch?
-    var state = June.getState(() => LocaAlert());
+  Future<void> myOnMapReady(LocaAlert state) async {
+    // TODO(james): refactor. maybe use a switch?
 
     var initialCenterReference = state.initialCenter;
     var shouldMoveToInitialCenter = initialCenterReference != null;
