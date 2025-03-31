@@ -27,7 +27,6 @@ class LocaAlert extends JuneState {
 
   LocaAlertView view = LocaAlertView.alarms;
   late PageController pageController;
-  String? triggeredAlarmId; // TODO: maybe just get rid of this.
 
   // MapView stuff. The booleans such as showMarkersInsteadOfCircles and closestAlarmIsInView are necessary because mapController
   // cannot be accessed within the build method of the map view. So instead we update these booleans using myOnMapEvent.
@@ -245,22 +244,18 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     return;
   }
 
-  for (var alarm in triggeredAlarms) debugPrintInfo('Alarm Check: Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
+  for (var alarm in triggeredAlarms) {
+    debugPrintInfo('Alarm Check: Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
 
-  // If another alarm is already triggered, ignore this one.
-  if (locaAlert.triggeredAlarmId != null) return; // TODO: maybe we actually should handle all triggered alarms at the same time.
+    alarm.active = false; // Deactivate the alarm so it doesn't trigger again upon next call to checkAlarms.
 
-  // We only handle one triggered alarm at a time. Although it is possible to have multiple alarms triggered at the same time.
-  var triggeredAlarm = triggeredAlarms.first;
-  triggeredAlarm.active = false; // Deactivate the alarm so it doesn't trigger again upon user location changing.
-  locaAlert.triggeredAlarmId = triggeredAlarm.id;
-  showAlarmDialog(NavigationService.navigatorKey.currentContext!, triggeredAlarm);
+    var notificationDetails = const NotificationDetails(
+      iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentBanner: true, presentSound: true),
+    );
+    await flutterLocalNotificationsPlugin.show(id++, 'Alarm Triggered', 'You have entered the radius of alarm: ${alarm.name}.', notificationDetails);
 
-  debugPrintInfo('Alarm Check: Sending the user a notification for alarm ${triggeredAlarm.name}.');
-  var notificationDetails = const NotificationDetails(
-    iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentBanner: true, presentSound: true),
-  );
-  await flutterLocalNotificationsPlugin.show(id++, 'Alarm Triggered', 'You have entered the radius of alarm: ${triggeredAlarm.name}.', notificationDetails);
+    showAlarmDialog(NavigationService.navigatorKey.currentContext!, alarm);
+  }
 
   if (locaAlert.vibration) {
     debugPrintInfo('Vibrating.');
