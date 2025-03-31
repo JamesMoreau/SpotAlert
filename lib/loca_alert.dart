@@ -31,7 +31,6 @@ class LocaAlert extends JuneState {
   MapController mapController = MapController();
   LatLng? visibleCenter;
   LatLngBounds? visibleBounds;
-  double? cameraZoom;
 
   LatLng? initialCenter = const LatLng(0, 0); // TODO(james): maybe try to get rid of optional?
   CacheStore? mapTileCacheStore;

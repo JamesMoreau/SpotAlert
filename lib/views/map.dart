@@ -43,64 +43,6 @@ class MapView extends StatelessWidget {
             ),
           ]);
 
-        // Display the alarms as circles or markers on the map. We create a set of markers or circles
-        // representing the same alarms. The markers are only visible when the user is zoomed out
-        // beyond (below) circleToMarkerZoomThreshold.
-        var alarmCircles = <CircleMarker>[];
-        var alarmMarkers = <Marker>[];
-        var showMarkersInsteadOfCircles = false;
-        if (state.cameraZoom != null) {
-          showMarkersInsteadOfCircles = state.cameraZoom! < circleToMarkerZoomThreshold;
-        }
-
-        if (showMarkersInsteadOfCircles) {
-          for (var alarm in state.alarms) {
-            var marker = Marker(
-              width: 100,
-              height: 65,
-              point: alarm.position,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
-                  Positioned(
-                    bottom: 0,
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 100),
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      decoration: BoxDecoration(
-                        color: paleBlue.withValues(alpha: 0.7),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        alarm.name,
-                        style: const TextStyle(fontSize: 10),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-
-            alarmMarkers.add(marker);
-          }
-        } else {
-          for (var alarm in state.alarms) {
-            var circle = CircleMarker(
-              point: alarm.position,
-              color: alarm.color.withValues(alpha: 0.5),
-              borderColor: const Color(0xff2b2b2b),
-              borderStrokeWidth: 2,
-              radius: alarm.radius,
-              useRadiusInMeter: true,
-            );
-
-            alarmCircles.add(circle);
-          }
-        }
-
         CircleMarker? alarmPlacementCircle;
         if (state.isPlacingAlarm) {
           var centerOfMap = state.mapController.camera.center;
@@ -141,7 +83,71 @@ class MapView extends StatelessWidget {
                     store: mapTileCacheStoreReference,
                   ),
                 ),
-                if (showMarkersInsteadOfCircles) MarkerLayer(markers: alarmMarkers) else CircleLayer(circles: alarmCircles),
+                // if (showMarkersInsteadOfCircles) MarkerLayer(markers: alarmMarkers) else CircleLayer(circles: alarmCircles),
+                Builder(
+                  builder: (context) {
+                    // Display the alarms as circles or markers on the map. We create a set of markers or circles
+                    // representing the same alarms. The markers are only visible when the user is zoomed out
+                    // beyond (below) circleToMarkerZoomThreshold.
+                    var showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
+
+                    if (showMarkersInsteadOfCircles) {
+                      var alarmMarkers = <Marker>[];
+
+                      for (var alarm in state.alarms) {
+                        var marker = Marker(
+                          width: 100,
+                          height: 65,
+                          point: alarm.position,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
+                              Positioned(
+                                bottom: 0,
+                                child: Container(
+                                  constraints: const BoxConstraints(maxWidth: 100),
+                                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                                  decoration: BoxDecoration(
+                                    color: paleBlue.withValues(alpha: 0.7),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    alarm.name,
+                                    style: const TextStyle(fontSize: 10),
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        alarmMarkers.add(marker);
+                      }
+
+                      return MarkerLayer(markers: alarmMarkers);
+                    } else {
+                      var alarmCircles = <CircleMarker>[];
+
+                      for (var alarm in state.alarms) {
+                        var circle = CircleMarker(
+                          point: alarm.position,
+                          color: alarm.color.withValues(alpha: 0.5),
+                          borderColor: const Color(0xff2b2b2b),
+                          borderStrokeWidth: 2,
+                          radius: alarm.radius,
+                          useRadiusInMeter: true,
+                        );
+
+                        alarmCircles.add(circle);
+                      }
+
+                      return CircleLayer(circles: alarmCircles);
+                    }
+                  },
+                ),
                 if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
                 if (state.userLocation != null) MarkerLayer(markers: userLocationMarker),
                 Builder(
@@ -389,7 +395,6 @@ class MapView extends StatelessWidget {
   void myOnMapEvent(MapEvent event, LocaAlert state) {
     state.visibleBounds = state.mapController.camera.visibleBounds;
     state.visibleCenter = state.mapController.camera.center;
-    state.cameraZoom = state.mapController.camera.zoom;
     state.setState();
   }
 
@@ -471,13 +476,12 @@ Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
   }
 
   var userPosition = locaAlert.userLocation;
-  var cameraZoom = locaAlert.cameraZoom;
-  if (userPosition == null || cameraZoom == null) {
+  if (userPosition == null) {
     debugPrintError('Unable to move map to user location.');
     return;
   }
 
-  locaAlert.mapController.move(userPosition, cameraZoom);
+  locaAlert.mapController.move(userPosition, locaAlert.mapController.camera.zoom);
   debugPrintInfo('Moving map to user location.');
 }
 
