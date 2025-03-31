@@ -81,7 +81,9 @@ Alarm? getAlarmById(LocaAlert locaAlert, String id) {
   return null;
 }
 
-// Pass the new alarm data here to update proxalarm state. The id field in newAlarmData is ignored. returns success.
+// TODO(james): is there a better way to do this? in order to call this you need to create a new Alarm, which assigns a new id.
+// maybe multiple optional parameters?
+// Pass the new alarm data here to update LocaAlert state. The id field in newAlarmData is ignored. returns success.
 bool updateAlarmById(LocaAlert locaAlert, String id, Alarm newAlarmData) {
   for (var alarm in locaAlert.alarms) {
     if (alarm.id == id) {
@@ -243,7 +245,9 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
   for (var alarm in triggeredAlarms) {
     debugPrintInfo('Alarm Check: Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
 
-    alarm.active = false; // Deactivate the alarm so it doesn't trigger again upon next call to checkAlarms.
+    // Deactivate the alarm so it doesn't trigger again upon next call to checkAlarms.
+    var updatedAlarmData = Alarm(name: alarm.name, position: alarm.position, radius: alarm.radius, color: alarm.color, active: false);
+    updateAlarmById(locaAlert, alarm.id, updatedAlarmData);
 
     var notificationDetails = const NotificationDetails(
       iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentBanner: true, presentSound: true),
