@@ -1,32 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:june/june.dart';
 import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/main.dart';
-import 'package:loca_alert/models/alarm.dart';
-import 'package:vibration/vibration.dart';
 
-void showAlarmDialog(BuildContext context, String alarmId) {
-  var state = June.getState(() => LocaAlert());
-  var alarm = getAlarmById(state, alarmId);
-
-  if (alarm == null) {
-    debugPrintError('Unable to retrieve triggered alarm.');
-    state.alarmIsCurrentlyTriggered = false;
+void showAlarmDialog(BuildContext context, LocaAlert state) {
+  if (state.triggeredAlarmId == null) {
+    debugPrintError('showAlarmDialog() was called but there is no triggered alarm id.');
     return;
   }
-
-  void deactivateAlarmAndCloseDialog(BuildContext context) {
-    var dismissedAlarm = Alarm(
-      name: alarm.name,
-      position: alarm.position,
-      radius: alarm.radius,
-      color: alarm.color,
-      active: false,
-    );
-    updateAlarmById(state, alarmId, dismissedAlarm);
-    if (state.vibration) Vibration.cancel();
-    Navigator.pop(context);
-    state.alarmIsCurrentlyTriggered = false;
+  
+  var alarm = getAlarmById(state, state.triggeredAlarmId!);
+  if (alarm == null) {
+    debugPrintError('Unable to retrieve triggered alarm with id: ${state.triggeredAlarmId}.');
+    state.triggeredAlarmId = null;
+    return;
   }
 
   showGeneralDialog<void>(
@@ -70,7 +56,11 @@ void showAlarmDialog(BuildContext context, String alarmId) {
                     Text(alarm.name, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => deactivateAlarmAndCloseDialog(context),
+                      onPressed: () {
+                        // Close the dialog
+                        state.triggeredAlarmId = null;
+                        Navigator.pop(context);
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueGrey,
                         foregroundColor: Colors.white,
