@@ -21,7 +21,7 @@ TODO:
   Should opening map view immedietly move to user (when not locked on)?
   Check that we are actually saving the settings to file. Also have default value if failed to load.
   Move loca_alert.dart to main.dart .
-  change "state" to locaAlert
+  would be cool to have user's position off screen indicator as well.
 */
 
 const author = 'James Moreau';
@@ -200,9 +200,9 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       home: JuneBuilder(
         () => LocaAlert(),
-        builder: (state) {
+        builder: (locaAlert) {
           // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
-          var appIsInitialized = state.mapTileCacheStore != null;
+          var appIsInitialized = locaAlert.mapTileCacheStore != null;
           if (!appIsInitialized) {
             return const Scaffold(
               body: Center(
@@ -213,7 +213,7 @@ class MainApp extends StatelessWidget {
 
           return Scaffold(
             body: PageView(
-              controller: state.pageController,
+              controller: locaAlert.pageController,
               physics: const NeverScrollableScrollPhysics(), // Disable swipe gesture to change pages
               children: [
                 const AlarmsView(),
@@ -245,9 +245,9 @@ class MainApp extends StatelessWidget {
                   elevation: 3,
                   onDestinationSelected: (int index) {
                     var newView = LocaAlertView.values[index];
-                    navigateToView(state, newView);
+                    navigateToView(locaAlert, newView);
                   },
-                  selectedIndex: state.view.index,
+                  selectedIndex: locaAlert.view.index,
                   destinations: const [
                     NavigationDestination(
                       icon: Icon(Icons.pin_drop_rounded),

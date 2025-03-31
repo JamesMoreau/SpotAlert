@@ -16,7 +16,7 @@ class SettingsView extends StatelessWidget {
   Widget build(BuildContext context) {
     return JuneBuilder(
       () => LocaAlert(),
-      builder: (state) {
+      builder: (locaAlert) {
         return SafeArea(
           child: Scrollbar(
             child: ListView(
@@ -24,8 +24,8 @@ class SettingsView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: ListTile(
-                    title: Text(state.packageInfo.appName),
-                    subtitle: Text('Version: ${state.packageInfo.version}'),
+                    title: Text(locaAlert.packageInfo.appName),
+                    subtitle: Text('Version: ${locaAlert.packageInfo.version}'),
                     trailing: const Icon(Icons.info_rounded),
                   ),
                 ),
@@ -34,12 +34,12 @@ class SettingsView extends StatelessWidget {
                   child: ListTile(
                     title: const Text('Vibration'),
                     trailing: Switch(
-                      value: state.vibrationSetting,
+                      value: locaAlert.vibrationSetting,
                       thumbIcon: thumbIcon,
                       onChanged: (value) {
-                          state.vibrationSetting = value;
-                          state.setState();
-                          saveSettings(state);
+                        locaAlert.vibrationSetting = value;
+                        locaAlert.setState();
+                        saveSettings(locaAlert);
                       },
                     ),
                   ),
@@ -49,11 +49,11 @@ class SettingsView extends StatelessWidget {
                   child: ListTile(
                     title: const Text('Show Closest Off-Screen Alarm'),
                     trailing: Switch(
-                      value: state.showClosestNonVisibleAlarmSetting,
+                      value: locaAlert.showClosestNonVisibleAlarmSetting,
                       onChanged: (value) {
-                          state.showClosestNonVisibleAlarmSetting = value;
-                          state.setState();
-                          saveSettings(state);
+                        locaAlert.showClosestNonVisibleAlarmSetting = value;
+                        locaAlert.setState();
+                        saveSettings(locaAlert);
                       },
                       thumbIcon: thumbIcon,
                     ),
@@ -95,7 +95,7 @@ class SettingsView extends StatelessWidget {
                     onTap: () async {
                       var scaffoldMessenger = ScaffoldMessenger.of(context); // Don't use Scaffold.of(context) across async gaps (according to flutter).
 
-                      await state.mapTileCacheStore?.clean();
+                      await locaAlert.mapTileCacheStore?.clean();
                       debugPrintInfo('Map tile cache cleared.');
 
                       scaffoldMessenger.showSnackBar(

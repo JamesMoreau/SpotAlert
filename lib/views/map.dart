@@ -18,8 +18,8 @@ class MapView extends StatelessWidget {
   Widget build(BuildContext context) {
     return JuneBuilder(
       () => LocaAlert(),
-      builder: (state) {
-        var mapTileCacheStoreReference = state.mapTileCacheStore;
+      builder: (locaAlert) {
+        var mapTileCacheStoreReference = locaAlert.mapTileCacheStore;
         if (mapTileCacheStoreReference == null) {
           return const Center(
             child: CircularProgressIndicator(),
@@ -29,7 +29,7 @@ class MapView extends StatelessWidget {
         var statusBarHeight = MediaQuery.of(context).padding.top;
         var screenSize = MediaQuery.of(context).size;
 
-        var userLocationReference = state.userLocation;
+        var userLocationReference = locaAlert.userLocation;
         var userLocationMarker = <Marker>[];
         if (userLocationReference != null)
           userLocationMarker.addAll([
@@ -44,12 +44,12 @@ class MapView extends StatelessWidget {
           ]);
 
         CircleMarker? alarmPlacementCircle;
-        if (state.isPlacingAlarm) {
-          var centerOfMap = state.mapController.camera.center;
+        if (locaAlert.isPlacingAlarm) {
+          var centerOfMap = locaAlert.mapController.camera.center;
           var alarmPlacementPosition = centerOfMap;
           alarmPlacementCircle = CircleMarker(
             point: alarmPlacementPosition,
-            radius: state.alarmPlacementRadius,
+            radius: locaAlert.alarmPlacementRadius,
             color: Colors.redAccent.withValues(alpha: 0.5),
             borderColor: Colors.black,
             borderStrokeWidth: 2,
@@ -59,24 +59,24 @@ class MapView extends StatelessWidget {
 
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
-        if (state.followUserLocation) myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
+        if (locaAlert.followUserLocation) myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
 
         return Stack(
           alignment: Alignment.center,
           children: [
             FlutterMap(
-              mapController: state.mapController,
+              mapController: locaAlert.mapController,
               options: MapOptions(
-                initialCenter: state.initialCenter ?? const LatLng(0, 0),
+                initialCenter: locaAlert.initialCenter ?? const LatLng(0, 0),
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
                 keepAlive: true,
-                onMapReady: () => myOnMapReady(state),
+                onMapReady: () => myOnMapReady(locaAlert),
               ),
               children: [
                 TileLayer(
                   urlTemplate: openStreetMapTemplateUrl,
-                  userAgentPackageName: state.packageInfo.packageName,
+                  userAgentPackageName: locaAlert.packageInfo.packageName,
                   tileProvider: CachedTileProvider(
                     maxStale: const Duration(days: 30),
                     store: mapTileCacheStoreReference,
@@ -92,7 +92,7 @@ class MapView extends StatelessWidget {
                     if (showMarkersInsteadOfCircles) {
                       var alarmMarkers = <Marker>[];
 
-                      for (var alarm in state.alarms) {
+                      for (var alarm in locaAlert.alarms) {
                         var marker = Marker(
                           width: 100,
                           height: 65,
@@ -129,7 +129,7 @@ class MapView extends StatelessWidget {
                     } else {
                       var alarmCircles = <CircleMarker>[];
 
-                      for (var alarm in state.alarms) {
+                      for (var alarm in locaAlert.alarms) {
                         var circle = CircleMarker(
                           point: alarm.position,
                           color: alarm.color.withValues(alpha: 0.5),
@@ -147,17 +147,17 @@ class MapView extends StatelessWidget {
                   },
                 ),
                 if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
-                if (state.userLocation != null) MarkerLayer(markers: userLocationMarker),
+                if (locaAlert.userLocation != null) MarkerLayer(markers: userLocationMarker),
                 Builder(
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
                     var closestAlarmIsVisible = false;
-                    var closestAlarm = getClosest(MapCamera.of(context).center, state.alarms, (alarm) => alarm.position);
+                    var closestAlarm = getClosest(MapCamera.of(context).center, locaAlert.alarms, (alarm) => alarm.position);
                     if (closestAlarm != null) {
                       closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
                     }
 
-                    var showClosestNonVisibleAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestNonVisibleAlarmSetting;
+                    var showClosestNonVisibleAlarm = closestAlarm != null && !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
                     if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
 
                     var ellipseWidth = screenSize.width * 0.8;
@@ -283,30 +283,30 @@ class MapView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  if (state.followUserLocation) ...[
+                  if (locaAlert.followUserLocation) ...[
                     FloatingActionButton(
-                      onPressed: () => followOrUnfollowUserLocation(state),
+                      onPressed: () => followOrUnfollowUserLocation(locaAlert),
                       elevation: 4,
                       backgroundColor: const Color.fromARGB(255, 216, 255, 218),
                       child: const Icon(Icons.near_me_rounded),
                     ),
                   ] else ...[
                     FloatingActionButton(
-                      onPressed: () => followOrUnfollowUserLocation(state),
+                      onPressed: () => followOrUnfollowUserLocation(locaAlert),
                       elevation: 4,
                       child: const Icon(Icons.lock_rounded),
                     ),
                   ],
                   const SizedBox(height: 10),
-                  if (state.isPlacingAlarm) ...[
+                  if (locaAlert.isPlacingAlarm) ...[
                     FloatingActionButton(
                       onPressed: () {
-                        var centerOfMap = state.mapController.camera.center;
+                        var centerOfMap = locaAlert.mapController.camera.center;
                         var alarmPlacementPosition = centerOfMap;
-                        var alarm = Alarm(name: 'Alarm', position: alarmPlacementPosition, radius: state.alarmPlacementRadius);
-                        addAlarm(state, alarm);
-                        resetAlarmPlacementUIState(state);
-                        state.setState();
+                        var alarm = Alarm(name: 'Alarm', position: alarmPlacementPosition, radius: locaAlert.alarmPlacementRadius);
+                        addAlarm(locaAlert, alarm);
+                        resetAlarmPlacementUIState(locaAlert);
+                        locaAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.check),
@@ -314,8 +314,8 @@ class MapView extends StatelessWidget {
                     const SizedBox(height: 10),
                     FloatingActionButton(
                       onPressed: () {
-                        resetAlarmPlacementUIState(state);
-                        state.setState();
+                        resetAlarmPlacementUIState(locaAlert);
+                        locaAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.cancel_rounded),
@@ -323,9 +323,9 @@ class MapView extends StatelessWidget {
                   ] else ...[
                     FloatingActionButton(
                       onPressed: () {
-                        state.isPlacingAlarm = true;
-                        state.followUserLocation = false;
-                        state.setState();
+                        locaAlert.isPlacingAlarm = true;
+                        locaAlert.followUserLocation = false;
+                        locaAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.pin_drop_rounded),
@@ -335,7 +335,7 @@ class MapView extends StatelessWidget {
                 ],
               ),
             ),
-            if (state.isPlacingAlarm)
+            if (locaAlert.isPlacingAlarm)
               Positioned(
                 bottom: 150,
                 child: Container(
@@ -359,10 +359,10 @@ class MapView extends StatelessWidget {
                         const Text('Size:', style: TextStyle(fontWeight: FontWeight.bold)),
                         Expanded(
                           child: Slider(
-                            value: state.alarmPlacementRadius,
+                            value: locaAlert.alarmPlacementRadius,
                             onChanged: (value) {
-                              state.alarmPlacementRadius = value;
-                              state.setState();
+                              locaAlert.alarmPlacementRadius = value;
+                              locaAlert.setState();
                             },
                             min: 100,
                             max: 3000,
@@ -382,15 +382,15 @@ class MapView extends StatelessWidget {
     );
   }
 
-  Future<void> myOnMapReady(LocaAlert state) async {
+  Future<void> myOnMapReady(LocaAlert locaAlert) async {
     // TODO(james): refactor. maybe use a switch?
-    var initialCenterReference = state.initialCenter;
+    var initialCenterReference = locaAlert.initialCenter;
     var shouldMoveToInitialCenter = initialCenterReference != null;
     if (shouldMoveToInitialCenter) {
-      state.followUserLocation = false;
-      state.mapController.move(initialCenterReference, state.mapController.camera.zoom);
-      state.initialCenter = null;
-      state.setState();
+      locaAlert.followUserLocation = false;
+      locaAlert.mapController.move(initialCenterReference, locaAlert.mapController.camera.zoom);
+      locaAlert.initialCenter = null;
+      locaAlert.setState();
     }
 
     var serviceIsEnabled = await location.serviceEnabled();
