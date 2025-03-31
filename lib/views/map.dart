@@ -135,11 +135,10 @@ class MapView extends StatelessWidget {
                   builder: (context) {
                     if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
 
-                    //TODO(james): placement ui is not updating every frame like it should.
                     return CircleLayer(
                       circles: [
                         CircleMarker(
-                          point: locaAlert.mapController.camera.center,
+                          point: MapCamera.of(context).center,
                           radius: locaAlert.alarmPlacementRadius,
                           color: Colors.redAccent.withValues(alpha: 0.5),
                           borderColor: Colors.black,
