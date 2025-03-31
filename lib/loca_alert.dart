@@ -192,18 +192,6 @@ void resetAlarmPlacementUIState(LocaAlert locaAlert) {
   locaAlert.alarmPlacementRadius = 100;
 }
 
-void changeVibration(LocaAlert locaAlert, {required bool newValue}) {
-  locaAlert.vibrationSetting = newValue;
-  locaAlert.setState();
-  saveSettingsToStorage(locaAlert);
-}
-
-void changeShowClosestNonVisibleAlarm(LocaAlert locaAlert, {required bool newValue}) { //TODO(james): change this to a toggle? or maybe just inline?
-  locaAlert.showClosestNonVisibleAlarmSetting = newValue;
-  locaAlert.setState();
-  saveSettingsToStorage(locaAlert);
-}
-
 Future<void> saveSettingsToStorage(LocaAlert locaAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';

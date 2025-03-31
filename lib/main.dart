@@ -21,6 +21,7 @@ TODO:
   Should opening map view immedietly move to user (when not locked on)?
   Check that we are actually saving the settings to file.
   Move loca_alert.dart to main.dart .
+  change "state" to locaAlert
 */
 
 const author = 'James Moreau';
