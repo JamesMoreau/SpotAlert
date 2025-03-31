@@ -9,13 +9,12 @@ import 'package:loca_alert/views/map.dart';
 class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});
 
-  void openAlarmEdit(BuildContext context, Alarm alarm) {
+  void openAlarmEdit(BuildContext context, LocaAlert locaAlert, Alarm alarm) {
     debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
 
     // Copy the alarm to the buffer alarm. We don't do this inside the edit widget because rebuilds will cause the buffer alarm to be reset.
-    var state = June.getState(() => LocaAlert());
-    state.bufferAlarm = Alarm(name: alarm.name, position: alarm.position, radius: alarm.radius, color: alarm.color, active: alarm.active);
-    state.nameInputController.text = alarm.name;
+    locaAlert.bufferAlarm = Alarm(name: alarm.name, position: alarm.position, radius: alarm.radius, color: alarm.color, active: alarm.active);
+    locaAlert.nameInputController.text = alarm.name;
 
     showModalBottomSheet<void>(
       context: context,
@@ -23,9 +22,9 @@ class AlarmsView extends StatelessWidget {
       builder: (context) => EditAlarmDialog(alarmId: alarm.id),
     ).whenComplete(() {
       // Reset the edit alarm state.
-      state.bufferAlarm = null;
-      state.nameInputController.clear();
-      state.setState();
+      locaAlert.bufferAlarm = null;
+      locaAlert.nameInputController.clear();
+      locaAlert.setState();
     });
   }
 
@@ -73,8 +72,8 @@ class AlarmsView extends StatelessWidget {
                     title: Text(alarm.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                     leading: Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
                     subtitle: Text(alarm.position.toSexagesimal(), style: TextStyle(fontSize: 9, color: Colors.grey[700])),
-                    onLongPress: () => openAlarmEdit(context, alarm),
-                    onTap: () => openAlarmEdit(context, alarm),
+                    onLongPress: () => openAlarmEdit(context, locaAlert, alarm),
+                    onTap: () => openAlarmEdit(context, locaAlert, alarm),
                     trailing: Switch(
                       value: alarm.active,
                       activeColor: alarm.color,
