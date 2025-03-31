@@ -473,8 +473,3 @@ Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
 }
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
-
-Future<void> navigateToAlarm(LocaAlert locaAlert, Alarm alarm) async {
-  locaAlert.initialCenter = alarm.position;
-  navigateToView(locaAlert, LocaAlertView.map);
-}

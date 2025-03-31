@@ -196,8 +196,9 @@ class EditAlarmDialog extends StatelessWidget {
                             backgroundColor: Theme.of(context).colorScheme.primary,
                           ),
                           onPressed: () async {
-                            Navigator.pop(context);
-                            await navigateToAlarm(locaAlert, bufferAlarmReference);
+                            Navigator.pop(context); // Close the edit alarm bottom sheet
+                            locaAlert.initialCenter = bufferAlarmReference.position;
+                            navigateToView(locaAlert, LocaAlertView.map);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
                           label: const Text('Go To Alarm', style: TextStyle(color: Colors.white)),
