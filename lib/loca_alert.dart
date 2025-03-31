@@ -20,7 +20,7 @@ import 'package:vibration/vibration.dart';
 class LocaAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
   LatLng? userLocation;
-  
+
   LocaAlertView view = LocaAlertView.alarms;
   late PageController pageController;
 
@@ -29,6 +29,8 @@ class LocaAlert extends JuneState {
   TextEditingController nameInputController = TextEditingController();
 
   // Map View
+  // Booleans showMarkersInsteadOfCircles and closestAlarmIsInView are necessary because mapController
+  // cannot be accessed within the build method of the map view.
   MapController mapController = MapController();
   LatLng? initialCenter = const LatLng(0, 0);
   CacheStore? mapTileCacheStore;
