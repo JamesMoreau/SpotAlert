@@ -4,7 +4,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/main.dart';
 import 'package:loca_alert/models/alarm.dart';
-import 'package:loca_alert/views/map.dart';
 
 class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});
