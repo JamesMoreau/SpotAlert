@@ -44,7 +44,16 @@ class MapView extends StatelessWidget {
           ]);
 
         // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-        var closestAlarmReference = state.closestAlarm;
+        Alarm? closestAlarm;
+        var closestAlarmIsVisible = false;
+        if (state.visibleCenter != null) {
+          closestAlarm = getClosestAlarmToPosition(state.visibleCenter!, state.alarms);
+
+          if (state.visibleBounds != null) {
+            closestAlarmIsVisible = state.visibleBounds!.contains(closestAlarm!.position);
+          }
+        }
+
         var arrow = const SizedBox.shrink() as Widget;
         var indicatorAlarmIcon = const SizedBox.shrink() as Widget;
         var angle = 0.0;
@@ -54,18 +63,18 @@ class MapView extends StatelessWidget {
         var ellipseHeight = screenSize.height * 0.65;
         var closestAlarmName = '';
 
-        var showClosestAlarmIndicator = closestAlarmReference != null && !state.closestAlarmIsInView && state.showClosestOffScreenAlarm;
+        var showClosestAlarmIndicator = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarm;
         if (showClosestAlarmIndicator) {
-          var indicatorColor = closestAlarmReference.color;
+          var indicatorColor = closestAlarm.color;
           arrow = Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: indicatorColor, size: 28));
           indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
 
           var centerOfMap = state.mapController.camera.center;
-          arrowRotation = angle = calculateAngleBetweenTwoPositions(centerOfMap, closestAlarmReference.position);
+          arrowRotation = angle = calculateAngleBetweenTwoPositions(centerOfMap, closestAlarm.position);
           angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
           angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
 
-          closestAlarmName = closestAlarmReference.name;
+          closestAlarmName = closestAlarm.name;
         }
 
         // Display the alarms as circles or markers on the map. We create a set of markers or circles
@@ -377,19 +386,8 @@ class MapView extends StatelessWidget {
   }
 
   void myOnMapEvent(MapEvent event, LocaAlert state) {
-    var centerOfMap = state.mapController.camera.center;
-
-    var alarms = state.alarms;
-    state.closestAlarm = getClosestAlarmToPosition(centerOfMap, alarms);
-
-    var closestAlarmReference = state.closestAlarm;
-    if (closestAlarmReference != null) {
-      var cameraBounds = state.mapController.camera.visibleBounds;
-      if (cameraBounds.contains(closestAlarmReference.position))
-        state.closestAlarmIsInView = true;
-      else
-        state.closestAlarmIsInView = false;
-    }
+    state.visibleBounds = state.mapController.camera.visibleBounds;
+    state.visibleCenter = state.mapController.camera.center;
 
     if (state.mapController.camera.zoom < circleToMarkerZoomThreshold)
       state.showMarkersInsteadOfCircles = true;

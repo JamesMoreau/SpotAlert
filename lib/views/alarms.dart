@@ -224,8 +224,6 @@ class EditAlarmDialog extends StatelessWidget {
                             if (!ok) {
                               debugPrintError('Alarm $id could not be deleted.');
                             }
-                            // In case this alarm we just deleted happens to be the closest alarm, we need to make sure it doesn't show up.
-                            locaAlert.closestAlarm = null;
                             Navigator.pop(context);
                           },
                           child: const Text('Delete Alarm', style: TextStyle(color: Colors.redAccent)),
