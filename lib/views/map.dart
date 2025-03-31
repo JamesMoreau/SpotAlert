@@ -63,8 +63,8 @@ class MapView extends StatelessWidget {
         var ellipseHeight = screenSize.height * 0.65;
         var closestAlarmName = '';
 
-        var showClosestAlarmIndicator = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
-        if (showClosestAlarmIndicator) {
+        var showClosestAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
+        if (showClosestAlarm) {
           var indicatorColor = closestAlarm.color;
           arrow = Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: indicatorColor, size: 28));
           indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
@@ -180,7 +180,7 @@ class MapView extends StatelessWidget {
                 if (state.userLocation != null) MarkerLayer(markers: userLocationMarker),
               ],
             ),
-            if (showClosestAlarmIndicator) ...[
+            if (showClosestAlarm) ...[
               IgnorePointer(
                 child: Center(
                   child: Transform.translate(
