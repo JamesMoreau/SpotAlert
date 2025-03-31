@@ -433,7 +433,6 @@ void followOrUnfollowUserLocation(LocaAlert locaAlert) {
     locaAlert.followUserLocation = false;
     locaAlert.setState();
   } else {
-    // Check if we actually can follow the user's location. If not, show a snackbar.
     if (locaAlert.userLocation == null) {
       debugPrintError("Unable to follow the user's location.");
       ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!).showSnackBar(
@@ -446,11 +445,13 @@ void followOrUnfollowUserLocation(LocaAlert locaAlert) {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
-    } else {
-      locaAlert.followUserLocation = true;
-      moveMapToUserLocation(locaAlert);
-      locaAlert.setState();
+
+      return;
     }
+
+    locaAlert.followUserLocation = true;
+    moveMapToUserLocation(locaAlert);
+    locaAlert.setState();
   }
 }
 
