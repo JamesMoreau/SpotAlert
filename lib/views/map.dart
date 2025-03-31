@@ -144,85 +144,85 @@ class MapView extends StatelessWidget {
                 if (showMarkersInsteadOfCircles) MarkerLayer(markers: alarmMarkers) else CircleLayer(circles: alarmCircles),
                 if (alarmPlacementCircle != null) CircleLayer(circles: [alarmPlacementCircle]),
                 if (state.userLocation != null) MarkerLayer(markers: userLocationMarker),
-              ],
-            ),
-            Builder(
-              builder: (context) {
-                // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-                Alarm? closestAlarm;
-                var closestAlarmIsVisible = false;
-                if (state.visibleCenter != null) {
-                  closestAlarm = getClosestAlarmToPosition(state.visibleCenter!, state.alarms);
+                Builder(
+                  builder: (context) {
+                    // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
+                    Alarm? closestAlarm;
+                    var closestAlarmIsVisible = false;
+                    if (state.visibleCenter != null) {
+                      closestAlarm = getClosestAlarmToPosition(state.visibleCenter!, state.alarms);
 
-                  if (state.visibleBounds != null) {
-                    closestAlarmIsVisible = state.visibleBounds!.contains(closestAlarm!.position);
-                  }
-                }
-                
-                var showClosestAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
-                if (!showClosestAlarm) return const SizedBox.shrink();
+                      if (state.visibleBounds != null) {
+                        closestAlarmIsVisible = state.visibleBounds!.contains(closestAlarm!.position);
+                      }
+                    }
 
-                // TODO(james): reduce / organize
-                var ellipseWidth = screenSize.width * 0.8;
-                var ellipseHeight = screenSize.height * 0.65;
-                var indicatorColor = closestAlarm.color;
-                var arrow = Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: indicatorColor, size: 28));
-                var indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
-                var centerOfMap = state.mapController.camera.center; // TODO(james): remove.
-                var arrowRotation = calculateAngleBetweenTwoPositions(centerOfMap, closestAlarm.position);
-                var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-                var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
+                    var showClosestAlarm = closestAlarm != null && !closestAlarmIsVisible && state.showClosestOffScreenAlarmSetting;
+                    if (!showClosestAlarm) return const SizedBox.shrink();
 
-                return Stack(
-                  children: [
-                    IgnorePointer(
-                      child: Center(
-                        child: Transform.translate(
-                          offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                          child: Transform.rotate(
-                            angle: arrowRotation,
-                            child: arrow,
-                          ),
-                        ),
-                      ),
-                    ),
-                    IgnorePointer(
-                      child: Center(
-                        child: Transform.translate(
-                          offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                          child: indicatorAlarmIcon,
-                        ),
-                      ),
-                    ),
-                    if (closestAlarm.name.isNotEmpty)
-                      IgnorePointer(
-                        child: Center(
-                          child: Transform.translate(
-                            offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
+                    // TODO(james): reduce / organize
+                    var ellipseWidth = screenSize.width * 0.8;
+                    var ellipseHeight = screenSize.height * 0.65;
+                    var indicatorColor = closestAlarm.color;
+                    var arrow = Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: indicatorColor, size: 28));
+                    var indicatorAlarmIcon = Icon(Icons.pin_drop_rounded, color: indicatorColor, size: 32);
+                    var centerOfMap = state.mapController.camera.center; // TODO(james): remove.
+                    var arrowRotation = calculateAngleBetweenTwoPositions(centerOfMap, closestAlarm.position);
+                    var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+                    var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
+
+                    return Stack(
+                      children: [
+                        IgnorePointer(
+                          child: Center(
                             child: Transform.translate(
-                              // Move the text up or down depending on the angle to now overlap with the arrow.
-                              offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
-                              child: Container(
-                                constraints: const BoxConstraints(maxWidth: 100),
-                                padding: const EdgeInsets.symmetric(horizontal: 2),
-                                decoration: BoxDecoration(
-                                  color: paleBlue.withValues(alpha: 0.7),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  closestAlarm.name,
-                                  style: const TextStyle(fontSize: 10),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
+                              offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+                              child: Transform.rotate(
+                                angle: arrowRotation,
+                                child: arrow,
                               ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                );
-              },
+                        IgnorePointer(
+                          child: Center(
+                            child: Transform.translate(
+                              offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+                              child: indicatorAlarmIcon,
+                            ),
+                          ),
+                        ),
+                        if (closestAlarm.name.isNotEmpty)
+                          IgnorePointer(
+                            child: Center(
+                              child: Transform.translate(
+                                offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
+                                child: Transform.translate(
+                                  // Move the text up or down depending on the angle to now overlap with the arrow.
+                                  offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
+                                  child: Container(
+                                    constraints: const BoxConstraints(maxWidth: 100),
+                                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                                    decoration: BoxDecoration(
+                                      color: paleBlue.withValues(alpha: 0.7),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      closestAlarm.name,
+                                      style: const TextStyle(fontSize: 10),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+              ],
             ),
             // Attribution to OpenStreetMap
             Positioned(
