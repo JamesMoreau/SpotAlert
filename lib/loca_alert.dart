@@ -76,28 +76,23 @@ Alarm? getAlarmById(LocaAlert locaAlert, String id) {
   return null;
 }
 
-bool updateAlarmById(
+void updateAndSaveAlarm(
   LocaAlert locaAlert,
-  String id, {
-  String? name,
-  LatLng? position,
-  double? radius,
-  Color? color,
-  bool? active,
+  Alarm alarm, {
+  String? newName,
+  LatLng? newPosition,
+  double? newRadius,
+  Color? newColor,
+  bool? isActive,
 }) {
-  for (var alarm in locaAlert.alarms) {
-    if (alarm.id == id) {
-      if (name != null) alarm.name = name;
-      if (position != null) alarm.position = position;
-      if (radius != null) alarm.radius = radius;
-      if (color != null) alarm.color = color;
-      if (active != null) alarm.active = active;
-      locaAlert.setState();
-      saveAlarmsToStorage(locaAlert);
-      return true;
-    }
-  }
-  return false;
+  if (newName != null) alarm.name = newName;
+  if (newPosition != null) alarm.position = newPosition;
+  if (newRadius != null) alarm.radius = newRadius;
+  if (newColor != null) alarm.color = newColor;
+  if (isActive != null) alarm.active = isActive;
+
+  locaAlert.setState();
+  saveAlarmsToStorage(locaAlert);
 }
 
 void addAlarm(LocaAlert locaAlert, Alarm alarm) {
@@ -219,7 +214,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     debugPrintInfo('Alarm Check: Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
 
     // Deactivate the alarm so it doesn't trigger again upon next call to checkAlarms.
-    updateAlarmById(locaAlert, alarm.id, active: false);
+    updateAndSaveAlarm(locaAlert, alarm, isActive: false);
 
     var notificationDetails = const NotificationDetails(
       iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentBanner: true, presentSound: true),

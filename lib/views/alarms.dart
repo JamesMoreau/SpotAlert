@@ -77,7 +77,7 @@ class AlarmsView extends StatelessWidget {
                       value: alarm.active,
                       activeColor: alarm.color,
                       thumbIcon: thumbIcon,
-                      onChanged: (value) => updateAlarmById(locaAlert, alarm.id, active: value),
+                      onChanged: (value) => updateAndSaveAlarm(locaAlert, alarm, isActive: value),
                     ),
                   ),
                 );
@@ -127,7 +127,31 @@ class EditAlarmDialog extends StatelessWidget {
                     TextButton(
                       child: const Text('Save'),
                       onPressed: () {
-                        saveBufferToAlarm(locaAlert, alarmId);
+                        // Replace the actual alarm data with the buffer alarm.
+                        var alarm = getAlarmById(locaAlert, alarmId);
+                        if (alarm == null) {
+                          debugPrintError('Cannot save alarm since no alarm exists with id $alarmId');
+                          return;
+                        }
+
+                        var bufferAlarm = locaAlert.bufferAlarm;
+                        if (bufferAlarm == null) {
+                          debugPrintError('Cannot save buffer alarm since it is null.');
+                          return;
+                        }
+
+                        bufferAlarm.name = locaAlert.nameInputController.text.trim();
+
+                        // We don't currently provide editing of the position, radius, or active status in the edit alarm ui.
+                        updateAndSaveAlarm(
+                          locaAlert,
+                          alarm,
+                          newName: bufferAlarm.name,
+                          newPosition: bufferAlarm.position,
+                          newRadius: bufferAlarm.radius,
+                          newColor: bufferAlarm.color,
+                          isActive: bufferAlarm.active,
+                        );
                         Navigator.pop(context);
                       },
                     ),
@@ -236,31 +260,4 @@ class EditAlarmDialog extends StatelessWidget {
       },
     );
   }
-}
-
-void saveBufferToAlarm(LocaAlert locaAlert, String alarmId) { // TODO(james) Cleanup. should we even be passing alarm id. or have reference? inline?
-  // Replace the actual alarm data with the buffer alarm.
-  var alarm = getAlarmById(locaAlert, alarmId);
-  if (alarm == null) {
-    debugPrintError('Cannot save alarm since no alarm exists with id $alarmId');
-    return;
-  }
-
-  var bufferAlarmReference = locaAlert.bufferAlarm;
-  if (bufferAlarmReference == null) {
-    debugPrintError('Cannot save buffer alarm since it is null.');
-    return;
-  }
-
-  bufferAlarmReference.name = locaAlert.nameInputController.text.trim();
-  
-  updateAlarmById(
-    locaAlert,
-    alarmId,
-    name: bufferAlarmReference.name,
-    position: bufferAlarmReference.position,
-    radius: bufferAlarmReference.radius,
-    color: bufferAlarmReference.color,
-    active: bufferAlarmReference.active,
-  );
 }
