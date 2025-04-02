@@ -41,6 +41,7 @@ const initialZoom = 15.0;
 const circleToMarkerZoomThreshold = 10.0;
 const maxZoomSupported = 18.0;
 const alarmCheckPeriod = Duration(seconds: 5);
+const locationPermissionCheckInterval = Duration(seconds: 20);
 const numberOfTriggeredAlarmVibrations = 6;
 
 enum AvailableAlarmColors {
@@ -264,7 +265,6 @@ void main() async {
   });
 
   // Check periodically if the location permission has been denied. If so, cancel the location updates.
-  var locationPermissionCheckInterval = const Duration(seconds: 20);
   Timer.periodic(locationPermissionCheckInterval, (timer) async {
     var locaAlert = June.getState(() => LocaAlert());
     var permission = await location.hasPermission();
