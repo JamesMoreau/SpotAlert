@@ -27,7 +27,6 @@ class MapView extends StatelessWidget {
         }
 
         var statusBarHeight = MediaQuery.of(context).padding.top;
-        var screenSize = MediaQuery.of(context).size;
 
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
@@ -161,6 +160,7 @@ class MapView extends StatelessWidget {
                     var showClosestNonVisibleAlarm = closestAlarm != null && !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
                     if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
 
+                    var screenSize = MediaQuery.of(context).size;
                     var ellipseWidth = screenSize.width * 0.8;
                     var ellipseHeight = screenSize.height * 0.65;
                     var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
@@ -220,7 +220,6 @@ class MapView extends StatelessWidget {
                 ),
               ],
             ),
-            // Attribution to OpenStreetMap
             Positioned(
               top: statusBarHeight + 5,
               child: IgnorePointer(
