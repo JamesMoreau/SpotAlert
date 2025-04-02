@@ -265,7 +265,6 @@ void main() async {
 
   // Check periodically if the location permission has been denied. If so, cancel the location updates.
   Timer.periodic(locationPermissionCheckInterval, (timer) async {
-    var locaAlert = June.getState(() => LocaAlert());
     var permission = await location.hasPermission();
 
     if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
