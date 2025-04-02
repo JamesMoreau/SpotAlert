@@ -102,7 +102,7 @@ void addAlarm(LocaAlert locaAlert, Alarm alarm) {
   saveAlarmsToStorage(locaAlert);
 }
 
-// This saves all current alarms to shared preferences. Should be called everytime the alarms state is changed.
+// This should be called everytime the alarms state is changed.
 Future<void> saveAlarmsToStorage(LocaAlert locaAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
@@ -199,13 +199,12 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     return;
   }
 
-  var userPositionReference = locaAlert.userLocation;
-  if (userPositionReference == null) {
+  if (locaAlert.userLocation == null) {
     debugPrintWarning('Alarm Check: No user position found.');
     return;
   }
 
-  var triggeredAlarms = detectTriggeredAlarms(userPositionReference, activeAlarms);
+  var triggeredAlarms = detectTriggeredAlarms(locaAlert.userLocation!, activeAlarms);
   if (triggeredAlarms.isEmpty) {
     debugPrintInfo('Alarm Check: No alarms triggered.');
     return;
