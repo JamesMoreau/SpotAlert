@@ -31,19 +31,17 @@ const appleID = '6478944468';
 
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const mapTileCacheFilename = 'myMapTiles';
-
-const initialZoom = 15.0;
-const circleToMarkerZoomThreshold = 10.0;
-const maxZoomSupported = 18.0;
-
-const alarmCheckPeriod = Duration(seconds: 5);
-const numberOfTriggeredAlarmVibrations = 6;
-
 const settingsAlarmVibrationKey = 'alarmVibration';
 const settingsAlarmNotificationKey = 'alarmNotification';
 const settingsShowClosestNonVisibleAlarmKey = 'showClosestNonVisibleAlarm';
 const settingsFilename = 'settings.json';
 const alarmsFilename = 'alarms.json';
+
+const initialZoom = 15.0;
+const circleToMarkerZoomThreshold = 10.0;
+const maxZoomSupported = 18.0;
+const alarmCheckPeriod = Duration(seconds: 5);
+const numberOfTriggeredAlarmVibrations = 6;
 
 enum AvailableAlarmColors {
   blue(Colors.blue),
@@ -62,8 +60,6 @@ enum AvailableAlarmColors {
   const AvailableAlarmColors(this.value);
   final Color value;
 }
-
-Location location = Location();
 
 ThemeData locationAlarmTheme = ThemeData(
   colorScheme: const ColorScheme(
@@ -120,6 +116,7 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNo
 int id = 0;
 
 class NavigationService {
+  // TODO(james): can this be removed?
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 }
 
@@ -134,7 +131,8 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-// This is used to produce unique ids. Only one instantiation is needed.
+Location location = Location();
+
 const Uuid idGenerator = Uuid();
 
 enum LocaAlertView { alarms, map, settings }
@@ -289,4 +287,3 @@ void main() async {
   locaAlert.mapTileCacheStore = FileCacheStore(mapTileCachePath);
   locaAlert.setState(); // Notify the ui that the map tile cache is loaded.
 }
-
