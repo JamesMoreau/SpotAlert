@@ -238,14 +238,15 @@ class MainApp extends StatelessWidget {
 void main() async {
   if (!(Platform.isIOS || Platform.isAndroid)) {
     debugPrintError('This app is not supported on this platform. Supported platforms are iOS and Android.');
+    await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     return;
   }
 
   runApp(const MainApp());
 
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
   var locaAlert = June.getState(() => LocaAlert());
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   var initializationSettings = const InitializationSettings(iOS: DarwinInitializationSettings());
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
