@@ -39,10 +39,10 @@ class MapView extends StatelessWidget {
             FlutterMap(
               mapController: locaAlert.mapController,
               options: MapOptions(
-                initialCenter: locaAlert.initialCenter ?? const LatLng(0, 0),
+                initialCenter: locaAlert.initialCenter,
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
-                keepAlive: true,
+                // keepAlive: true,
                 onMapReady: () => myOnMapReady(locaAlert),
               ),
               children: [
@@ -382,15 +382,9 @@ class MapView extends StatelessWidget {
   }
 
   Future<void> myOnMapReady(LocaAlert locaAlert) async {
-    // TODO(james): refactor. maybe use a switch?
-    var initialCenterReference = locaAlert.initialCenter;
-    var shouldMoveToInitialCenter = initialCenterReference != null;
-    if (shouldMoveToInitialCenter) {
-      locaAlert.followUserLocation = false;
-      locaAlert.mapController.move(initialCenterReference, locaAlert.mapController.camera.zoom);
-      locaAlert.initialCenter = null;
-      locaAlert.setState();
-    }
+    locaAlert.followUserLocation = false;
+    locaAlert.setState();
+    locaAlert.mapController.move(locaAlert.initialCenter, locaAlert.mapController.camera.zoom);
 
     var serviceIsEnabled = await location.serviceEnabled();
     if (!serviceIsEnabled) {
