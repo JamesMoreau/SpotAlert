@@ -19,8 +19,7 @@ class MapView extends StatelessWidget {
     return JuneBuilder(
       () => LocaAlert(),
       builder: (locaAlert) {
-        var mapTileCacheStoreReference = locaAlert.mapTileCacheStore;
-        if (mapTileCacheStoreReference == null) {
+        if (locaAlert.mapTileCacheStore == null) {
           return const Center(
             child: CircularProgressIndicator(),
           );
@@ -50,7 +49,7 @@ class MapView extends StatelessWidget {
                   userAgentPackageName: locaAlert.packageInfo.packageName,
                   tileProvider: CachedTileProvider(
                     maxStale: const Duration(days: 30),
-                    store: mapTileCacheStoreReference,
+                    store: locaAlert.mapTileCacheStore!,
                   ),
                 ),
                 Builder(
