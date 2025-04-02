@@ -137,60 +137,23 @@ class MyHttpOverrides extends HttpOverrides {
 // This is used to produce unique ids. Only one instantiation is needed.
 const Uuid idGenerator = Uuid();
 
-void main() async {
-  if (!(Platform.isIOS || Platform.isAndroid)) {
-    debugPrintError('This app is not supported on this platform. Supported platforms are iOS and Android.');
-    return;
-  }
+enum LocaAlertView { alarms, map, settings }
 
-  runApp(const MainApp());
+void navigateToView(LocaAlert locaAlert, LocaAlertView view) {
+  locaAlert.view = view;
+  locaAlert.setState();
+  locaAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
 
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-
-  var locaAlert = June.getState(() => LocaAlert());
-
-  var initializationSettings = const InitializationSettings(iOS: DarwinInitializationSettings());
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  await location.enableBackgroundMode();
-  location.onLocationChanged.listen((location) async {
-    if (location.latitude == null || location.longitude == null) return;
-
-    locaAlert.userLocation = LatLng(location.latitude!, location.longitude!);
-    locaAlert.setState();
-
-    await checkAlarms(locaAlert);
-
-    var shouldMoveMapToUserLocation = locaAlert.followUserLocation && locaAlert.view == LocaAlertView.map;
-    if (shouldMoveMapToUserLocation) await moveMapToUserLocation(locaAlert);
-  });
-
-  // Check periodically if the location permission has been denied. If so, cancel the location updates.
-  var locationPermissionCheckInterval = const Duration(seconds: 20);
-  Timer.periodic(locationPermissionCheckInterval, (timer) async {
-    var locaAlert = June.getState(() => LocaAlert());
-    var permission = await location.hasPermission();
-
-    if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
-      locaAlert.userLocation = null;
-      locaAlert.followUserLocation = false;
-      locaAlert.setState();
-    }
-  });
-
-  await loadSettings(locaAlert);
-  await loadAlarmsFromStorage(locaAlert);
-
-  // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
-  HttpOverrides.global = MyHttpOverrides();
-
-  var cacheDirectory = await getApplicationCacheDirectory();
-  var mapTileCachePath = '${cacheDirectory.path}${Platform.pathSeparator}$mapTileCacheFilename';
-  locaAlert.mapTileCacheStore = FileCacheStore(mapTileCachePath);
-  locaAlert.setState(); // Notify the ui that the map tile cache is loaded.
+  debugPrintInfo('Navigating to $view.');
 }
 
-enum LocaAlertView { alarms, map, settings }
+void debugPrintMessage(String message) {
+  if (kDebugMode) debugPrint(message);
+}
+
+void debugPrintInfo(String message) => debugPrintMessage('ℹ️ $message');
+void debugPrintWarning(String message) => debugPrintMessage('⚠️ $message');
+void debugPrintError(String message) => debugPrintMessage('❌ $message');
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -274,18 +237,56 @@ class MainApp extends StatelessWidget {
   }
 }
 
-void navigateToView(LocaAlert locaAlert, LocaAlertView view) {
-  locaAlert.view = view;
-  locaAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-  locaAlert.setState();
+void main() async {
+  if (!(Platform.isIOS || Platform.isAndroid)) {
+    debugPrintError('This app is not supported on this platform. Supported platforms are iOS and Android.');
+    return;
+  }
 
-  debugPrintInfo('Navigating to $view.');
+  runApp(const MainApp());
+
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  var locaAlert = June.getState(() => LocaAlert());
+
+  var initializationSettings = const InitializationSettings(iOS: DarwinInitializationSettings());
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+  await location.enableBackgroundMode();
+  location.onLocationChanged.listen((location) async {
+    if (location.latitude == null || location.longitude == null) return;
+
+    locaAlert.userLocation = LatLng(location.latitude!, location.longitude!);
+    locaAlert.setState();
+
+    await checkAlarms(locaAlert);
+
+    var shouldMoveMapToUserLocation = locaAlert.followUserLocation && locaAlert.view == LocaAlertView.map;
+    if (shouldMoveMapToUserLocation) await moveMapToUserLocation(locaAlert);
+  });
+
+  // Check periodically if the location permission has been denied. If so, cancel the location updates.
+  var locationPermissionCheckInterval = const Duration(seconds: 20);
+  Timer.periodic(locationPermissionCheckInterval, (timer) async {
+    var locaAlert = June.getState(() => LocaAlert());
+    var permission = await location.hasPermission();
+
+    if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
+      locaAlert.userLocation = null;
+      locaAlert.followUserLocation = false;
+      locaAlert.setState();
+    }
+  });
+
+  await loadSettings(locaAlert);
+  await loadAlarmsFromStorage(locaAlert);
+
+  // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
+  HttpOverrides.global = MyHttpOverrides();
+
+  var cacheDirectory = await getApplicationCacheDirectory();
+  var mapTileCachePath = '${cacheDirectory.path}${Platform.pathSeparator}$mapTileCacheFilename';
+  locaAlert.mapTileCacheStore = FileCacheStore(mapTileCachePath);
+  locaAlert.setState(); // Notify the ui that the map tile cache is loaded.
 }
 
-void debugPrintMessage(String message) {
-  if (kDebugMode) debugPrint(message);
-}
-
-void debugPrintInfo(String message) => debugPrintMessage('ℹ️ $message');
-void debugPrintWarning(String message) => debugPrintMessage('⚠️ $message');
-void debugPrintError(String message) => debugPrintMessage('❌ $message');
