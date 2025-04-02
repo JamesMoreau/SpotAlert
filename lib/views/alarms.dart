@@ -11,20 +11,16 @@ class AlarmsView extends StatelessWidget {
   void openAlarmEdit(BuildContext context, LocaAlert locaAlert, Alarm alarm) {
     debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
 
-    // Copy the alarm to the buffer alarm. We don't do this inside the edit widget because rebuilds will cause the buffer alarm to be reset.
-    locaAlert.bufferAlarm = Alarm(name: alarm.name, position: alarm.position, radius: alarm.radius, color: alarm.color, active: alarm.active);
-    locaAlert.nameInputController.text = alarm.name;
+    // Copy the alarm to the buffer alarm. We don't do this inside the edit widget to avoid rebuilds resetting the buffer state.
+    locaAlert.editAlarm = alarm;
+    locaAlert.colorInput = alarm.color;
+    locaAlert.nameInput.text = alarm.name;
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => EditAlarmDialog(alarmId: alarm.id),
-    ).whenComplete(() {
-      // Reset the edit alarm state.
-      locaAlert.bufferAlarm = null;
-      locaAlert.nameInputController.clear();
-      locaAlert.setState();
-    });
+      builder: (context) => const EditAlarmDialog(),
+    );
   }
 
   @override
@@ -91,20 +87,13 @@ class AlarmsView extends StatelessWidget {
 }
 
 class EditAlarmDialog extends StatelessWidget {
-  final String alarmId;
-
-  const EditAlarmDialog({required this.alarmId, super.key});
+  const EditAlarmDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
       () => LocaAlert(),
       builder: (locaAlert) {
-        var bufferAlarmReference = locaAlert.bufferAlarm;
-        if (bufferAlarmReference == null) {
-          return const SizedBox.shrink();
-        }
-
         return SizedBox(
           height: MediaQuery.of(context).size.height * 0.9,
           child: Padding(
@@ -127,30 +116,12 @@ class EditAlarmDialog extends StatelessWidget {
                     TextButton(
                       child: const Text('Save'),
                       onPressed: () {
-                        // Replace the actual alarm data with the buffer alarm.
-                        var alarm = getAlarmById(locaAlert, alarmId);
-                        if (alarm == null) {
-                          debugPrintError('Cannot save alarm since no alarm exists with id $alarmId');
-                          return;
-                        }
-
-                        var bufferAlarm = locaAlert.bufferAlarm;
-                        if (bufferAlarm == null) {
-                          debugPrintError('Cannot save buffer alarm since it is null.');
-                          return;
-                        }
-
-                        bufferAlarm.name = locaAlert.nameInputController.text.trim();
-
-                        // We don't currently provide editing of the position, radius, or active status in the edit alarm ui.
+                        // Replace the actual alarm data with the buffer data.
                         updateAndSaveAlarm(
                           locaAlert,
-                          alarm,
-                          newName: bufferAlarm.name,
-                          newPosition: bufferAlarm.position,
-                          newRadius: bufferAlarm.radius,
-                          newColor: bufferAlarm.color,
-                          isActive: bufferAlarm.active,
+                          locaAlert.editAlarm,
+                          newName: locaAlert.nameInput.text.trim(),
+                          newColor: locaAlert.colorInput,
                         );
                         Navigator.pop(context);
                       },
@@ -164,13 +135,13 @@ class EditAlarmDialog extends StatelessWidget {
                       Text('Name', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
                       TextFormField(
                         textAlign: TextAlign.center,
-                        controller: locaAlert.nameInputController,
+                        controller: locaAlert.nameInput,
                         onChanged: (value) => locaAlert.setState(),
                         decoration: InputDecoration(
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.clear_rounded),
                             onPressed: () {
-                              locaAlert.nameInputController.clear();
+                              locaAlert.nameInput.clear();
                               locaAlert.setState();
                             },
                           ),
@@ -185,7 +156,7 @@ class EditAlarmDialog extends StatelessWidget {
                             Padding(
                               padding: const EdgeInsets.all(8),
                               child: CircleAvatar(
-                                backgroundColor: bufferAlarmReference.color,
+                                backgroundColor: locaAlert.colorInput,
                                 radius: 20,
                                 child: const Icon(Icons.pin_drop_rounded, color: Colors.white),
                               ),
@@ -195,13 +166,13 @@ class EditAlarmDialog extends StatelessWidget {
                                 padding: const EdgeInsets.all(8),
                                 child: GestureDetector(
                                   onTap: () {
-                                    bufferAlarmReference.color = color.value;
+                                    locaAlert.colorInput = color.value;
                                     locaAlert.setState();
                                   },
                                   child: CircleAvatar(
                                     backgroundColor: color.value,
                                     radius: 20,
-                                    child: color.value == bufferAlarmReference.color ? const Icon(Icons.check_rounded, color: Colors.white) : null,
+                                    child: color.value == locaAlert.colorInput ? const Icon(Icons.check_rounded, color: Colors.white) : null,
                                   ),
                                 ),
                               ),
@@ -211,7 +182,7 @@ class EditAlarmDialog extends StatelessWidget {
                       ),
                       const SizedBox(height: 30),
                       Text('Position', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
-                      Text(bufferAlarmReference.position.toSexagesimal(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(locaAlert.editAlarm.position.toSexagesimal(), style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
                       Align(
                         child: ElevatedButton.icon(
@@ -220,7 +191,7 @@ class EditAlarmDialog extends StatelessWidget {
                           ),
                           onPressed: () async {
                             Navigator.pop(context); // Close the edit alarm bottom sheet
-                            locaAlert.initialCenter = bufferAlarmReference.position; // TODO(james): this isn't working.
+                            locaAlert.initialCenter = locaAlert.editAlarm.position; // TODO(james): this isn't working.
                             navigateToView(locaAlert, LocaAlertView.map);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
@@ -229,7 +200,7 @@ class EditAlarmDialog extends StatelessWidget {
                       ),
                       const SizedBox(height: 30),
                       Text('Radius / Size (in meters)', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
-                      Text(bufferAlarmReference.radius.toInt().toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(locaAlert.editAlarm.radius.toInt().toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
                       const SizedBox(height: 30),
                       Align(
                         child: ElevatedButton(
@@ -241,7 +212,7 @@ class EditAlarmDialog extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            var ok = deleteAlarmById(locaAlert, alarmId);
+                            var ok = deleteAlarmById(locaAlert, locaAlert.editAlarm.id);
                             if (!ok) {
                               debugPrintError('Alarm $id could not be deleted.');
                             }

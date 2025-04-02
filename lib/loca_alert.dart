@@ -24,8 +24,9 @@ class LocaAlert extends JuneState {
   late PageController pageController;
 
   // Alarm View
-  Alarm? bufferAlarm;
-  TextEditingController nameInputController = TextEditingController();
+  Alarm editAlarm = Alarm(name: '', position: const LatLng(0, 0), radius: 100);
+  TextEditingController nameInput = TextEditingController();
+  Color colorInput = AvailableAlarmColors.blue.value;
 
   // Map View
   MapController mapController = MapController();
