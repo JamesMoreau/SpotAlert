@@ -44,10 +44,7 @@ void showAlarmDialog(BuildContext context, Alarm triggeredAlarm) {
                     Text(triggeredAlarm.name, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () {
-                        // Close the dialog
-                        Navigator.pop(context);
-                      },
+                      onPressed: () => Navigator.pop(context), // Close the dialog
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blueGrey,
                         foregroundColor: Colors.white,

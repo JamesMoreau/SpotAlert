@@ -105,9 +105,7 @@ class EditAlarmDialog extends StatelessWidget {
                   children: [
                     TextButton(
                       child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: () => Navigator.pop(context),
                     ),
                     const Text(
                       'Edit Alarm',

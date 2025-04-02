@@ -229,9 +229,7 @@ class MapView extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.7),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
-                      '© OpenStreetMap contributors',
-                    ),
+                    child: const Text('© OpenStreetMap contributors'),
                   ),
                 ),
               ),
@@ -269,9 +267,7 @@ class MapView extends StatelessWidget {
                                   textAlign: TextAlign.center,
                                 ),
                                 TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
+                                  onPressed: () => Navigator.pop(context),
                                   child: const Text('Close'),
                                 ),
                               ],
@@ -303,17 +299,13 @@ class MapView extends StatelessWidget {
                         var alarm = Alarm(name: 'Alarm', position: locaAlert.mapController.camera.center, radius: locaAlert.alarmPlacementRadius);
                         addAlarm(locaAlert, alarm);
                         resetAlarmPlacementUIState(locaAlert);
-                        locaAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.check),
                     ),
                     const SizedBox(height: 10),
                     FloatingActionButton(
-                      onPressed: () {
-                        resetAlarmPlacementUIState(locaAlert);
-                        locaAlert.setState();
-                      },
+                      onPressed: () => resetAlarmPlacementUIState(locaAlert),
                       elevation: 4,
                       child: const Icon(Icons.cancel_rounded),
                     ),
