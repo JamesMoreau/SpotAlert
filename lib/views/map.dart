@@ -443,6 +443,20 @@ void followOrUnfollowUser(LocaAlert locaAlert) {
   locaAlert.setState();
 }
 
-Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {}
+Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
+  var currentViewIsMap = locaAlert.view != LocaAlertView.map;
+  if (currentViewIsMap) {
+    return;
+  }
+
+  var userPosition = locaAlert.userLocation;
+  if (userPosition == null) {
+    debugPrintError('Unable to move map to user location.');
+    return;
+  }
+
+  locaAlert.mapController.move(userPosition, locaAlert.mapController.camera.zoom);
+  debugPrintInfo('Moving map to user location.');
+}
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
