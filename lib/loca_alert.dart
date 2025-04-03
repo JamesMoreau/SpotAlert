@@ -244,7 +244,8 @@ T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
   var closestDistance = double.infinity;
 
   for (var item in items) {
-    final d = const Distance().as(LengthUnit.Meter, getPosition(item), target);
+    var itemPositon = getPosition(item);
+    var d = const Distance().as(LengthUnit.Meter, itemPositon, target);
     if (d < closestDistance) {
       closestDistance = d;
       closestItem = item;
