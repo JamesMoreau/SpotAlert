@@ -41,7 +41,7 @@ class MapView extends StatelessWidget {
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
                 // keepAlive: true,
-                onMapReady: () => myOnMapReady(locaAlert),
+                onMapReady: () => myOnMapReady(context, locaAlert),
               ),
               children: [
                 TileLayer(
@@ -280,14 +280,14 @@ class MapView extends StatelessWidget {
                   const SizedBox(height: 10),
                   if (locaAlert.followUserLocation) ...[
                     FloatingActionButton(
-                      onPressed: () => followOrUnfollowUser(locaAlert),
+                      onPressed: () => followOrUnfollowUser(context, locaAlert),
                       elevation: 4,
                       backgroundColor: const Color.fromARGB(255, 216, 255, 218),
                       child: const Icon(Icons.near_me_rounded),
                     ),
                   ] else ...[
                     FloatingActionButton(
-                      onPressed: () => followOrUnfollowUser(locaAlert),
+                      onPressed: () => followOrUnfollowUser(context, locaAlert),
                       elevation: 4,
                       child: const Icon(Icons.lock_rounded),
                     ),
@@ -371,7 +371,9 @@ class MapView extends StatelessWidget {
     );
   }
 
-  Future<void> myOnMapReady(LocaAlert locaAlert) async {
+  Future<void> myOnMapReady(BuildContext context, LocaAlert locaAlert) async {
+    var scaffoldMessenger = ScaffoldMessenger.of(context); // Don't use scaffold messenger across async gaps.
+
     locaAlert.followUserLocation = false;
     locaAlert.setState();
     locaAlert.mapController.move(locaAlert.initialCenter, locaAlert.mapController.camera.zoom);
@@ -391,7 +393,7 @@ class MapView extends StatelessWidget {
     // If the user has denied location permissions forever, we can't request them, so we show a snackbar.
     if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
       debugPrintWarning('User has denied location permissions.');
-      ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!).showSnackBar(
+      scaffoldMessenger.showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Container(
@@ -402,7 +404,6 @@ class MapView extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
       );
-
       return;
     }
 
@@ -410,7 +411,7 @@ class MapView extends StatelessWidget {
   }
 }
 
-void followOrUnfollowUser(LocaAlert locaAlert) {
+void followOrUnfollowUser(BuildContext context, LocaAlert locaAlert) {
   if (locaAlert.followUserLocation) {
     locaAlert.followUserLocation = false;
     locaAlert.setState();
@@ -419,7 +420,7 @@ void followOrUnfollowUser(LocaAlert locaAlert) {
 
   if (locaAlert.userLocation == null) {
     debugPrintError("Unable to follow the user's location.");
-    ScaffoldMessenger.of(NavigationService.navigatorKey.currentContext!).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         content: const Padding(
