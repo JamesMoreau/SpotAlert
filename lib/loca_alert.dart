@@ -220,7 +220,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     var notificationDetails = const NotificationDetails(
       iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentBanner: true, presentSound: true),
     );
-    await flutterLocalNotificationsPlugin.show(id++, 'Alarm Triggered', 'You have entered the radius of alarm: ${alarm.name}.', notificationDetails);
+    await flutterLocalNotificationsPlugin.show(notificationId++, 'Alarm Triggered', 'You have entered the radius of alarm: ${alarm.name}.', notificationDetails);
 
     showAlarmDialog(navigatorKey.currentContext!, alarm);
   }

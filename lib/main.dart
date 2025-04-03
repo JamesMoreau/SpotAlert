@@ -113,7 +113,7 @@ final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Ico
 });
 
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-int id = 0;
+int notificationId = 0;
 
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 

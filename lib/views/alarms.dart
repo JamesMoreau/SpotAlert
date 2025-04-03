@@ -210,7 +210,8 @@ class EditAlarmDialog extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            var ok = deleteAlarmById(locaAlert, locaAlert.editAlarm.id);
+                            var id = locaAlert.editAlarm.id;
+                            var ok = deleteAlarmById(locaAlert, id);
                             if (!ok) {
                               debugPrintError('Alarm $id could not be deleted.');
                             }
