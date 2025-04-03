@@ -298,14 +298,21 @@ class MapView extends StatelessWidget {
                       onPressed: () {
                         var alarm = Alarm(name: 'Alarm', position: locaAlert.mapController.camera.center, radius: locaAlert.alarmPlacementRadius);
                         addAlarm(locaAlert, alarm);
-                        resetAlarmPlacementUIState(locaAlert);
+                        
+                        locaAlert.isPlacingAlarm = false;
+                        locaAlert.alarmPlacementRadius = 100;
+                        locaAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.check),
                     ),
                     const SizedBox(height: 10),
                     FloatingActionButton(
-                      onPressed: () => resetAlarmPlacementUIState(locaAlert),
+                      onPressed: () {
+                        locaAlert.isPlacingAlarm = false;
+                        locaAlert.alarmPlacementRadius = 100;
+                        locaAlert.setState();
+                      },
                       elevation: 4,
                       child: const Icon(Icons.cancel_rounded),
                     ),

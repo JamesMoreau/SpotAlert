@@ -169,12 +169,6 @@ Future<void> loadSettings(LocaAlert locaAlert) async {
   debugPrintInfo('Loaded settings from storage.');
 }
 
-void resetAlarmPlacementUIState(LocaAlert locaAlert) {
-  locaAlert.isPlacingAlarm = false;
-  locaAlert.alarmPlacementRadius = 100;
-  locaAlert.setState();
-}
-
 Future<void> saveSettings(LocaAlert locaAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
