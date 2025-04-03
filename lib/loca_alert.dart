@@ -222,7 +222,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     );
     await flutterLocalNotificationsPlugin.show(id++, 'Alarm Triggered', 'You have entered the radius of alarm: ${alarm.name}.', notificationDetails);
 
-    showAlarmDialog(NavigationService.navigatorKey.currentContext!, alarm);
+    showAlarmDialog(navigatorKey.currentContext!, alarm);
   }
 
   if (locaAlert.vibrationSetting) {

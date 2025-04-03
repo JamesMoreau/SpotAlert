@@ -115,10 +115,7 @@ final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Ico
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 int id = 0;
 
-class NavigationService {
-  // TODO(james): can this be removed?
-  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-}
+GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyHttpOverrides extends HttpOverrides {
   final int maxConnections = 8;
@@ -230,7 +227,7 @@ class MainApp extends StatelessWidget {
         },
       ),
       theme: locationAlarmTheme,
-      navigatorKey: NavigationService.navigatorKey,
+      navigatorKey: navigatorKey,
     );
   }
 }
