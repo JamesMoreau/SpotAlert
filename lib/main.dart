@@ -118,10 +118,9 @@ int id = 0;
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyHttpOverrides extends HttpOverrides {
-  final int maxConnections = 8;
-
   @override
   HttpClient createHttpClient(SecurityContext? context) {
+    var maxConnections = 8;
     var client = super.createHttpClient(context);
     client.maxConnectionsPerHost = maxConnections;
     return client;
