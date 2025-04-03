@@ -41,7 +41,7 @@ class MapView extends StatelessWidget {
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
                 // keepAlive: true,
-                onMapReady: () => myOnMapReady(context, locaAlert),
+                onMapReady: () => myOnMapReady(locaAlert),
               ),
               children: [
                 TileLayer(
@@ -298,7 +298,7 @@ class MapView extends StatelessWidget {
                       onPressed: () {
                         var alarm = Alarm(name: 'Alarm', position: locaAlert.mapController.camera.center, radius: locaAlert.alarmPlacementRadius);
                         addAlarm(locaAlert, alarm);
-                        
+
                         locaAlert.isPlacingAlarm = false;
                         locaAlert.alarmPlacementRadius = 100;
                         locaAlert.setState();
@@ -378,9 +378,7 @@ class MapView extends StatelessWidget {
     );
   }
 
-  Future<void> myOnMapReady(BuildContext context, LocaAlert locaAlert) async {
-    var scaffoldMessenger = ScaffoldMessenger.of(context); // Don't use scaffold messenger across async gaps.
-
+  Future<void> myOnMapReady(LocaAlert locaAlert) async {
     locaAlert.followUserLocation = false;
     locaAlert.setState();
     locaAlert.mapController.move(locaAlert.initialCenter, locaAlert.mapController.camera.zoom);
@@ -400,7 +398,7 @@ class MapView extends StatelessWidget {
     // If the user has denied location permissions forever, we can't request them, so we show a snackbar.
     if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
       debugPrintWarning('User has denied location permissions.');
-      scaffoldMessenger.showSnackBar(
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Container(
@@ -445,8 +443,6 @@ void followOrUnfollowUser(LocaAlert locaAlert) {
   locaAlert.setState();
 }
 
-Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
-
-}
+Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {}
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
