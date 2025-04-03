@@ -280,14 +280,14 @@ class MapView extends StatelessWidget {
                   const SizedBox(height: 10),
                   if (locaAlert.followUserLocation) ...[
                     FloatingActionButton(
-                      onPressed: () => followOrUnfollowUser(context, locaAlert),
+                      onPressed: () => followOrUnfollowUser(locaAlert),
                       elevation: 4,
                       backgroundColor: const Color.fromARGB(255, 216, 255, 218),
                       child: const Icon(Icons.near_me_rounded),
                     ),
                   ] else ...[
                     FloatingActionButton(
-                      onPressed: () => followOrUnfollowUser(context, locaAlert),
+                      onPressed: () => followOrUnfollowUser(locaAlert),
                       elevation: 4,
                       child: const Icon(Icons.lock_rounded),
                     ),
@@ -418,7 +418,7 @@ class MapView extends StatelessWidget {
   }
 }
 
-void followOrUnfollowUser(BuildContext context, LocaAlert locaAlert) {
+void followOrUnfollowUser(LocaAlert locaAlert) {
   if (locaAlert.followUserLocation) {
     locaAlert.followUserLocation = false;
     locaAlert.setState();
@@ -427,7 +427,7 @@ void followOrUnfollowUser(BuildContext context, LocaAlert locaAlert) {
 
   if (locaAlert.userLocation == null) {
     debugPrintError("Unable to follow the user's location.");
-    ScaffoldMessenger.of(context).showSnackBar(
+    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         content: const Padding(
@@ -446,19 +446,7 @@ void followOrUnfollowUser(BuildContext context, LocaAlert locaAlert) {
 }
 
 Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
-  var currentViewIsMap = locaAlert.view != LocaAlertView.map;
-  if (currentViewIsMap) {
-    return;
-  }
 
-  var userPosition = locaAlert.userLocation;
-  if (userPosition == null) {
-    debugPrintError('Unable to move map to user location.');
-    return;
-  }
-
-  locaAlert.mapController.move(userPosition, locaAlert.mapController.camera.zoom);
-  debugPrintInfo('Moving map to user location.');
 }
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
