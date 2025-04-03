@@ -62,7 +62,7 @@ bool deleteAlarmById(LocaAlert locaAlert, String id) {
     if (locaAlert.alarms[i].id == id) {
       locaAlert.alarms.removeAt(i);
       locaAlert.setState();
-      saveAlarmsToStorage(locaAlert);
+      saveAlarms(locaAlert);
       return true;
     }
   }
@@ -94,17 +94,17 @@ void updateAndSaveAlarm(
   if (isActive != null) alarm.active = isActive;
 
   locaAlert.setState();
-  saveAlarmsToStorage(locaAlert);
+  saveAlarms(locaAlert);
 }
 
 void addAlarm(LocaAlert locaAlert, Alarm alarm) {
   locaAlert.alarms.add(alarm);
   locaAlert.setState();
-  saveAlarmsToStorage(locaAlert);
+  saveAlarms(locaAlert);
 }
 
 // This should be called everytime the alarms state is changed.
-Future<void> saveAlarmsToStorage(LocaAlert locaAlert) async {
+Future<void> saveAlarms(LocaAlert locaAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
   var file = File(alarmsPath);
@@ -121,7 +121,7 @@ Future<void> saveAlarmsToStorage(LocaAlert locaAlert) async {
   debugPrintInfo('Saved alarms to storage: $alarmJsons.');
 }
 
-Future<void> loadAlarmsFromStorage(LocaAlert locaAlert) async {
+Future<void> loadAlarms(LocaAlert locaAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
   var file = File(alarmsPath);

@@ -271,7 +271,7 @@ void main() async {
   });
 
   await loadSettings(locaAlert);
-  await loadAlarmsFromStorage(locaAlert);
+  await loadAlarms(locaAlert);
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();
