@@ -19,16 +19,16 @@ import 'package:vibration/vibration.dart';
 class LocaAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
   LatLng? userLocation;
-
+  
   LocaAlertView view = LocaAlertView.alarms;
   late PageController pageController;
 
-  // Alarm View
+  // Alarms
   Alarm editAlarm = Alarm(name: '', position: const LatLng(0, 0), radius: 100);
   TextEditingController nameInput = TextEditingController();
   Color colorInput = AvailableAlarmColors.blue.value;
 
-  // Map View
+  // Map
   MapController mapController = MapController();
   CacheStore? mapTileCacheStore;
   LatLng initialCenter = const LatLng(0, 0);
@@ -36,6 +36,7 @@ class LocaAlert extends JuneState {
   double alarmPlacementRadius = 100;
   bool followUserLocation = false;
 
+  // Settings
   late PackageInfo packageInfo;
   bool vibrationSetting = true;
   bool showClosestNonVisibleAlarmSetting = true;
