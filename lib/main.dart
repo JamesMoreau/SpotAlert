@@ -19,7 +19,6 @@ import 'package:uuid/uuid.dart';
 /*
 TODO:
   Should opening map view immedietly move to user (when not locked on)?
-  Check that we are actually saving the settings to file. Also have default value if failed to load.
   would be cool to have user's position off screen indicator as well.
 */
 
