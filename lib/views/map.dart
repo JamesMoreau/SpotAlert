@@ -37,10 +37,8 @@ class MapView extends StatelessWidget {
             FlutterMap(
               mapController: locaAlert.mapController,
               options: MapOptions(
-                initialCenter: locaAlert.initialCenter,
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
-                // keepAlive: true,
                 onMapReady: () => myOnMapReady(locaAlert),
               ),
               children: [
@@ -115,20 +113,44 @@ class MapView extends StatelessWidget {
                     }
                   },
                 ),
-                if (locaAlert.userLocation != null) ...[
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: locaAlert.userLocation!,
-                        child: const Icon(Icons.circle, color: Colors.blue),
-                      ),
-                      Marker(
-                        point: locaAlert.userLocation!,
-                        child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
-                      ),
-                    ],
-                  ),
-                ],
+                StreamBuilder(
+                  stream: locaAlert.location.onLocationChanged,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      debugPrintError('Error getting location: ${snapshot.error}');
+                      return const SizedBox.shrink();
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SizedBox.shrink();
+                    }
+
+                    if (!snapshot.hasData) {
+                      return const SizedBox.shrink();
+                    }
+
+                    var locationData = snapshot.data!;
+                    if (locationData.latitude == null || locationData.longitude == null) {
+                      debugPrintError('Location data is null: $locationData');
+                      return const SizedBox.shrink();
+                    }
+
+                    var location = LatLng(locationData.latitude!, locationData.longitude!);
+
+                    return MarkerLayer(
+                      markers: [
+                        Marker(
+                          point: location,
+                          child: const Icon(Icons.circle, color: Colors.blue),
+                        ),
+                        Marker(
+                          point: location,
+                          child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
+                        ),
+                      ],
+                    );
+                  },
+                ),
                 Builder(
                   builder: (context) {
                     if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
@@ -381,18 +403,17 @@ class MapView extends StatelessWidget {
   Future<void> myOnMapReady(LocaAlert locaAlert) async {
     locaAlert.followUserLocation = false;
     locaAlert.setState();
-    locaAlert.mapController.move(locaAlert.initialCenter, locaAlert.mapController.camera.zoom);
 
-    var serviceIsEnabled = await location.serviceEnabled();
+    var serviceIsEnabled = await locaAlert.location.serviceEnabled();
     if (!serviceIsEnabled) {
-      var newIsServiceEnabled = await location.requestService();
+      var newIsServiceEnabled = await locaAlert.location.requestService();
       if (!newIsServiceEnabled) {
         debugPrintError('Location services are not enabled.');
         return;
       }
     }
 
-    var permission = await location.hasPermission();
+    var permission = await locaAlert.location.hasPermission();
     debugPrintInfo('Location permission status: $permission');
 
     // If the user has denied location permissions forever, we can't request them, so we show a snackbar.
@@ -417,46 +438,8 @@ class MapView extends StatelessWidget {
 }
 
 void followOrUnfollowUser(LocaAlert locaAlert) {
-  if (locaAlert.followUserLocation) {
-    locaAlert.followUserLocation = false;
-    locaAlert.setState();
-    return;
-  }
-
-  if (locaAlert.userLocation == null) {
-    debugPrintError("Unable to follow the user's location.");
-    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: const Padding(
-          padding: EdgeInsets.all(8),
-          child: Text('Unable to follow your location. Are location services permitted?'),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-    return;
-  }
-
-  locaAlert.followUserLocation = true;
-  moveMapToUserLocation(locaAlert);
+  locaAlert.followUserLocation = !locaAlert.followUserLocation;
   locaAlert.setState();
-}
-
-Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
-  var currentViewIsMap = locaAlert.view != LocaAlertView.map;
-  if (currentViewIsMap) {
-    return;
-  }
-
-  var userPosition = locaAlert.userLocation;
-  if (userPosition == null) {
-    debugPrintError('Unable to move map to user location.');
-    return;
-  }
-
-  locaAlert.mapController.move(userPosition, locaAlert.mapController.camera.zoom);
-  debugPrintInfo('Moving map to user location.');
 }
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);

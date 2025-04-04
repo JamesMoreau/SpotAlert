@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:june/june.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/views/alarms.dart';
 import 'package:loca_alert/views/map.dart';
@@ -124,8 +123,6 @@ class MyHttpOverrides extends HttpOverrides {
     return client;
   }
 }
-
-Location location = Location();
 
 const Uuid idGenerator = Uuid();
 
@@ -245,26 +242,17 @@ void main() async {
   var initializationSettings = const InitializationSettings(iOS: DarwinInitializationSettings());
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-  await location.enableBackgroundMode();
-  location.onLocationChanged.listen((location) async {
-    if (location.latitude == null || location.longitude == null) return;
-
-    locaAlert.userLocation = LatLng(location.latitude!, location.longitude!);
-    locaAlert.setState();
-
+  await locaAlert.location.enableBackgroundMode();
+  locaAlert.location.onLocationChanged.listen((location) async {
     await checkAlarms(locaAlert);
-
-    var shouldMoveMapToUserLocation = locaAlert.followUserLocation && locaAlert.view == LocaAlertView.map;
-    if (shouldMoveMapToUserLocation) await moveMapToUserLocation(locaAlert);
   });
 
-  // Check periodically if the location permission has been denied. If so, cancel the location updates.
+  // Check periodically if the location permission has been denied.
   Timer.periodic(locationPermissionCheckInterval, (timer) async {
-    var permission = await location.hasPermission();
-
+    var permission = await locaAlert.location.hasPermission();
     if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
-      locaAlert.userLocation = null;
       locaAlert.followUserLocation = false;
+      await locaAlert.location.onLocationChanged.drain<void>(); // Cancel the location updates.
       locaAlert.setState();
     }
   });

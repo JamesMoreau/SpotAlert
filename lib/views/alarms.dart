@@ -189,7 +189,7 @@ class EditAlarmDialog extends StatelessWidget {
                           ),
                           onPressed: () async {
                             Navigator.pop(context); // Close the edit alarm bottom sheet
-                            locaAlert.initialCenter = locaAlert.editAlarm.position;
+                            // locaAlert.initialCenter = locaAlert.editAlarm.position; // TODO(james): put this back
                             navigateToView(locaAlert, LocaAlertView.map);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),

@@ -18,7 +18,7 @@ import 'package:vibration/vibration.dart';
 
 class LocaAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
-  LatLng? userLocation;
+  Location location = Location();
   
   LocaAlertView view = LocaAlertView.alarms;
   late PageController pageController;
@@ -31,7 +31,7 @@ class LocaAlert extends JuneState {
   // Map
   MapController mapController = MapController();
   CacheStore? mapTileCacheStore;
-  LatLng initialCenter = const LatLng(0, 0);
+  // LatLng initialCenter = const LatLng(0, 0);
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = 100;
   bool followUserLocation = false;
@@ -189,18 +189,20 @@ Future<void> saveSettings(LocaAlert locaAlert) async {
 Future<void> checkAlarms(LocaAlert locaAlert) async {
   var activeAlarms = locaAlert.alarms.where((alarm) => alarm.active).toList();
 
-  var permission = await location.hasPermission();
+  var permission = await locaAlert.location.hasPermission();
   if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
     debugPrintError('Alarm Check: Location permission denied. Cannot check for triggered alarms.');
     return;
   }
 
-  if (locaAlert.userLocation == null) {
-    debugPrintWarning('Alarm Check: No user position found.');
+  var locationData = await locaAlert.location.getLocation();
+  if (locationData.latitude == null || locationData.longitude == null) {
+    debugPrintWarning('Alarm Check: Cannot determine the user location.');
     return;
   }
 
-  var triggeredAlarms = detectTriggeredAlarms(locaAlert.userLocation!, activeAlarms);
+  var location = LatLng(locationData.latitude!, locationData.longitude!);
+  var triggeredAlarms = detectTriggeredAlarms(location, activeAlarms);
   if (triggeredAlarms.isEmpty) {
     debugPrintInfo('Alarm Check: No alarms triggered.');
     return;
