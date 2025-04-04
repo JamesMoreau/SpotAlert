@@ -51,7 +51,7 @@ class MapView extends StatelessWidget {
                     store: locaAlert.mapTileCacheStore!,
                   ),
                 ),
-                Builder(
+                Builder( // Markers
                   builder: (context) {
                     // Display the alarms as circles or markers on the map. We create a set of markers or circles
                     // representing the same alarms. The markers are only visible when the user is zoomed out
@@ -114,7 +114,7 @@ class MapView extends StatelessWidget {
                     }
                   },
                 ),
-                StreamBuilder(
+                StreamBuilder( // User location marker.
                   stream: locaAlert.location.onLocationChanged,
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
@@ -152,7 +152,7 @@ class MapView extends StatelessWidget {
                     );
                   },
                 ),
-                Builder(
+                Builder( // Alarm placement marker.
                   builder: (context) {
                     if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
 
