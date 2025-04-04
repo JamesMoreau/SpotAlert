@@ -37,6 +37,7 @@ class MapView extends StatelessWidget {
             FlutterMap(
               mapController: locaAlert.mapController,
               options: MapOptions(
+                keepAlive: true,
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
                 onMapReady: () => myOnMapReady(locaAlert),
