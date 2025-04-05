@@ -244,31 +244,28 @@ void main() async {
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   await locaAlert.location.enableBackgroundMode();
-  locaAlert.location.onLocationChanged.listen((location) async {
-    // await checkAlarms(locaAlert);
+  locaAlert.location.onLocationChanged.listen(
+    (location) async {
+      // await checkAlarms(locaAlert);
 
-    if (locaAlert.followUserLocation && locaAlert.mapControllerIsReady) {
-      var locationData = await locaAlert.location.getLocation();
-      if (locationData.latitude == null || locationData.longitude == null) {
-        debugPrintWarning('Alarm Check: Cannot determine the user location.');
-        return;
+      if (locaAlert.followUserLocation && locaAlert.mapControllerIsReady) {
+        var locationData = await locaAlert.location.getLocation();
+        if (locationData.latitude == null || locationData.longitude == null) {
+          debugPrintWarning('Alarm Check: Cannot determine the user location.');
+          return;
+        }
+
+        var location = LatLng(locationData.latitude!, locationData.longitude!);
+        var zoom = locaAlert.mapController.camera.zoom;
+        locaAlert.mapController.move(location, zoom);
       }
-
-      var location = LatLng(locationData.latitude!, locationData.longitude!);
-      var zoom = locaAlert.mapController.camera.zoom;
-      locaAlert.mapController.move(location, zoom);
-    }
-  });
-
-  // Check periodically if the location permission has been denied.
-  Timer.periodic(locationPermissionCheckInterval, (timer) async {
-    var permission = await locaAlert.location.hasPermission();
-    if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
+    },
+    onError: (error) async {
       locaAlert.followUserLocation = false;
       await locaAlert.location.onLocationChanged.drain<void>(); // Cancel the location updates.
       locaAlert.setState();
-    }
-  });
+    },
+  );
 
   await loadSettings(locaAlert);
   await loadAlarms(locaAlert);
