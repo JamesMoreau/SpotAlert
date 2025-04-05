@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:june/june.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/views/alarms.dart';
 import 'package:loca_alert/views/map.dart';
@@ -245,6 +246,18 @@ void main() async {
   await locaAlert.location.enableBackgroundMode();
   locaAlert.location.onLocationChanged.listen((location) async {
     // await checkAlarms(locaAlert);
+
+    if (locaAlert.followUserLocation && locaAlert.mapControllerIsReady) {
+      var locationData = await locaAlert.location.getLocation();
+      if (locationData.latitude == null || locationData.longitude == null) {
+        debugPrintWarning('Alarm Check: Cannot determine the user location.');
+        return;
+      }
+
+      var location = LatLng(locationData.latitude!, locationData.longitude!);
+      var zoom = locaAlert.mapController.camera.zoom;
+      locaAlert.mapController.move(location, zoom);
+    }
   });
 
   // Check periodically if the location permission has been denied.

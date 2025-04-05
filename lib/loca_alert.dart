@@ -29,7 +29,8 @@ class LocaAlert extends JuneState {
   Color colorInput = AvailableAlarmColors.blue.value;
 
   // Map
-  MapController mapController = MapController(); // TODO(james): Could make this optional
+  MapController mapController = MapController();
+  bool mapControllerIsReady = false;
   CacheStore? mapTileCacheStore;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = 100;

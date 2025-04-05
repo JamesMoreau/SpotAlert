@@ -402,8 +402,7 @@ class MapView extends StatelessWidget {
   }
 
   Future<void> myOnMapReady(LocaAlert locaAlert) async {
-    locaAlert.followUserLocation = false;
-    locaAlert.setState();
+    locaAlert.mapControllerIsReady = true;
 
     var serviceIsEnabled = await locaAlert.location.serviceEnabled();
     if (!serviceIsEnabled) {
