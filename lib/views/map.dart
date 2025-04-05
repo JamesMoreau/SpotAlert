@@ -402,7 +402,7 @@ class MapView extends StatelessWidget {
   }
 
   Future<void> myOnMapReady(LocaAlert locaAlert) async {
-    locaAlert.mapControllerIsReady = true;
+    locaAlert.mapControllerIsAttached = true;
 
     var serviceIsEnabled = await locaAlert.location.serviceEnabled();
     if (!serviceIsEnabled) {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
@@ -188,12 +190,18 @@ class EditAlarmDialog extends StatelessWidget {
                             backgroundColor: Theme.of(context).colorScheme.primary,
                           ),
                           onPressed: () async {
-                            // Navigator.pop(context); // Close the edit alarm bottom sheet // TODO(j): put this back
-                            // navigateToView(locaAlert, LocaAlertView.map);
+                            Navigator.pop(context); // Close the edit alarm bottom sheet.
+                            navigateToView(locaAlert, LocaAlertView.map);
 
-                            // var zoom = locaAlert.mapController.camera.zoom;
-                            // var position = locaAlert.editAlarm.position;
-                            // locaAlert.mapController.move(position, zoom);
+                            // This is a hack but we need to be sure that map controller is attached before moving.
+                            await Future.doWhile(() async {
+                              if (locaAlert.mapControllerIsAttached) return false;
+                              await Future<void>.delayed(const Duration(milliseconds: 50));
+                              return true;
+                            });
+
+                            var position = locaAlert.editAlarm.position;
+                            locaAlert.mapController.move(position, initialZoom);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
                           label: const Text('Go To Alarm', style: TextStyle(color: Colors.white)),

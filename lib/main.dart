@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
@@ -12,7 +11,6 @@ import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/views/alarms.dart';
 import 'package:loca_alert/views/map.dart';
 import 'package:loca_alert/views/settings.dart';
-import 'package:location/location.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -248,7 +246,8 @@ void main() async {
     (location) async {
       // await checkAlarms(locaAlert);
 
-      if (locaAlert.followUserLocation && locaAlert.mapControllerIsReady) {
+      var shouldMoveToUserLocation = locaAlert.followUserLocation && locaAlert.mapControllerIsAttached;
+      if (shouldMoveToUserLocation) {
         var locationData = await locaAlert.location.getLocation();
         if (locationData.latitude == null || locationData.longitude == null) {
           debugPrintWarning('Alarm Check: Cannot determine the user location.');
