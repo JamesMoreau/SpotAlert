@@ -440,6 +440,34 @@ class MapView extends StatelessWidget {
 void followOrUnfollowUser(LocaAlert locaAlert) {
   locaAlert.followUserLocation = !locaAlert.followUserLocation;
   locaAlert.setState();
+  
+  // If we are following, then we need to move the map immediately instead 
+  // of waiting for the next location update.
+  if (locaAlert.followUserLocation) moveMapToUserLocation(locaAlert);
+
+}
+
+Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
+  var permission = await locaAlert.location.hasPermission();
+  if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
+    debugPrintError('Location permission denied. Cannot move map to user location.');
+    return;
+  }
+
+  var locationData = await locaAlert.location.getLocation();
+  if (locationData.latitude == null || locationData.longitude == null) {
+    debugPrintError('Cannot determine the user location.');
+    return;
+  }
+
+  if (!locaAlert.mapControllerIsAttached) {
+    debugPrintError('The map controller is not attached. Cannot move to user location.');
+    return;
+  }
+
+  final location = LatLng(locationData.latitude!, locationData.longitude!);
+  final zoom = locaAlert.mapController.camera.zoom;
+  locaAlert.mapController.move(location, zoom);
 }
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);

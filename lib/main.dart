@@ -247,17 +247,7 @@ void main() async {
       // await checkAlarms(locaAlert);
 
       var shouldMoveToUserLocation = locaAlert.followUserLocation && locaAlert.mapControllerIsAttached;
-      if (shouldMoveToUserLocation) {
-        var locationData = await locaAlert.location.getLocation();
-        if (locationData.latitude == null || locationData.longitude == null) {
-          debugPrintWarning('Alarm Check: Cannot determine the user location.');
-          return;
-        }
-
-        var location = LatLng(locationData.latitude!, locationData.longitude!);
-        var zoom = locaAlert.mapController.camera.zoom;
-        locaAlert.mapController.move(location, zoom);
-      }
+      if (shouldMoveToUserLocation) await moveMapToUserLocation(locaAlert);
     },
     onError: (error) async {
       locaAlert.followUserLocation = false;
