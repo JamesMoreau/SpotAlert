@@ -244,7 +244,7 @@ void main() async {
   await locaAlert.location.enableBackgroundMode();
   locaAlert.location.onLocationChanged.listen(
     (location) async {
-      // await checkAlarms(locaAlert);
+      await checkAlarms(locaAlert);
 
       var shouldMoveToUserLocation = locaAlert.followUserLocation && locaAlert.mapControllerIsAttached;
       if (shouldMoveToUserLocation) await moveMapToUserLocation(locaAlert);

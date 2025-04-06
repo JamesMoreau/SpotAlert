@@ -444,16 +444,9 @@ void followOrUnfollowUser(LocaAlert locaAlert) {
   // If we are following, then we need to move the map immediately instead 
   // of waiting for the next location update.
   if (locaAlert.followUserLocation) moveMapToUserLocation(locaAlert);
-
 }
 
 Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
-  var permission = await locaAlert.location.hasPermission();
-  if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
-    debugPrintError('Location permission denied. Cannot move map to user location.');
-    return;
-  }
-
   var locationData = await locaAlert.location.getLocation();
   if (locationData.latitude == null || locationData.longitude == null) {
     debugPrintError('Cannot determine the user location.');
