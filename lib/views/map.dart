@@ -377,8 +377,11 @@ class MapView extends StatelessWidget {
     );
   }
 
-  Future<void> myOnMapReady(LocaAlert locaAlert) async {
-    locaAlert.mapControllerIsAttached = true; // From this point on we can now use mapController outside the map widget.
+  // Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
+  Future<void> myOnMapReady(LocaAlert locaAlert) async { 
+
+    // From this point on we can now use mapController outside the map widget.
+    locaAlert.mapControllerIsAttached = true;
 
     // TODO(j): we shouldn't do this here. instead we should check permissions in main() and do the snackbar
     // if there is no user location on map opening.
