@@ -18,7 +18,6 @@ import 'package:uuid/uuid.dart';
 /*
 TODO:
   Should opening map view immedietly move to user (when not locked on)?
-  would be cool to have user's position off screen indicator as well.
 */
 
 const author = 'James Moreau';

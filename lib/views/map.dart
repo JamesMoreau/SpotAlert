@@ -26,6 +26,9 @@ class MapView extends StatelessWidget {
         }
 
         var statusBarHeight = MediaQuery.of(context).padding.top;
+        var screenSize = MediaQuery.of(context).size;
+        var ellipseWidth = screenSize.width * 0.8;
+        var ellipseHeight = screenSize.height * 0.65;
 
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
@@ -148,6 +151,41 @@ class MapView extends StatelessWidget {
                 ),
                 Builder(
                   builder: (context) {
+                    // If the user's position is not visible, show an arrow pointing towards them.
+
+                    if (locaAlert.position == null) return const SizedBox();
+
+                    var userIsVisible = MapCamera.of(context).visibleBounds.contains(locaAlert.position!);
+                    if (userIsVisible) return const SizedBox.shrink();
+
+                    var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, locaAlert.position!);
+                    var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+
+                    return IgnorePointer(
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Transform.translate(
+                              offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+                              child: Transform.rotate(
+                                angle: arrowRotation,
+                                child: Transform.rotate(angle: -pi / 2, child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28)),
+                              ),
+                            ),
+                          ),
+                          Center(
+                            child: Transform.translate(
+                              offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+                              child: const Stack(children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))]),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                Builder(
+                  builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
                     var closestAlarmIsVisible = false;
                     var closestAlarm = getClosest(MapCamera.of(context).center, locaAlert.alarms, (alarm) => alarm.position);
@@ -158,17 +196,14 @@ class MapView extends StatelessWidget {
                     var showClosestNonVisibleAlarm = closestAlarm != null && !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
                     if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
 
-                    var screenSize = MediaQuery.of(context).size;
-                    var ellipseWidth = screenSize.width * 0.8;
-                    var ellipseHeight = screenSize.height * 0.65;
                     var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-                    var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-                    var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // This is used to offset the text from the icon to not overlap with the arrow.
+                    var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
+                    var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // So that the text does not overlap with the arrow.
 
-                    return Stack(
-                      children: [
-                        IgnorePointer(
-                          child: Center(
+                    return IgnorePointer(
+                      child: Stack(
+                        children: [
+                          Center(
                             child: Transform.translate(
                               offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
                               child: Transform.rotate(
@@ -177,18 +212,14 @@ class MapView extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ),
-                        IgnorePointer(
-                          child: Center(
+                          Center(
                             child: Transform.translate(
                               offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
                               child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
                             ),
                           ),
-                        ),
-                        if (closestAlarm.name.isNotEmpty)
-                          IgnorePointer(
-                            child: Center(
+                          if (closestAlarm.name.isNotEmpty)
+                            Center(
                               child: Transform.translate(
                                 offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
                                 child: Transform.translate(
@@ -211,8 +242,8 @@ class MapView extends StatelessWidget {
                                 ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -378,8 +409,7 @@ class MapView extends StatelessWidget {
   }
 
   // Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
-  Future<void> myOnMapReady(LocaAlert locaAlert) async { 
-
+  Future<void> myOnMapReady(LocaAlert locaAlert) async {
     // From this point on we can now use mapController outside the map widget.
     locaAlert.mapControllerIsAttached = true;
 

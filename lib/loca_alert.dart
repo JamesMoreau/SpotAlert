@@ -17,7 +17,7 @@ import 'package:vibration/vibration.dart';
 
 class LocaAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
-  LatLng? position;
+  LatLng? position; // The user's position.
   
   LocaAlertView view = LocaAlertView.alarms;
   late PageController pageController;
@@ -38,7 +38,7 @@ class LocaAlert extends JuneState {
   // Settings
   late PackageInfo packageInfo;
   bool vibrationSetting = true;
-  bool showClosestNonVisibleAlarmSetting = true;
+  bool showClosestNonVisibleAlarmSetting = true; // TODO(j): Maybe we should just show all the non visible alarms, and have a setting where only the closest one is shown.
 
   @override
   Future<void> onInit() async {
