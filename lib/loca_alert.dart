@@ -11,14 +11,13 @@ import 'package:latlong2/latlong.dart';
 import 'package:loca_alert/main.dart';
 import 'package:loca_alert/models/alarm.dart';
 import 'package:loca_alert/views/triggered_alarm_dialog.dart';
-import 'package:location/location.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vibration/vibration.dart';
 
 class LocaAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
-  Location location = Location();
+  LatLng? position;
   
   LocaAlertView view = LocaAlertView.alarms;
   late PageController pageController;
@@ -187,22 +186,14 @@ Future<void> saveSettings(LocaAlert locaAlert) async {
 }
 
 Future<void> checkAlarms(LocaAlert locaAlert) async {
+  if (locaAlert.position == null) {
+    debugPrintInfo('Alarm Check: User position not available.');
+    return;
+  }
+
   var activeAlarms = locaAlert.alarms.where((alarm) => alarm.active).toList();
 
-  var permission = await locaAlert.location.hasPermission();
-  if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
-    debugPrintError('Alarm Check: Location permission denied. Cannot check for triggered alarms.');
-    return;
-  }
-
-  var locationData = await locaAlert.location.getLocation();
-  if (locationData.latitude == null || locationData.longitude == null) {
-    debugPrintWarning('Alarm Check: Cannot determine the user location.');
-    return;
-  }
-
-  var location = LatLng(locationData.latitude!, locationData.longitude!);
-  var triggeredAlarms = detectTriggeredAlarms(location, activeAlarms);
+  var triggeredAlarms = detectTriggeredAlarms(locaAlert.position!, activeAlarms);
   if (triggeredAlarms.isEmpty) {
     debugPrintInfo('Alarm Check: No alarms triggered.');
     return;

@@ -37,7 +37,7 @@ class MapView extends StatelessWidget {
             FlutterMap(
               mapController: locaAlert.mapController,
               options: MapOptions(
-                keepAlive: true,
+                keepAlive: true, // Since the app has multiple pages, we want to map widget to stay alive so we can still use MapController in other places.
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
                 onMapReady: () => myOnMapReady(locaAlert),
@@ -114,44 +114,20 @@ class MapView extends StatelessWidget {
                     }
                   },
                 ),
-                StreamBuilder(
-                  stream: locaAlert.location.onLocationChanged,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      debugPrintError('Error getting location: ${snapshot.error}');
-                      return const SizedBox.shrink();
-                    }
-
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox.shrink();
-                    }
-
-                    if (!snapshot.hasData) {
-                      return const SizedBox.shrink();
-                    }
-
-                    var locationData = snapshot.data!;
-                    if (locationData.latitude == null || locationData.longitude == null) {
-                      debugPrintError('Location data is null: $locationData');
-                      return const SizedBox.shrink();
-                    }
-
-                    var location = LatLng(locationData.latitude!, locationData.longitude!);
-
-                    return MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: location,
-                          child: const Icon(Icons.circle, color: Colors.blue),
-                        ),
-                        Marker(
-                          point: location,
-                          child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                if (locaAlert.position != null) ...[
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: locaAlert.position!,
+                        child: const Icon(Icons.circle, color: Colors.blue),
+                      ),
+                      Marker(
+                        point: locaAlert.position!,
+                        child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
+                      ),
+                    ],
+                  ),
+                ],
                 Builder(
                   builder: (context) {
                     if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
@@ -402,18 +378,20 @@ class MapView extends StatelessWidget {
   }
 
   Future<void> myOnMapReady(LocaAlert locaAlert) async {
-    locaAlert.mapControllerIsAttached = true;
+    locaAlert.mapControllerIsAttached = true; // From this point on we can now use mapController outside the map widget.
 
-    var serviceIsEnabled = await locaAlert.location.serviceEnabled();
+    // TODO(j): we shouldn't do this here. instead we should check permissions in main() and do the snackbar
+    // if there is no user location on map opening.
+    var serviceIsEnabled = await location.serviceEnabled();
     if (!serviceIsEnabled) {
-      var newIsServiceEnabled = await locaAlert.location.requestService();
+      var newIsServiceEnabled = await location.requestService();
       if (!newIsServiceEnabled) {
         debugPrintError('Location services are not enabled.');
         return;
       }
     }
 
-    var permission = await locaAlert.location.hasPermission();
+    var permission = await location.hasPermission();
     debugPrintInfo('Location permission status: $permission');
 
     // If the user has denied location permissions forever, we can't request them, so we show a snackbar.
@@ -440,27 +418,25 @@ class MapView extends StatelessWidget {
 void followOrUnfollowUser(LocaAlert locaAlert) {
   locaAlert.followUserLocation = !locaAlert.followUserLocation;
   locaAlert.setState();
-  
-  // If we are following, then we need to move the map immediately instead 
+
+  // If we are following, then we need to move the map immediately instead
   // of waiting for the next location update.
   if (locaAlert.followUserLocation) moveMapToUserLocation(locaAlert);
 }
 
 Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
-  var locationData = await locaAlert.location.getLocation();
-  if (locationData.latitude == null || locationData.longitude == null) {
-    debugPrintError('Cannot determine the user location.');
-    return;
-  }
-
   if (!locaAlert.mapControllerIsAttached) {
     debugPrintError('The map controller is not attached. Cannot move to user location.');
     return;
   }
 
-  final location = LatLng(locationData.latitude!, locationData.longitude!);
+  if (locaAlert.position == null) {
+    debugPrintError('No user position available. Cannot move to user location.');
+    return;
+  }
+
   final zoom = locaAlert.mapController.camera.zoom;
-  locaAlert.mapController.move(location, zoom);
+  locaAlert.mapController.move(locaAlert.position!, zoom);
 }
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);

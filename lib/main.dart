@@ -11,6 +11,7 @@ import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/views/alarms.dart';
 import 'package:loca_alert/views/map.dart';
 import 'package:loca_alert/views/settings.dart';
+import 'package:location/location.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
@@ -36,7 +37,6 @@ const initialZoom = 15.0;
 const circleToMarkerZoomThreshold = 10.0;
 const maxZoomSupported = 18.0;
 const alarmCheckPeriod = Duration(seconds: 5);
-const locationPermissionCheckInterval = Duration(seconds: 20);
 const numberOfTriggeredAlarmVibrations = 6;
 
 enum AvailableAlarmColors {
@@ -122,6 +122,8 @@ class MyHttpOverrides extends HttpOverrides {
     return client;
   }
 }
+
+Location location = Location();
 
 const Uuid idGenerator = Uuid();
 
@@ -241,17 +243,23 @@ void main() async {
   var initializationSettings = const InitializationSettings(iOS: DarwinInitializationSettings());
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-  await locaAlert.location.enableBackgroundMode();
-  locaAlert.location.onLocationChanged.listen(
+  await location.enableBackgroundMode();
+  location.onLocationChanged.listen(
     (location) async {
+      if (location.latitude != null && location.longitude != null) {
+        locaAlert.position = LatLng(location.latitude!, location.longitude!);
+        locaAlert.setState();
+      } else {
+        debugPrintError('Location unable to be determined.');
+      }
+
       await checkAlarms(locaAlert);
 
-      var shouldMoveToUserLocation = locaAlert.followUserLocation && locaAlert.mapControllerIsAttached;
-      if (shouldMoveToUserLocation) await moveMapToUserLocation(locaAlert);
+      if (locaAlert.followUserLocation) await moveMapToUserLocation(locaAlert);
     },
     onError: (error) async {
+      locaAlert.position = null;
       locaAlert.followUserLocation = false;
-      await locaAlert.location.onLocationChanged.drain<void>(); // Cancel the location updates.
       locaAlert.setState();
     },
   );
