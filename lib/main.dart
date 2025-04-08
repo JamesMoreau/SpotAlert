@@ -17,7 +17,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO:
-  Should opening map view immedietly move to user (when not locked on)?
 */
 
 const author = 'James Moreau';

@@ -43,7 +43,7 @@ class MapView extends StatelessWidget {
                 keepAlive: true, // Since the app has multiple pages, we want to map widget to stay alive so we can still use MapController in other places.
                 initialZoom: initialZoom,
                 interactionOptions: InteractionOptions(flags: myInteractiveFlags),
-                onMapReady: () => myOnMapReady(locaAlert),
+                onMapReady: () => onMapReady(locaAlert),
               ),
               children: [
                 TileLayer(
@@ -409,33 +409,17 @@ class MapView extends StatelessWidget {
   }
 
   // Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
-  Future<void> myOnMapReady(LocaAlert locaAlert) async {
+  Future<void> onMapReady(LocaAlert locaAlert) async {
     // From this point on we can now use mapController outside the map widget.
     locaAlert.mapControllerIsAttached = true;
 
-    // TODO(j): we shouldn't do this here. instead we should check permissions in main() and do the snackbar
-    // if there is no user location on map opening.
-    var serviceIsEnabled = await location.serviceEnabled();
-    if (!serviceIsEnabled) {
-      var newIsServiceEnabled = await location.requestService();
-      if (!newIsServiceEnabled) {
-        debugPrintError('Location services are not enabled.');
-        return;
-      }
-    }
-
-    var permission = await location.hasPermission();
-    debugPrintInfo('Location permission status: $permission');
-
-    // If the user has denied location permissions forever, we can't request them, so we show a snackbar.
-    if (permission == PermissionStatus.denied || permission == PermissionStatus.deniedForever) {
-      debugPrintWarning('User has denied location permissions.');
+    if (locaAlert.position == null) {
       ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Container(
             padding: const EdgeInsets.all(8),
-            child: const Text('Location permissions are required to use this app.'),
+            child: const Text('No user location found. Are location permissions enabled?'),
           ),
           action: SnackBarAction(label: 'Settings', onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -444,7 +428,8 @@ class MapView extends StatelessWidget {
       return;
     }
 
-    // The remaining case is that the user has granted location permissions, so we do nothing.
+    // Move the map to the user's position upon opening the map.
+    await moveMapToUserLocation(locaAlert);
   }
 }
 
