@@ -38,7 +38,7 @@ class LocaAlert extends JuneState {
   // Settings
   late PackageInfo packageInfo;
   bool vibrationSetting = true;
-  bool showClosestNonVisibleAlarmSetting = true; // TODO(j): Maybe we should just show all the non visible alarms, and have a setting where only the closest one is shown.
+  bool showClosestNonVisibleAlarmSetting = true;
 
   @override
   Future<void> onInit() async {

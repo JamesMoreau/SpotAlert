@@ -175,7 +175,9 @@ class MapView extends StatelessWidget {
                           Center(
                             child: Transform.translate(
                               offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                              child: const Stack(children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))]),
+                              child: const Stack(
+                                children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))],
+                              ),
                             ),
                           ),
                         ],
@@ -186,8 +188,9 @@ class MapView extends StatelessWidget {
                 Builder(
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-                    var closestAlarmIsVisible = false;
                     var closestAlarm = getClosest(MapCamera.of(context).center, locaAlert.alarms, (alarm) => alarm.position);
+
+                    var closestAlarmIsVisible = false;
                     if (closestAlarm != null) {
                       closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
                     }
@@ -360,7 +363,7 @@ class MapView extends StatelessWidget {
                 ],
               ),
             ),
-            if (locaAlert.isPlacingAlarm)
+            if (locaAlert.isPlacingAlarm) ...[
               Positioned(
                 bottom: 150,
                 child: Container(
@@ -398,9 +401,8 @@ class MapView extends StatelessWidget {
                     ),
                   ),
                 ),
-              )
-            else
-              const SizedBox.shrink(),
+              ),
+            ],
           ],
         );
       },
@@ -419,7 +421,7 @@ Future<void> onMapReady(LocaAlert locaAlert) async {
         behavior: SnackBarBehavior.floating,
         content: Container(
           padding: const EdgeInsets.all(8),
-          child: const Text('No user location found. Are location permissions enabled?'),
+          child: const Text('Are location permissions enabled?'),
         ),
         action: SnackBarAction(label: 'Settings', onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -432,6 +434,11 @@ Future<void> onMapReady(LocaAlert locaAlert) async {
 }
 
 void followOrUnfollowUser(LocaAlert locaAlert) {
+  if (locaAlert.position == null) {
+    debugPrint('Cannot follow the user since there is no position');
+    return;
+  }
+
   locaAlert.followUserLocation = !locaAlert.followUserLocation;
   locaAlert.setState();
 
