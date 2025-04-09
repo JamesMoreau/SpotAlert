@@ -193,7 +193,6 @@ class MainApp extends StatelessWidget {
                   topRight: Radius.circular(50),
                 ),
                 child: NavigationBar(
-                  elevation: 3,
                   onDestinationSelected: (int index) {
                     var newView = LocaAlertView.values[index];
                     navigateToView(locaAlert, newView);
@@ -203,7 +202,7 @@ class MainApp extends StatelessWidget {
                     var (icon, label) = switch (view) {
                       LocaAlertView.alarms => (Icons.pin_drop_rounded, 'Alarms'),
                       LocaAlertView.map => (Icons.map_rounded, 'Map'),
-                      LocaAlertView.settings => (Icons.settings_rounded, 'Settings')
+                      LocaAlertView.settings => (Icons.settings_rounded, 'Settings'),
                     };
 
                     return NavigationDestination(icon: Icon(icon), label: label);
