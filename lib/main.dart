@@ -125,7 +125,7 @@ Location location = Location();
 
 const Uuid idGenerator = Uuid();
 
-enum LocaAlertView { alarms, map, settings } // TODO
+enum LocaAlertView { alarms, map, settings }
 
 void navigateToView(LocaAlert locaAlert, LocaAlertView view) {
   locaAlert.view = view;
@@ -199,20 +199,15 @@ class MainApp extends StatelessWidget {
                     navigateToView(locaAlert, newView);
                   },
                   selectedIndex: locaAlert.view.index,
-                  destinations: const [
-                    NavigationDestination(
-                      icon: Icon(Icons.pin_drop_rounded),
-                      label: 'Alarms',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.map_rounded),
-                      label: 'Map',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.settings_rounded),
-                      label: 'Settings',
-                    ),
-                  ],
+                  destinations: LocaAlertView.values.map((view) {
+                    var (icon, label) = switch (view) {
+                      LocaAlertView.alarms => (Icons.pin_drop_rounded, 'Alarms'),
+                      LocaAlertView.map => (Icons.map_rounded, 'Map'),
+                      LocaAlertView.settings => (Icons.settings_rounded, 'Settings')
+                    };
+
+                    return NavigationDestination(icon: Icon(icon), label: label);
+                  }).toList(),
                 ),
               ),
             ),
