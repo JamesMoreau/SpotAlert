@@ -9,7 +9,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:loca_alert/loca_alert.dart';
 import 'package:loca_alert/main.dart';
 import 'package:loca_alert/models/alarm.dart';
-import 'package:location/location.dart';
 
 class MapView extends StatelessWidget {
   const MapView({super.key});
@@ -407,30 +406,29 @@ class MapView extends StatelessWidget {
       },
     );
   }
+}
 
-  // Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
-  Future<void> onMapReady(LocaAlert locaAlert) async {
-    // From this point on we can now use mapController outside the map widget.
-    locaAlert.mapControllerIsAttached = true;
+// Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
+Future<void> onMapReady(LocaAlert locaAlert) async {
+  // From this point on we can now use mapController outside the map widget.
+  locaAlert.mapControllerIsAttached = true;
 
-    if (locaAlert.position == null) {
-      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Container(
-            padding: const EdgeInsets.all(8),
-            child: const Text('No user location found. Are location permissions enabled?'),
-          ),
-          action: SnackBarAction(label: 'Settings', onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location)),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+  if (locaAlert.position == null) {
+    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Container(
+          padding: const EdgeInsets.all(8),
+          child: const Text('No user location found. Are location permissions enabled?'),
         ),
-      );
-      return;
-    }
-
-    // Move the map to the user's position upon opening the map.
-    await moveMapToUserLocation(locaAlert);
+        action: SnackBarAction(label: 'Settings', onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+    return;
   }
+
+  await moveMapToUserLocation(locaAlert);
 }
 
 void followOrUnfollowUser(LocaAlert locaAlert) {
