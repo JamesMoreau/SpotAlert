@@ -413,7 +413,7 @@ class MapView extends StatelessWidget {
 // Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
 Future<void> onMapReady(LocaAlert locaAlert) async {
   // From this point on we can now use mapController outside the map widget.
-  locaAlert.mapControllerIsAttached = true;
+  locaAlert.mapControllerIsAttached = true; //TODO(j): maybe figure out how to use ? optional instead?
 
   if (locaAlert.position == null) {
     ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
@@ -435,7 +435,7 @@ Future<void> onMapReady(LocaAlert locaAlert) async {
 
 void followOrUnfollowUser(LocaAlert locaAlert) {
   if (locaAlert.position == null) {
-    debugPrint('Cannot follow the user since there is no position');
+    debugPrint('Cannot follow the user since there is no position.');
     return;
   }
 

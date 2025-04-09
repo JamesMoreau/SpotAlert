@@ -125,7 +125,7 @@ Location location = Location();
 
 const Uuid idGenerator = Uuid();
 
-enum LocaAlertView { alarms, map, settings }
+enum LocaAlertView { alarms, map, settings } // TODO
 
 void navigateToView(LocaAlert locaAlert, LocaAlertView view) {
   locaAlert.view = view;
