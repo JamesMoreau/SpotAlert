@@ -29,6 +29,7 @@ class LocaAlert extends JuneState {
 
   // Map
   MapController mapController = MapController();
+  // TODO(j): actually check that this is being used wherever we use mapController.
   bool mapControllerIsAttached = false; // This let's us know if we can use the controller.
   CacheStore? mapTileCacheStore;
   bool isPlacingAlarm = false;
