@@ -20,10 +20,8 @@ TODO:
 */
 
 const author = 'James Moreau';
-const myEmail = 'jp.moreau@aol.com';
-const githubLink = 'www.github.com/jamesmoreau';
-const appleID = '6478944468';
-
+const websiteUrl = 'https://jamesmoreau.github.io';
+const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const mapTileCacheFilename = 'myMapTiles';
 const settingsAlarmVibrationKey = 'alarmVibration';
@@ -34,7 +32,6 @@ const alarmsFilename = 'alarms.json';
 const initialZoom = 15.0;
 const circleToMarkerZoomThreshold = 10.0;
 const maxZoomSupported = 18.0;
-const alarmCheckPeriod = Duration(seconds: 5);
 const numberOfTriggeredAlarmVibrations = 6;
 
 enum AvailableAlarmColors {

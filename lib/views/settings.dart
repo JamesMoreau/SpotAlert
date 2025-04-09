@@ -73,8 +73,7 @@ class SettingsView extends StatelessWidget {
                     title: const Text('Review App'),
                     trailing: const Icon(Icons.feedback_rounded),
                     onTap: () async {
-                      var url = 'https://apps.apple.com/app/id$appleID';
-                      var uri = Uri.parse(url);
+                      var uri = Uri.parse(appStoreUrl);
                       var canLaunch = await canLaunchUrl(uri);
                       if (!canLaunch) {
                         if (kDebugMode) print('Cannot launch url.');
@@ -106,6 +105,25 @@ class SettingsView extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                       );
+                    },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: ListTile(
+                    title: const Text('Author:'),
+                    subtitle: const Text(author),
+                    trailing: const Icon(Icons.open_in_new),
+                    onTap: () async {
+                      var uri = Uri.parse(websiteUrl);
+                      var canLaunch = await canLaunchUrl(uri);
+                      if (!canLaunch) {
+                        if (kDebugMode) print('Cannot launch url.');
+                        return;
+                      }
+
+                      debugPrintInfo('Opening app store page for feedback.');
+                      await launchUrl(uri);
                     },
                   ),
                 ),
