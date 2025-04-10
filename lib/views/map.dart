@@ -149,6 +149,58 @@ class MapView extends StatelessWidget {
   }
 }
 
+// Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
+Future<void> onMapReady(LocaAlert locaAlert) async {
+  // From this point on we can now use mapController outside the map widget.
+  locaAlert.mapControllerIsAttached = true;
+
+  if (locaAlert.position == null) {
+    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Container(
+          padding: const EdgeInsets.all(8),
+          child: const Text('Are location permissions enabled?'),
+        ),
+        action: SnackBarAction(label: 'Settings', onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+    return;
+  }
+
+  await moveMapToUserLocation(locaAlert);
+}
+
+void followOrUnfollowUser(LocaAlert locaAlert) {
+  if (locaAlert.position == null) {
+    debugPrint('Cannot follow the user since there is no position.');
+    return;
+  }
+
+  locaAlert.followUserLocation = !locaAlert.followUserLocation;
+  locaAlert.setState();
+
+  // If we are following, then we need to move the map immediately instead
+  // of waiting for the next location update.
+  if (locaAlert.followUserLocation) moveMapToUserLocation(locaAlert);
+}
+
+Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
+  if (!locaAlert.mapControllerIsAttached) {
+    debugPrintError('The map controller is not attached. Cannot move to user location.');
+    return;
+  }
+
+  if (locaAlert.position == null) {
+    debugPrintError('No user position available. Cannot move to user location.');
+    return;
+  }
+
+  final zoom = locaAlert.mapController.camera.zoom;
+  locaAlert.mapController.move(locaAlert.position!, zoom);
+}
+
 class Compass extends StatelessWidget {
   const Compass({super.key});
 
@@ -436,58 +488,6 @@ class Overlay extends StatelessWidget {
       },
     );
   }
-}
-
-// Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
-Future<void> onMapReady(LocaAlert locaAlert) async {
-  // From this point on we can now use mapController outside the map widget.
-  locaAlert.mapControllerIsAttached = true;
-
-  if (locaAlert.position == null) {
-    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Container(
-          padding: const EdgeInsets.all(8),
-          child: const Text('Are location permissions enabled?'),
-        ),
-        action: SnackBarAction(label: 'Settings', onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-    return;
-  }
-
-  await moveMapToUserLocation(locaAlert);
-}
-
-void followOrUnfollowUser(LocaAlert locaAlert) {
-  if (locaAlert.position == null) {
-    debugPrint('Cannot follow the user since there is no position.');
-    return;
-  }
-
-  locaAlert.followUserLocation = !locaAlert.followUserLocation;
-  locaAlert.setState();
-
-  // If we are following, then we need to move the map immediately instead
-  // of waiting for the next location update.
-  if (locaAlert.followUserLocation) moveMapToUserLocation(locaAlert);
-}
-
-Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
-  if (!locaAlert.mapControllerIsAttached) {
-    debugPrintError('The map controller is not attached. Cannot move to user location.');
-    return;
-  }
-
-  if (locaAlert.position == null) {
-    debugPrintError('No user position available. Cannot move to user location.');
-    return;
-  }
-
-  final zoom = locaAlert.mapController.camera.zoom;
-  locaAlert.mapController.move(locaAlert.position!, zoom);
 }
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
