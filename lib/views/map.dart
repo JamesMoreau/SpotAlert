@@ -53,7 +53,7 @@ class MapView extends StatelessWidget {
                 var showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
                 if (showMarkersInsteadOfCircles) {
                   var alarmMarkers = <Marker>[];
-        
+
                   for (var alarm in locaAlert.alarms) {
                     var marker = Marker(
                       width: 100,
@@ -83,14 +83,14 @@ class MapView extends StatelessWidget {
                         ],
                       ),
                     );
-        
+
                     alarmMarkers.add(marker);
                   }
-        
+
                   return MarkerLayer(markers: alarmMarkers);
                 } else {
                   var alarmCircles = <CircleMarker>[];
-        
+
                   for (var alarm in locaAlert.alarms) {
                     var circle = CircleMarker(
                       point: alarm.position,
@@ -100,10 +100,10 @@ class MapView extends StatelessWidget {
                       radius: alarm.radius,
                       useRadiusInMeter: true,
                     );
-        
+
                     alarmCircles.add(circle);
                   }
-        
+
                   return CircleLayer(circles: alarmCircles);
                 }
               },
@@ -125,7 +125,7 @@ class MapView extends StatelessWidget {
             Builder(
               builder: (context) {
                 if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
-        
+
                 return CircleLayer(
                   circles: [
                     CircleMarker(
@@ -221,15 +221,15 @@ class Compass extends StatelessWidget {
                 Builder(
                   builder: (context) {
                     // If the user's position is not visible, show an arrow pointing towards them.
-            
+
                     if (locaAlert.position == null) return const SizedBox.shrink();
-            
+
                     var userIsVisible = MapCamera.of(context).visibleBounds.contains(locaAlert.position!);
                     if (userIsVisible) return const SizedBox.shrink();
-            
+
                     var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, locaAlert.position!);
                     var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-            
+
                     return IgnorePointer(
                       child: Stack(
                         alignment: Alignment.center,
@@ -244,7 +244,7 @@ class Compass extends StatelessWidget {
                           Transform.translate(
                             offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
                             child: const Stack(
-                              children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))],
+                              children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))d],
                             ),
                           ),
                         ],
@@ -260,16 +260,16 @@ class Compass extends StatelessWidget {
 
                     var closestAlarm = getClosest(locaAlert.position!, locaAlert.alarms, (alarm) => alarm.position);
                     if (closestAlarm == null) return const SizedBox.shrink();
-            
+
                     var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
-                    
+
                     var showClosestNonVisibleAlarm = !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
                     if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
-            
+
                     var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
                     var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
                     var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi);
-            
+
                     return IgnorePointer(
                       child: Stack(
                         alignment: Alignment.center,
