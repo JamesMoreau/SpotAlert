@@ -24,11 +24,6 @@ class MapView extends StatelessWidget {
           );
         }
 
-        var statusBarHeight = MediaQuery.of(context).padding.top;
-        var screenSize = MediaQuery.of(context).size;
-        var ellipseWidth = screenSize.width * 0.8;
-        var ellipseHeight = screenSize.height * 0.65;
-
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
         if (locaAlert.followUserLocation) myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
@@ -160,6 +155,10 @@ class MapView extends StatelessWidget {
                     var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, locaAlert.position!);
                     var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
+                    var screenSize = MediaQuery.of(context).size;
+                    var ellipseWidth = screenSize.width * 0.8;
+                    var ellipseHeight = screenSize.height * 0.65;
+
                     return IgnorePointer(
                       child: Stack(
                         children: [
@@ -185,72 +184,107 @@ class MapView extends StatelessWidget {
                     );
                   },
                 ),
-                Builder(
-                  builder: (context) {
-                    // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-                    var closestAlarm = getClosest(MapCamera.of(context).center, locaAlert.alarms, (alarm) => alarm.position);
-
-                    var closestAlarmIsVisible = false;
-                    if (closestAlarm != null) {
-                      closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
-                    }
-
-                    var showClosestNonVisibleAlarm = closestAlarm != null && !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
-                    if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
-
-                    var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-                    var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
-                    var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // So that the text does not overlap with the arrow.
-
-                    return IgnorePointer(
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: Transform.translate(
-                              offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                              child: Transform.rotate(
-                                angle: arrowRotation,
-                                child: Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28)),
-                              ),
-                            ),
-                          ),
-                          Center(
-                            child: Transform.translate(
-                              offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                              child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
-                            ),
-                          ),
-                          if (closestAlarm.name.isNotEmpty)
-                            Center(
-                              child: Transform.translate(
-                                offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
-                                child: Transform.translate(
-                                  // Move the text up or down depending on the angle to now overlap with the arrow.
-                                  offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
-                                  child: Container(
-                                    constraints: const BoxConstraints(maxWidth: 100),
-                                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                                    decoration: BoxDecoration(
-                                      color: paleBlue.withValues(alpha: 0.7),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      closestAlarm.name,
-                                      style: const TextStyle(fontSize: 10),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                const MapCompassLayer(),
               ],
             ),
+            const MapOverlay(),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class MapCompassLayer extends StatelessWidget {
+  const MapCompassLayer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return JuneBuilder(
+      () => LocaAlert(),
+      builder: (locaAlert) {
+        // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
+        var closestAlarm = getClosest(MapCamera.of(context).center, locaAlert.alarms, (alarm) => alarm.position);
+
+        var closestAlarmIsVisible = false;
+        if (closestAlarm != null) {
+          closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
+        }
+
+        var showClosestNonVisibleAlarm = closestAlarm != null && !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
+        if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
+
+        var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
+        var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
+        var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // So that the text does not overlap with the arrow.
+
+        var screenSize = MediaQuery.of(context).size;
+        var ellipseWidth = screenSize.width * 0.8;
+        var ellipseHeight = screenSize.height * 0.65;
+
+        return IgnorePointer(
+          child: Stack(
+            children: [
+              Center(
+                child: Transform.translate(
+                  offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+                  child: Transform.rotate(
+                    angle: arrowRotation,
+                    child: Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28)),
+                  ),
+                ),
+              ),
+              Center(
+                child: Transform.translate(
+                  offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+                  child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
+                ),
+              ),
+              if (closestAlarm.name.isNotEmpty)
+                Center(
+                  child: Transform.translate(
+                    offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
+                    child: Transform.translate(
+                      // Move the text up or down depending on the angle to now overlap with the arrow.
+                      offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 100),
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        decoration: BoxDecoration(
+                          color: paleBlue.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          closestAlarm.name,
+                          style: const TextStyle(fontSize: 10),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class MapOverlay extends StatelessWidget {
+  const MapOverlay({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return JuneBuilder(
+      () => LocaAlert(),
+      builder: (locaAlert) {
+        var statusBarHeight = MediaQuery.of(context).padding.top;
+
+        return Stack(
+          alignment: Alignment.center,
+          children: [
             Positioned(
               top: statusBarHeight + 5,
               child: IgnorePointer(
@@ -359,7 +393,6 @@ class MapView extends StatelessWidget {
                       child: const Icon(Icons.pin_drop_rounded),
                     ),
                   ],
-                  const SizedBox.shrink(),
                 ],
               ),
             ),
