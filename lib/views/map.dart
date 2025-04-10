@@ -179,6 +179,7 @@ class Compass extends StatelessWidget {
 
                   return IgnorePointer(
                     child: Stack(
+                      alignment: Alignment.center,
                       children: [
                         Transform.translate(
                           offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
@@ -215,6 +216,7 @@ class Compass extends StatelessWidget {
 
                   return IgnorePointer(
                     child: Stack(
+                      alignment: Alignment.center,
                       children: [
                         Transform.translate(
                           offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
