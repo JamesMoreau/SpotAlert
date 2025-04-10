@@ -244,7 +244,7 @@ class Compass extends StatelessWidget {
                           Transform.translate(
                             offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
                             child: const Stack(
-                              children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))d],
+                              children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))],
                             ),
                           ),
                         ],
