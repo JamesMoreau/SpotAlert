@@ -255,7 +255,10 @@ class Compass extends StatelessWidget {
                 Builder(
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-                    var closestAlarm = getClosest(MapCamera.of(context).center, locaAlert.alarms, (alarm) => alarm.position);
+
+                    if (locaAlert.position == null) return const SizedBox.shrink();
+
+                    var closestAlarm = getClosest(locaAlert.position!, locaAlert.alarms, (alarm) => alarm.position);
                     if (closestAlarm == null) return const SizedBox.shrink();
             
                     var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
