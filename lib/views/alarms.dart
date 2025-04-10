@@ -194,7 +194,7 @@ class EditAlarmDialog extends StatelessWidget {
                             // This is a hack but we need to be sure that map controller is attached before moving.
                             await Future.doWhile(() async {
                               if (locaAlert.mapControllerIsAttached) return false;
-                              await Future<void>.delayed(const Duration(milliseconds: 50));
+                              await Future<void>.delayed(const Duration(milliseconds: 10));
                               return true;
                             });
 

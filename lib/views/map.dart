@@ -26,7 +26,9 @@ class MapView extends StatelessWidget {
 
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
-        if (locaAlert.followUserLocation) myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
+        if (locaAlert.followUserLocation) {
+          myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
+        }
 
         return FlutterMap(
           mapController: locaAlert.mapController,
@@ -412,6 +414,11 @@ class Overlay extends StatelessWidget {
                   if (locaAlert.isPlacingAlarm) ...[
                     FloatingActionButton(
                       onPressed: () {
+                        if (locaAlert.mapControllerIsAttached) {
+                          debugPrintError('Map controller is not attached. Cannot place alarm.');
+                          return;
+                        }
+
                         var alarm = Alarm(name: 'Alarm', position: locaAlert.mapController.camera.center, radius: locaAlert.alarmPlacementRadius);
                         addAlarm(locaAlert, alarm);
 
