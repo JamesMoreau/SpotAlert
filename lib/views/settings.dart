@@ -47,7 +47,7 @@ class SettingsView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: ListTile(
-                    title: const Text('Show Closest Off-Screen Alarm'),
+                    title: const Text('Show Closest Alarm'),
                     trailing: Switch(
                       value: locaAlert.showClosestNonVisibleAlarmSetting,
                       onChanged: (value) {
