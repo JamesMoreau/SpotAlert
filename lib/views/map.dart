@@ -28,125 +28,119 @@ class MapView extends StatelessWidget {
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
         if (locaAlert.followUserLocation) myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
 
-        return Stack(
-          // TODO(j): could remove this stack and have all widget be children of the flutter map.
-          alignment: Alignment.center,
+        return FlutterMap(
+          mapController: locaAlert.mapController,
+          options: MapOptions(
+            keepAlive: true, // Since the app has multiple pages, we want to map widget to stay alive so we can still use MapController in other places.
+            initialZoom: initialZoom,
+            interactionOptions: InteractionOptions(flags: myInteractiveFlags),
+            onMapReady: () => onMapReady(locaAlert),
+          ),
           children: [
-            FlutterMap(
-              mapController: locaAlert.mapController,
-              options: MapOptions(
-                keepAlive: true, // Since the app has multiple pages, we want to map widget to stay alive so we can still use MapController in other places.
-                initialZoom: initialZoom,
-                interactionOptions: InteractionOptions(flags: myInteractiveFlags),
-                onMapReady: () => onMapReady(locaAlert),
+            TileLayer(
+              urlTemplate: openStreetMapTemplateUrl,
+              userAgentPackageName: locaAlert.packageInfo.packageName,
+              tileProvider: CachedTileProvider(
+                maxStale: const Duration(days: 30),
+                store: locaAlert.mapTileCacheStore!,
               ),
-              children: [
-                TileLayer(
-                  urlTemplate: openStreetMapTemplateUrl,
-                  userAgentPackageName: locaAlert.packageInfo.packageName,
-                  tileProvider: CachedTileProvider(
-                    maxStale: const Duration(days: 30),
-                    store: locaAlert.mapTileCacheStore!,
-                  ),
-                ),
-                Builder(
-                  builder: (context) {
-                    // Display the alarms as circles or markers on the map. We create a set of markers or circles
-                    // representing the same alarms. The markers are only visible when the user is zoomed out
-                    // beyond (below) circleToMarkerZoomThreshold.
-                    var showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
-                    if (showMarkersInsteadOfCircles) {
-                      var alarmMarkers = <Marker>[];
-
-                      for (var alarm in locaAlert.alarms) {
-                        var marker = Marker(
-                          width: 100,
-                          height: 65,
-                          point: alarm.position,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
-                              Positioned(
-                                bottom: 0,
-                                child: Container(
-                                  constraints: const BoxConstraints(maxWidth: 100),
-                                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                                  decoration: BoxDecoration(
-                                    color: paleBlue.withValues(alpha: 0.7),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    alarm.name,
-                                    style: const TextStyle(fontSize: 10),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
+            ),
+            Builder(
+              builder: (context) {
+                // Display the alarms as circles or markers on the map. We create a set of markers or circles
+                // representing the same alarms. The markers are only visible when the user is zoomed out
+                // beyond (below) circleToMarkerZoomThreshold.
+                var showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
+                if (showMarkersInsteadOfCircles) {
+                  var alarmMarkers = <Marker>[];
+        
+                  for (var alarm in locaAlert.alarms) {
+                    var marker = Marker(
+                      width: 100,
+                      height: 65,
+                      point: alarm.position,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
+                          Positioned(
+                            bottom: 0,
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 100),
+                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              decoration: BoxDecoration(
+                                color: paleBlue.withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ],
+                              child: Text(
+                                alarm.name,
+                                style: const TextStyle(fontSize: 10),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
+                            ),
                           ),
-                        );
-
-                        alarmMarkers.add(marker);
-                      }
-
-                      return MarkerLayer(markers: alarmMarkers);
-                    } else {
-                      var alarmCircles = <CircleMarker>[];
-
-                      for (var alarm in locaAlert.alarms) {
-                        var circle = CircleMarker(
-                          point: alarm.position,
-                          color: alarm.color.withValues(alpha: 0.5),
-                          borderColor: const Color(0xff2b2b2b),
-                          borderStrokeWidth: 2,
-                          radius: alarm.radius,
-                          useRadiusInMeter: true,
-                        );
-
-                        alarmCircles.add(circle);
-                      }
-
-                      return CircleLayer(circles: alarmCircles);
-                    }
-                  },
-                ),
-                if (locaAlert.position != null) ...[
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        point: locaAlert.position!,
-                        child: const Icon(Icons.circle, color: Colors.blue),
+                        ],
                       ),
-                      Marker(
-                        point: locaAlert.position!,
-                        child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
-                      ),
-                    ],
+                    );
+        
+                    alarmMarkers.add(marker);
+                  }
+        
+                  return MarkerLayer(markers: alarmMarkers);
+                } else {
+                  var alarmCircles = <CircleMarker>[];
+        
+                  for (var alarm in locaAlert.alarms) {
+                    var circle = CircleMarker(
+                      point: alarm.position,
+                      color: alarm.color.withValues(alpha: 0.5),
+                      borderColor: const Color(0xff2b2b2b),
+                      borderStrokeWidth: 2,
+                      radius: alarm.radius,
+                      useRadiusInMeter: true,
+                    );
+        
+                    alarmCircles.add(circle);
+                  }
+        
+                  return CircleLayer(circles: alarmCircles);
+                }
+              },
+            ),
+            if (locaAlert.position != null) ...[
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: locaAlert.position!,
+                    child: const Icon(Icons.circle, color: Colors.blue),
+                  ),
+                  Marker(
+                    point: locaAlert.position!,
+                    child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
                   ),
                 ],
-                Builder(
-                  builder: (context) {
-                    if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
-
-                    return CircleLayer(
-                      circles: [
-                        CircleMarker(
-                          point: MapCamera.of(context).center,
-                          radius: locaAlert.alarmPlacementRadius,
-                          color: Colors.redAccent.withValues(alpha: 0.5),
-                          borderColor: Colors.black,
-                          borderStrokeWidth: 2,
-                          useRadiusInMeter: true,
-                        ),
-                      ],
-                    );
-                  },
-                ),
-                const Compass(),
-              ],
+              ),
+            ],
+            Builder(
+              builder: (context) {
+                if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
+        
+                return CircleLayer(
+                  circles: [
+                    CircleMarker(
+                      point: MapCamera.of(context).center,
+                      radius: locaAlert.alarmPlacementRadius,
+                      color: Colors.redAccent.withValues(alpha: 0.5),
+                      borderColor: Colors.black,
+                      borderStrokeWidth: 2,
+                      useRadiusInMeter: true,
+                    ),
+                  ],
+                );
+              },
             ),
+            const Compass(),
             const Overlay(),
           ],
         );
@@ -163,6 +157,10 @@ class Compass extends StatelessWidget {
     return JuneBuilder(
       () => LocaAlert(),
       builder: (locaAlert) {
+        var screenSize = MediaQuery.of(context).size;
+        var ellipseWidth = screenSize.width * 0.8;
+        var ellipseHeight = screenSize.height * 0.65;
+
         return IgnorePointer(
           child: Stack(
             alignment: Alignment.center,
@@ -179,13 +177,8 @@ class Compass extends StatelessWidget {
                   var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, locaAlert.position!);
                   var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
-                  var screenSize = MediaQuery.of(context).size;
-                  var ellipseWidth = screenSize.width * 0.8;
-                  var ellipseHeight = screenSize.height * 0.65;
-
                   return IgnorePointer(
                     child: Stack(
-                      alignment: Alignment.center,
                       children: [
                         Transform.translate(
                           offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
@@ -209,44 +202,33 @@ class Compass extends StatelessWidget {
                 builder: (context) {
                   // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
                   var closestAlarm = getClosest(MapCamera.of(context).center, locaAlert.alarms, (alarm) => alarm.position);
+                  if (closestAlarm == null) return const SizedBox.shrink();
 
-                  var closestAlarmIsVisible = false;
-                  if (closestAlarm != null) {
-                    closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
-                  }
-
-                  var showClosestNonVisibleAlarm = closestAlarm != null && !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
+                  var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
+                  
+                  var showClosestNonVisibleAlarm = !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
                   if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
 
                   var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
                   var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
                   var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi);
 
-                  var screenSize = MediaQuery.of(context).size;
-                  var ellipseWidth = screenSize.width * 0.8;
-                  var ellipseHeight = screenSize.height * 0.65;
-
-                  return Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Center(
-                        child: Transform.translate(
+                  return IgnorePointer(
+                    child: Stack(
+                      children: [
+                        Transform.translate(
                           offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
                           child: Transform.rotate(
                             angle: arrowRotation,
                             child: Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28)),
                           ),
                         ),
-                      ),
-                      Center(
-                        child: Transform.translate(
+                        Transform.translate(
                           offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
                           child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
                         ),
-                      ),
-                      if (closestAlarm.name.isNotEmpty) ...[
-                        Center(
-                          child: Transform.translate(
+                        if (closestAlarm.name.isNotEmpty) ...[
+                          Transform.translate(
                             offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
                             child: Transform.translate(
                               // Move the text up or down depending on the angle to now overlap with the arrow.
@@ -267,9 +249,9 @@ class Compass extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ],
-                    ],
+                    ),
                   );
                 },
               ),

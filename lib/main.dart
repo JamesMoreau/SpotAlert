@@ -17,6 +17,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO:
+  should we show closest offscreen alarm to user position vs camer center?
 */
 
 const author = 'James Moreau';
