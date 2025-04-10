@@ -361,39 +361,7 @@ class Overlay extends StatelessWidget {
                 children: [
                   FloatingActionButton(
                     child: const Icon(Icons.info_outline_rounded),
-                    onPressed: () => showDialog<void>(
-                      context: context,
-                      builder: (BuildContext context) => Dialog(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Icon(Icons.info_outline_rounded, size: 40, color: Theme.of(context).colorScheme.primary),
-                                const SizedBox(height: 15),
-                                const Text(
-                                  'Here you can place new alarms by tapping the marker button. You can also follow / unfollow your location by tapping the lock button.',
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 15),
-                                const Text('Staying on the map view for long periods of time may drain your battery.', textAlign: TextAlign.center),
-                                const SizedBox(height: 15),
-                                const Text(
-                                  'Set location permissions to "While Using" or "Always" and enable notifications to use the app when running in background.',
-                                  textAlign: TextAlign.center,
-                                ),
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Close'),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    onPressed: () => showInfoDialog(context),
                   ),
                   const SizedBox(height: 10),
                   if (locaAlert.followUserLocation) ...[
@@ -414,12 +382,7 @@ class Overlay extends StatelessWidget {
                   if (locaAlert.isPlacingAlarm) ...[
                     FloatingActionButton(
                       onPressed: () {
-                        if (locaAlert.mapControllerIsAttached) {
-                          debugPrintError('Map controller is not attached. Cannot place alarm.');
-                          return;
-                        }
-
-                        var alarm = Alarm(name: 'Alarm', position: locaAlert.mapController.camera.center, radius: locaAlert.alarmPlacementRadius);
+                        var alarm = Alarm(name: 'Alarm', position: MapCamera.of(context).center, radius: locaAlert.alarmPlacementRadius);
                         addAlarm(locaAlert, alarm);
 
                         locaAlert.isPlacingAlarm = false;
@@ -498,6 +461,42 @@ class Overlay extends StatelessWidget {
       },
     );
   }
+}
+
+void showInfoDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (BuildContext context) => Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(Icons.info_outline_rounded, size: 40, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(height: 15),
+              const Text(
+                'Here you can place new alarms by tapping the marker button. You can also follow / unfollow your location by tapping the lock button.',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 15),
+              const Text('Staying on the map view for long periods of time may drain your battery.', textAlign: TextAlign.center),
+              const SizedBox(height: 15),
+              const Text(
+                'Set location permissions to "While Using" or "Always" and enable notifications to use the app when running in background.',
+                textAlign: TextAlign.center,
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
