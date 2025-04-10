@@ -161,22 +161,19 @@ class MapView extends StatelessWidget {
 
                     return IgnorePointer(
                       child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          Center(
-                            child: Transform.translate(
-                              offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                              child: Transform.rotate(
-                                angle: arrowRotation,
-                                child: Transform.rotate(angle: -pi / 2, child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28)),
-                              ),
+                          Transform.translate(
+                            offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+                            child: Transform.rotate(
+                              angle: arrowRotation,
+                              child: Transform.rotate(angle: -pi / 2, child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28)),
                             ),
                           ),
-                          Center(
-                            child: Transform.translate(
-                              offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                              child: const Stack(
-                                children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))],
-                              ),
+                          Transform.translate(
+                            offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+                            child: const Stack(
+                              children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))],
                             ),
                           ),
                         ],
@@ -216,7 +213,7 @@ class MapCompassLayer extends StatelessWidget {
 
         var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
         var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
-        var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi); // So that the text does not overlap with the arrow.
+        var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi);
 
         var screenSize = MediaQuery.of(context).size;
         var ellipseWidth = screenSize.width * 0.8;
