@@ -169,10 +169,10 @@ class Compass extends StatelessWidget {
                 builder: (context) {
                   // If the user's position is not visible, show an arrow pointing towards them.
 
-                  if (locaAlert.position == null) return const SizedBox();
+                  if (locaAlert.position == null) return const Center(child: SizedBox.shrink());
 
                   var userIsVisible = MapCamera.of(context).visibleBounds.contains(locaAlert.position!);
-                  if (userIsVisible) return const SizedBox.shrink();
+                  if (userIsVisible) return const Center(child: SizedBox.shrink());
 
                   var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, locaAlert.position!);
                   var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
@@ -203,12 +203,12 @@ class Compass extends StatelessWidget {
                 builder: (context) {
                   // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
                   var closestAlarm = getClosest(MapCamera.of(context).center, locaAlert.alarms, (alarm) => alarm.position);
-                  if (closestAlarm == null) return const SizedBox.shrink();
+                  if (closestAlarm == null) return const Center(child: SizedBox.shrink());
 
                   var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
                   
                   var showClosestNonVisibleAlarm = !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
-                  if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
+                  if (!showClosestNonVisibleAlarm) return const Center(child: SizedBox.shrink());
 
                   var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
                   var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
