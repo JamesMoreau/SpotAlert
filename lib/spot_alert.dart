@@ -226,7 +226,7 @@ List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
   var triggeredAlarms = <Alarm>[];
 
   for (var alarm in alarms) {
-    var distance = const Distance().as(LengthUnit.Meter, alarm.position, position);
+    var distance = const Distance().distance(alarm.position, position);
     if (distance <= alarm.radius) triggeredAlarms.add(alarm);
   }
 
@@ -239,7 +239,7 @@ T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
 
   for (var item in items) {
     var itemPositon = getPosition(item);
-    var d = const Distance().as(LengthUnit.Meter, itemPositon, target);
+    var d = const Distance().distance(itemPositon, target);
     if (d < closestDistance) {
       closestDistance = d;
       closestItem = item;
