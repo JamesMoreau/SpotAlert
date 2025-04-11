@@ -9,7 +9,7 @@ import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:spot_alert/loca_alert.dart';
+import 'package:spot_alert/spot_alert.dart';
 import 'package:spot_alert/views/alarms.dart';
 import 'package:spot_alert/views/map.dart';
 import 'package:spot_alert/views/settings.dart';

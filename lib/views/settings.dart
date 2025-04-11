@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:spot_alert/loca_alert.dart';
 import 'package:spot_alert/main.dart';
+import 'package:spot_alert/spot_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatelessWidget {
