@@ -15,11 +15,11 @@ import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 import 'package:vibration/vibration.dart';
 
-class LocaAlert extends JuneState {
+class SpotAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
   LatLng? position; // The user's position.
   
-  LocaAlertView view = LocaAlertView.alarms;
+  SpotAlertView view = SpotAlertView.alarms;
   late PageController pageController;
 
   // Alarms
@@ -56,12 +56,12 @@ class LocaAlert extends JuneState {
   }
 }
 
-bool deleteAlarmById(LocaAlert locaAlert, String id) {
-  for (var i = 0; i < locaAlert.alarms.length; i++) {
-    if (locaAlert.alarms[i].id == id) {
-      locaAlert.alarms.removeAt(i);
-      locaAlert.setState();
-      saveAlarms(locaAlert);
+bool deleteAlarmById(SpotAlert spotAlert, String id) {
+  for (var i = 0; i < spotAlert.alarms.length; i++) {
+    if (spotAlert.alarms[i].id == id) {
+      spotAlert.alarms.removeAt(i);
+      spotAlert.setState();
+      saveAlarms(spotAlert);
       return true;
     }
   }
@@ -69,8 +69,8 @@ bool deleteAlarmById(LocaAlert locaAlert, String id) {
   return false;
 }
 
-Alarm? getAlarmById(LocaAlert locaAlert, String id) {
-  for (var alarm in locaAlert.alarms) {
+Alarm? getAlarmById(SpotAlert spotAlert, String id) {
+  for (var alarm in spotAlert.alarms) {
     if (alarm.id == id) return alarm;
   }
 
@@ -78,7 +78,7 @@ Alarm? getAlarmById(LocaAlert locaAlert, String id) {
 }
 
 void updateAndSaveAlarm(
-  LocaAlert locaAlert,
+  SpotAlert spotAlert,
   Alarm alarm, {
   String? newName,
   LatLng? newPosition,
@@ -92,24 +92,24 @@ void updateAndSaveAlarm(
   if (newColor != null) alarm.color = newColor;
   if (isActive != null) alarm.active = isActive;
 
-  locaAlert.setState();
-  saveAlarms(locaAlert);
+  spotAlert.setState();
+  saveAlarms(spotAlert);
 }
 
-void addAlarm(LocaAlert locaAlert, Alarm alarm) {
-  locaAlert.alarms.add(alarm);
-  locaAlert.setState();
-  saveAlarms(locaAlert);
+void addAlarm(SpotAlert spotAlert, Alarm alarm) {
+  spotAlert.alarms.add(alarm);
+  spotAlert.setState();
+  saveAlarms(spotAlert);
 }
 
 // This should be called everytime the alarms state is changed.
-Future<void> saveAlarms(LocaAlert locaAlert) async {
+Future<void> saveAlarms(SpotAlert spotAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
   var file = File(alarmsPath);
 
   var alarmJsons = List<String>.empty(growable: true);
-  for (var alarm in locaAlert.alarms) {
+  for (var alarm in spotAlert.alarms) {
     var alarmMap = alarmToMap(alarm);
     var alarmJson = jsonEncode(alarmMap);
     alarmJsons.add(alarmJson);
@@ -120,7 +120,7 @@ Future<void> saveAlarms(LocaAlert locaAlert) async {
   debugPrintInfo('Saved alarms to storage: $alarmJsons.');
 }
 
-Future<void> loadAlarms(LocaAlert locaAlert) async {
+Future<void> loadAlarms(SpotAlert spotAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
   var file = File(alarmsPath);
@@ -140,14 +140,14 @@ Future<void> loadAlarms(LocaAlert locaAlert) async {
   for (var alarmJson in alarmJsonsList) {
     var alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
     var alarm = alarmFromMap(alarmMap);
-    locaAlert.alarms.add(alarm);
+    spotAlert.alarms.add(alarm);
   }
 
-  locaAlert.setState();
+  spotAlert.setState();
   debugPrintInfo('Loaded alarms from storage.');
 }
 
-Future<void> loadSettings(LocaAlert locaAlert) async {
+Future<void> loadSettings(SpotAlert spotAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
   var settingsFile = File(settingsPath);
@@ -164,19 +164,19 @@ Future<void> loadSettings(LocaAlert locaAlert) async {
   }
 
   var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
-  locaAlert.vibrationSetting = settingsMap[settingsAlarmVibrationKey] as bool;
-  locaAlert.showClosestNonVisibleAlarmSetting = settingsMap[settingsShowClosestNonVisibleAlarmKey] as bool;
+  spotAlert.vibrationSetting = settingsMap[settingsAlarmVibrationKey] as bool;
+  spotAlert.showClosestNonVisibleAlarmSetting = settingsMap[settingsShowClosestNonVisibleAlarmKey] as bool;
   debugPrintInfo('Loaded settings from storage.');
 }
 
-Future<void> saveSettings(LocaAlert locaAlert) async {
+Future<void> saveSettings(SpotAlert spotAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
   var settingsFile = File(settingsPath);
 
   var settingsMap = <String, dynamic>{
-    settingsAlarmVibrationKey: locaAlert.vibrationSetting,
-    settingsShowClosestNonVisibleAlarmKey: locaAlert.showClosestNonVisibleAlarmSetting,
+    settingsAlarmVibrationKey: spotAlert.vibrationSetting,
+    settingsShowClosestNonVisibleAlarmKey: spotAlert.showClosestNonVisibleAlarmSetting,
   };
 
   var settingsJson = jsonEncode(settingsMap);
@@ -185,15 +185,15 @@ Future<void> saveSettings(LocaAlert locaAlert) async {
   debugPrintInfo('Saved settings to storage.');
 }
 
-Future<void> checkAlarms(LocaAlert locaAlert) async {
-  if (locaAlert.position == null) {
+Future<void> checkAlarms(SpotAlert spotAlert) async {
+  if (spotAlert.position == null) {
     debugPrintInfo('Alarm Check: User position not available.');
     return;
   }
 
-  var activeAlarms = locaAlert.alarms.where((alarm) => alarm.active).toList();
+  var activeAlarms = spotAlert.alarms.where((alarm) => alarm.active).toList();
 
-  var triggeredAlarms = detectTriggeredAlarms(locaAlert.position!, activeAlarms);
+  var triggeredAlarms = detectTriggeredAlarms(spotAlert.position!, activeAlarms);
   if (triggeredAlarms.isEmpty) {
     debugPrintInfo('Alarm Check: No alarms triggered.');
     return;
@@ -203,7 +203,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     debugPrintInfo('Alarm Check: Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
 
     // Deactivate the alarm so it doesn't trigger again upon next call to checkAlarms.
-    updateAndSaveAlarm(locaAlert, alarm, isActive: false);
+    updateAndSaveAlarm(spotAlert, alarm, isActive: false);
 
     var notificationDetails = const NotificationDetails(
       iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentBanner: true, presentSound: true),
@@ -213,7 +213,7 @@ Future<void> checkAlarms(LocaAlert locaAlert) async {
     showAlarmDialog(navigatorKey.currentContext!, alarm);
   }
 
-  if (locaAlert.vibrationSetting) {
+  if (spotAlert.vibrationSetting) {
     debugPrintInfo('Vibrating.');
     for (var i = 0; i < numberOfTriggeredAlarmVibrations; i++) {
       await Vibration.vibrate(duration: 1000);

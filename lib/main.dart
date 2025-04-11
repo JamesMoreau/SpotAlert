@@ -122,12 +122,12 @@ Location location = Location();
 
 const Uuid idGenerator = Uuid();
 
-enum LocaAlertView { alarms, map, settings }
+enum SpotAlertView { alarms, map, settings }
 
-void navigateToView(LocaAlert locaAlert, LocaAlertView view) {
-  locaAlert.view = view;
-  locaAlert.setState();
-  locaAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+void navigateToView(SpotAlert spotAlert, SpotAlertView view) {
+  spotAlert.view = view;
+  spotAlert.setState();
+  spotAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
 
   debugPrintInfo('Navigating to $view.');
 }
@@ -147,10 +147,10 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: JuneBuilder(
-        () => LocaAlert(),
-        builder: (locaAlert) {
+        () => SpotAlert(),
+        builder: (spotAlert) {
           // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
-          var appIsInitialized = locaAlert.mapTileCacheStore != null;
+          var appIsInitialized = spotAlert.mapTileCacheStore != null;
           if (!appIsInitialized) {
             return const Scaffold(
               body: Center(
@@ -161,7 +161,7 @@ class MainApp extends StatelessWidget {
 
           return Scaffold(
             body: PageView(
-              controller: locaAlert.pageController,
+              controller: spotAlert.pageController,
               physics: const NeverScrollableScrollPhysics(), // Disable swipe gesture to change pages
               children: [
                 const AlarmsView(),
@@ -191,15 +191,15 @@ class MainApp extends StatelessWidget {
                 ),
                 child: NavigationBar(
                   onDestinationSelected: (int index) {
-                    var newView = LocaAlertView.values[index];
-                    navigateToView(locaAlert, newView);
+                    var newView = SpotAlertView.values[index];
+                    navigateToView(spotAlert, newView);
                   },
-                  selectedIndex: locaAlert.view.index,
-                  destinations: LocaAlertView.values.map((view) {
+                  selectedIndex: spotAlert.view.index,
+                  destinations: SpotAlertView.values.map((view) {
                     var (icon, label) = switch (view) {
-                      LocaAlertView.alarms => (Icons.pin_drop_rounded, 'Alarms'),
-                      LocaAlertView.map => (Icons.map_rounded, 'Map'),
-                      LocaAlertView.settings => (Icons.settings_rounded, 'Settings'),
+                      SpotAlertView.alarms => (Icons.pin_drop_rounded, 'Alarms'),
+                      SpotAlertView.map => (Icons.map_rounded, 'Map'),
+                      SpotAlertView.settings => (Icons.settings_rounded, 'Settings'),
                     };
 
                     return NavigationDestination(icon: Icon(icon), label: label);
@@ -225,7 +225,7 @@ void main() async {
 
   runApp(const MainApp());
 
-  var locaAlert = June.getState(() => LocaAlert());
+  var spotAlert = June.getState(() => SpotAlert());
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
@@ -236,31 +236,31 @@ void main() async {
   location.onLocationChanged.listen(
     (location) async {
       if (location.latitude != null && location.longitude != null) {
-        locaAlert.position = LatLng(location.latitude!, location.longitude!);
-        locaAlert.setState();
+        spotAlert.position = LatLng(location.latitude!, location.longitude!);
+        spotAlert.setState();
       } else {
         debugPrintError('Location unable to be determined.');
       }
 
-      await checkAlarms(locaAlert);
+      await checkAlarms(spotAlert);
 
-      if (locaAlert.followUserLocation) await moveMapToUserLocation(locaAlert);
+      if (spotAlert.followUserLocation) await moveMapToUserLocation(spotAlert);
     },
     onError: (error) async {
-      locaAlert.position = null;
-      locaAlert.followUserLocation = false;
-      locaAlert.setState();
+      spotAlert.position = null;
+      spotAlert.followUserLocation = false;
+      spotAlert.setState();
     },
   );
 
-  await loadSettings(locaAlert);
-  await loadAlarms(locaAlert);
+  await loadSettings(spotAlert);
+  await loadAlarms(spotAlert);
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();
 
   var cacheDirectory = await getApplicationCacheDirectory();
   var mapTileCachePath = '${cacheDirectory.path}${Platform.pathSeparator}$mapTileCacheFilename';
-  locaAlert.mapTileCacheStore = FileCacheStore(mapTileCachePath);
-  locaAlert.setState(); // Notify the ui that the map tile cache is loaded.
+  spotAlert.mapTileCacheStore = FileCacheStore(mapTileCachePath);
+  spotAlert.setState(); // Notify the ui that the map tile cache is loaded.
 }

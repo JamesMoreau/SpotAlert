@@ -1,14 +1,14 @@
 # Privacy Policy
 
-This privacy policy governs the use of the LocaAlert mobile application.
+This privacy policy governs the use of the SpotAlert mobile application.
 
 ## Information Collection and Use
 
-LocaAlert does not collect any personal information or data from its users. We do not track, store, or share any information about our users.
+SpotAlert does not collect any personal information or data from its users. We do not track, store, or share any information about our users.
 
 ## Third-Party Services
 
-LocaAlert does not use any third-party services or libraries that may collect user data.
+SpotAlert does not use any third-party services or libraries that may collect user data.
 
 ## Security
 
