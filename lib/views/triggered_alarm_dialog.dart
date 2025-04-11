@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:loca_alert/main.dart';
-import 'package:loca_alert/models/alarm.dart';
+import 'package:spot_alert/main.dart';
+import 'package:spot_alert/models/alarm.dart';
 
 void showAlarmDialog(BuildContext context, Alarm triggeredAlarm) {
   showGeneralDialog<void>(

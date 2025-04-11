@@ -7,12 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/loca_alert.dart';
-import 'package:loca_alert/views/alarms.dart';
-import 'package:loca_alert/views/map.dart';
-import 'package:loca_alert/views/settings.dart';
 import 'package:location/location.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:spot_alert/loca_alert.dart';
+import 'package:spot_alert/views/alarms.dart';
+import 'package:spot_alert/views/map.dart';
+import 'package:spot_alert/views/settings.dart';
 import 'package:uuid/uuid.dart';
 
 /*

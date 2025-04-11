@@ -8,11 +8,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/main.dart';
-import 'package:loca_alert/models/alarm.dart';
-import 'package:loca_alert/views/triggered_alarm_dialog.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:spot_alert/main.dart';
+import 'package:spot_alert/models/alarm.dart';
+import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 import 'package:vibration/vibration.dart';
 
 class LocaAlert extends JuneState {

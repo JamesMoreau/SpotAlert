@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/main.dart';
+import 'package:spot_alert/main.dart';
 
 class Alarm {
   String id;

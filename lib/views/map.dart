@@ -6,9 +6,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/loca_alert.dart';
-import 'package:loca_alert/main.dart';
-import 'package:loca_alert/models/alarm.dart';
+import 'package:spot_alert/loca_alert.dart';
+import 'package:spot_alert/main.dart';
+import 'package:spot_alert/models/alarm.dart';
 
 class MapView extends StatelessWidget {
   const MapView({super.key});

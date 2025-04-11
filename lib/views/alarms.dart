@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/loca_alert.dart';
-import 'package:loca_alert/main.dart';
-import 'package:loca_alert/models/alarm.dart';
+import 'package:spot_alert/loca_alert.dart';
+import 'package:spot_alert/main.dart';
+import 'package:spot_alert/models/alarm.dart';
 
 class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});
