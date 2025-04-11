@@ -6,9 +6,9 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loca_alert/loca_alert.dart';
-import 'package:loca_alert/main.dart';
-import 'package:loca_alert/models/alarm.dart';
+import 'package:spot_alert/main.dart';
+import 'package:spot_alert/models/alarm.dart';
+import 'package:spot_alert/spot_alert.dart';
 
 class MapView extends StatelessWidget {
   const MapView({super.key});
@@ -16,9 +16,9 @@ class MapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => LocaAlert(),
-      builder: (locaAlert) {
-        if (locaAlert.mapTileCacheStore == null) {
+      () => SpotAlert(),
+      builder: (spotAlert) {
+        if (spotAlert.mapTileCacheStore == null) {
           return const Center(
             child: CircularProgressIndicator(),
           );
@@ -26,25 +26,25 @@ class MapView extends StatelessWidget {
 
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
-        if (locaAlert.followUserLocation) {
+        if (spotAlert.followUserLocation) {
           myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
         }
 
         return FlutterMap(
-          mapController: locaAlert.mapController,
+          mapController: spotAlert.mapController,
           options: MapOptions(
             keepAlive: true, // Since the app has multiple pages, we want to map widget to stay alive so we can still use MapController in other places.
             initialZoom: initialZoom,
             interactionOptions: InteractionOptions(flags: myInteractiveFlags),
-            onMapReady: () => onMapReady(locaAlert),
+            onMapReady: () => onMapReady(spotAlert),
           ),
           children: [
             TileLayer(
               urlTemplate: openStreetMapTemplateUrl,
-              userAgentPackageName: locaAlert.packageInfo.packageName,
+              userAgentPackageName: spotAlert.packageInfo.packageName,
               tileProvider: CachedTileProvider(
                 maxStale: const Duration(days: 30),
-                store: locaAlert.mapTileCacheStore!,
+                store: spotAlert.mapTileCacheStore!,
               ),
             ),
             Builder(
@@ -56,7 +56,7 @@ class MapView extends StatelessWidget {
                 if (showMarkersInsteadOfCircles) {
                   var alarmMarkers = <Marker>[];
 
-                  for (var alarm in locaAlert.alarms) {
+                  for (var alarm in spotAlert.alarms) {
                     var marker = Marker(
                       width: 100,
                       height: 65,
@@ -93,7 +93,7 @@ class MapView extends StatelessWidget {
                 } else {
                   var alarmCircles = <CircleMarker>[];
 
-                  for (var alarm in locaAlert.alarms) {
+                  for (var alarm in spotAlert.alarms) {
                     var circle = CircleMarker(
                       point: alarm.position,
                       color: alarm.color.withValues(alpha: 0.5),
@@ -110,15 +110,15 @@ class MapView extends StatelessWidget {
                 }
               },
             ),
-            if (locaAlert.position != null) ...[
+            if (spotAlert.position != null) ...[
               MarkerLayer(
                 markers: [
                   Marker(
-                    point: locaAlert.position!,
+                    point: spotAlert.position!,
                     child: const Icon(Icons.circle, color: Colors.blue),
                   ),
                   Marker(
-                    point: locaAlert.position!,
+                    point: spotAlert.position!,
                     child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
                   ),
                 ],
@@ -126,13 +126,13 @@ class MapView extends StatelessWidget {
             ],
             Builder(
               builder: (context) {
-                if (!locaAlert.isPlacingAlarm) return const SizedBox.shrink();
+                if (!spotAlert.isPlacingAlarm) return const SizedBox.shrink();
 
                 return CircleLayer(
                   circles: [
                     CircleMarker(
                       point: MapCamera.of(context).center,
-                      radius: locaAlert.alarmPlacementRadius,
+                      radius: spotAlert.alarmPlacementRadius,
                       color: Colors.redAccent.withValues(alpha: 0.5),
                       borderColor: Colors.black,
                       borderStrokeWidth: 2,
@@ -152,11 +152,11 @@ class MapView extends StatelessWidget {
 }
 
 // Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
-Future<void> onMapReady(LocaAlert locaAlert) async {
+Future<void> onMapReady(SpotAlert spotAlert) async {
   // From this point on we can now use mapController outside the map widget.
-  locaAlert.mapControllerIsAttached = true;
+  spotAlert.mapControllerIsAttached = true;
 
-  if (locaAlert.position == null) {
+  if (spotAlert.position == null) {
     ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -171,36 +171,36 @@ Future<void> onMapReady(LocaAlert locaAlert) async {
     return;
   }
 
-  await moveMapToUserLocation(locaAlert);
+  await moveMapToUserLocation(spotAlert);
 }
 
-void followOrUnfollowUser(LocaAlert locaAlert) {
-  if (locaAlert.position == null) {
+void followOrUnfollowUser(SpotAlert spotAlert) {
+  if (spotAlert.position == null) {
     debugPrint('Cannot follow the user since there is no position.');
     return;
   }
 
-  locaAlert.followUserLocation = !locaAlert.followUserLocation;
-  locaAlert.setState();
+  spotAlert.followUserLocation = !spotAlert.followUserLocation;
+  spotAlert.setState();
 
   // If we are following, then we need to move the map immediately instead
   // of waiting for the next location update.
-  if (locaAlert.followUserLocation) moveMapToUserLocation(locaAlert);
+  if (spotAlert.followUserLocation) moveMapToUserLocation(spotAlert);
 }
 
-Future<void> moveMapToUserLocation(LocaAlert locaAlert) async {
-  if (!locaAlert.mapControllerIsAttached) {
+Future<void> moveMapToUserLocation(SpotAlert spotAlert) async {
+  if (!spotAlert.mapControllerIsAttached) {
     debugPrintError('The map controller is not attached. Cannot move to user location.');
     return;
   }
 
-  if (locaAlert.position == null) {
+  if (spotAlert.position == null) {
     debugPrintError('No user position available. Cannot move to user location.');
     return;
   }
 
-  final zoom = locaAlert.mapController.camera.zoom;
-  locaAlert.mapController.move(locaAlert.position!, zoom);
+  final zoom = spotAlert.mapController.camera.zoom;
+  spotAlert.mapController.move(spotAlert.position!, zoom);
 }
 
 class Compass extends StatelessWidget {
@@ -209,8 +209,8 @@ class Compass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => LocaAlert(),
-      builder: (locaAlert) {
+      () => SpotAlert(),
+      builder: (spotAlert) {
         var screenSize = MediaQuery.of(context).size;
         var ellipseWidth = screenSize.width * 0.8;
         var ellipseHeight = screenSize.height * 0.65;
@@ -224,12 +224,12 @@ class Compass extends StatelessWidget {
                   builder: (context) {
                     // If the user's position is not visible, show an arrow pointing towards them.
 
-                    if (locaAlert.position == null) return const SizedBox.shrink();
+                    if (spotAlert.position == null) return const SizedBox.shrink();
 
-                    var userIsVisible = MapCamera.of(context).visibleBounds.contains(locaAlert.position!);
+                    var userIsVisible = MapCamera.of(context).visibleBounds.contains(spotAlert.position!);
                     if (userIsVisible) return const SizedBox.shrink();
 
-                    var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, locaAlert.position!);
+                    var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, spotAlert.position!);
                     var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
                     return IgnorePointer(
@@ -258,14 +258,14 @@ class Compass extends StatelessWidget {
                   builder: (context) {
                     // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
 
-                    if (locaAlert.position == null) return const SizedBox.shrink();
+                    if (spotAlert.position == null) return const SizedBox.shrink();
 
-                    var closestAlarm = getClosest(locaAlert.position!, locaAlert.alarms, (alarm) => alarm.position);
+                    var closestAlarm = getClosest(spotAlert.position!, spotAlert.alarms, (alarm) => alarm.position);
                     if (closestAlarm == null) return const SizedBox.shrink();
 
                     var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
 
-                    var showClosestNonVisibleAlarm = !closestAlarmIsVisible && locaAlert.showClosestNonVisibleAlarmSetting;
+                    var showClosestNonVisibleAlarm = !closestAlarmIsVisible && spotAlert.showClosestNonVisibleAlarmSetting;
                     if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
 
                     var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
@@ -330,8 +330,8 @@ class Overlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => LocaAlert(),
-      builder: (locaAlert) {
+      () => SpotAlert(),
+      builder: (spotAlert) {
         var statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Stack(
@@ -364,30 +364,30 @@ class Overlay extends StatelessWidget {
                     onPressed: () => showInfoDialog(context),
                   ),
                   const SizedBox(height: 10),
-                  if (locaAlert.followUserLocation) ...[
+                  if (spotAlert.followUserLocation) ...[
                     FloatingActionButton(
-                      onPressed: () => followOrUnfollowUser(locaAlert),
+                      onPressed: () => followOrUnfollowUser(spotAlert),
                       elevation: 4,
                       backgroundColor: const Color.fromARGB(255, 216, 255, 218),
                       child: const Icon(Icons.near_me_rounded),
                     ),
                   ] else ...[
                     FloatingActionButton(
-                      onPressed: () => followOrUnfollowUser(locaAlert),
+                      onPressed: () => followOrUnfollowUser(spotAlert),
                       elevation: 4,
                       child: const Icon(Icons.lock_rounded),
                     ),
                   ],
                   const SizedBox(height: 10),
-                  if (locaAlert.isPlacingAlarm) ...[
+                  if (spotAlert.isPlacingAlarm) ...[
                     FloatingActionButton(
                       onPressed: () {
-                        var alarm = Alarm(name: 'Alarm', position: MapCamera.of(context).center, radius: locaAlert.alarmPlacementRadius);
-                        addAlarm(locaAlert, alarm);
+                        var alarm = Alarm(name: 'Alarm', position: MapCamera.of(context).center, radius: spotAlert.alarmPlacementRadius);
+                        addAlarm(spotAlert, alarm);
 
-                        locaAlert.isPlacingAlarm = false;
-                        locaAlert.alarmPlacementRadius = 100;
-                        locaAlert.setState();
+                        spotAlert.isPlacingAlarm = false;
+                        spotAlert.alarmPlacementRadius = 100;
+                        spotAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.check),
@@ -395,9 +395,9 @@ class Overlay extends StatelessWidget {
                     const SizedBox(height: 10),
                     FloatingActionButton(
                       onPressed: () {
-                        locaAlert.isPlacingAlarm = false;
-                        locaAlert.alarmPlacementRadius = 100;
-                        locaAlert.setState();
+                        spotAlert.isPlacingAlarm = false;
+                        spotAlert.alarmPlacementRadius = 100;
+                        spotAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.cancel_rounded),
@@ -405,9 +405,9 @@ class Overlay extends StatelessWidget {
                   ] else ...[
                     FloatingActionButton(
                       onPressed: () {
-                        locaAlert.isPlacingAlarm = true;
-                        locaAlert.followUserLocation = false;
-                        locaAlert.setState();
+                        spotAlert.isPlacingAlarm = true;
+                        spotAlert.followUserLocation = false;
+                        spotAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.pin_drop_rounded),
@@ -416,7 +416,7 @@ class Overlay extends StatelessWidget {
                 ],
               ),
             ),
-            if (locaAlert.isPlacingAlarm) ...[
+            if (spotAlert.isPlacingAlarm) ...[
               Positioned(
                 bottom: 150,
                 child: Container(
@@ -440,10 +440,10 @@ class Overlay extends StatelessWidget {
                         const Text('Size:', style: TextStyle(fontWeight: FontWeight.bold)),
                         Expanded(
                           child: Slider(
-                            value: locaAlert.alarmPlacementRadius,
+                            value: spotAlert.alarmPlacementRadius,
                             onChanged: (value) {
-                              locaAlert.alarmPlacementRadius = value;
-                              locaAlert.setState();
+                              spotAlert.alarmPlacementRadius = value;
+                              spotAlert.setState();
                             },
                             min: 100,
                             max: 3000,

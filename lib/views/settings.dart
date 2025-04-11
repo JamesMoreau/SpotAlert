@@ -4,9 +4,9 @@ import 'package:app_settings/app_settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
-import 'package:loca_alert/loca_alert.dart';
-import 'package:loca_alert/main.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:spot_alert/main.dart';
+import 'package:spot_alert/spot_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsView extends StatelessWidget {
@@ -15,8 +15,8 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => LocaAlert(),
-      builder: (locaAlert) {
+      () => SpotAlert(),
+      builder: (spotAlert) {
         return SafeArea(
           child: Scrollbar(
             child: ListView(
@@ -24,8 +24,8 @@ class SettingsView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: ListTile(
-                    title: Text(locaAlert.packageInfo.appName),
-                    subtitle: Text('Version: ${locaAlert.packageInfo.version}'),
+                    title: Text(spotAlert.packageInfo.appName),
+                    subtitle: Text('Version: ${spotAlert.packageInfo.version}'),
                     trailing: const Icon(Icons.info_rounded),
                   ),
                 ),
@@ -34,12 +34,12 @@ class SettingsView extends StatelessWidget {
                   child: ListTile(
                     title: const Text('Vibration'),
                     trailing: Switch(
-                      value: locaAlert.vibrationSetting,
+                      value: spotAlert.vibrationSetting,
                       thumbIcon: thumbIcon,
                       onChanged: (value) {
-                        locaAlert.vibrationSetting = value;
-                        locaAlert.setState();
-                        saveSettings(locaAlert);
+                        spotAlert.vibrationSetting = value;
+                        spotAlert.setState();
+                        saveSettings(spotAlert);
                       },
                     ),
                   ),
@@ -49,11 +49,11 @@ class SettingsView extends StatelessWidget {
                   child: ListTile(
                     title: const Text('Show Closest Alarm'),
                     trailing: Switch(
-                      value: locaAlert.showClosestNonVisibleAlarmSetting,
+                      value: spotAlert.showClosestNonVisibleAlarmSetting,
                       onChanged: (value) {
-                        locaAlert.showClosestNonVisibleAlarmSetting = value;
-                        locaAlert.setState();
-                        saveSettings(locaAlert);
+                        spotAlert.showClosestNonVisibleAlarmSetting = value;
+                        spotAlert.setState();
+                        saveSettings(spotAlert);
                       },
                       thumbIcon: thumbIcon,
                     ),
@@ -94,7 +94,7 @@ class SettingsView extends StatelessWidget {
                     onTap: () async {
                       var scaffoldMessenger = ScaffoldMessenger.of(context); // Don't use Scaffold.of(context) across async gaps (according to flutter).
 
-                      await locaAlert.mapTileCacheStore?.clean();
+                      await spotAlert.mapTileCacheStore?.clean();
                       debugPrintInfo('Map tile cache cleared.');
 
                       scaffoldMessenger.showSnackBar(
