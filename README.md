@@ -10,6 +10,3 @@ Built in Flutter using geolocation, mapping, notification, and storage libraries
 ![Screenshot](documentation/hpsneGYIwG.png)
 
 ![Screenshot](documentation/28kyDS7Pfs.png)
-
-![Screenshot](documentation/oEG7QShjMM.png)
-
