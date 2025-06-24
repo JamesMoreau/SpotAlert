@@ -14,6 +14,7 @@ import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 import 'package:vibration/vibration.dart';
+import 'package:vibration/vibration_presets.dart';
 
 class SpotAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
@@ -215,10 +216,7 @@ Future<void> checkAlarms(SpotAlert spotAlert) async {
 
   if (spotAlert.vibrationSetting) {
     debugPrintInfo('Vibrating.');
-    for (var i = 0; i < numberOfTriggeredAlarmVibrations; i++) {
-      await Vibration.vibrate(duration: 1000);
-      await Future<void>.delayed(const Duration(milliseconds: 1000));
-    }
+    await Vibration.vibrate(preset: VibrationPreset.urgentBuzzWave);
   }
 }
 

@@ -32,7 +32,6 @@ const alarmsFilename = 'alarms.json';
 const initialZoom = 15.0;
 const circleToMarkerZoomThreshold = 10.0;
 const maxZoomSupported = 18.0;
-const numberOfTriggeredAlarmVibrations = 6;
 
 enum AvailableAlarmColors {
   blue(Colors.blue),
