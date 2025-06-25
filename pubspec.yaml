@@ -29,17 +29,17 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  app_settings: ^5.1.1
+  app_settings: ^6.1.1
   dio_cache_interceptor: ^3.5.0
   dio_cache_interceptor_file_store: ^1.2.3
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^19.0.0
+  flutter_local_notifications: ^19.3.0
   flutter_map: ^8.1.1
-  flutter_map_cache: ^1.4.3
+  flutter_map_cache: ^1.5.2
   june: ^1.0.0+1
   latlong2: any
-  location: ^8.0.0
+  location: ^8.0.1
   package_info_plus: ^8.0.2
   path_provider: ^2.1.2
   url_launcher: ^6.3.0
@@ -54,12 +54,12 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
   lint: ^2.1.2
   pubspec_dependency_sorter: ^1.0.4
-  very_good_analysis: ^7.0.0
+  very_good_analysis: ^9.0.0
 
 flutter_launcher_icons:
   android: "launcher_icon"
