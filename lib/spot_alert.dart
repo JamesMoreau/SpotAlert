@@ -13,13 +13,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/views/triggered_alarm_dialog.dart';
-import 'package:vibration/vibration.dart';
-import 'package:vibration/vibration_presets.dart';
 
 class SpotAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
   LatLng? position; // The user's position.
-  
+
   SpotAlertView view = SpotAlertView.alarms;
   late PageController pageController;
 
@@ -38,7 +36,6 @@ class SpotAlert extends JuneState {
 
   // Settings
   late PackageInfo packageInfo;
-  bool vibrationSetting = true;
   bool showClosestNonVisibleAlarmSetting = true;
 
   @override
@@ -165,7 +162,6 @@ Future<void> loadSettings(SpotAlert spotAlert) async {
   }
 
   var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
-  spotAlert.vibrationSetting = settingsMap[settingsAlarmVibrationKey] as bool;
   spotAlert.showClosestNonVisibleAlarmSetting = settingsMap[settingsShowClosestNonVisibleAlarmKey] as bool;
   debugPrintInfo('Loaded settings from storage.');
 }
@@ -176,7 +172,6 @@ Future<void> saveSettings(SpotAlert spotAlert) async {
   var settingsFile = File(settingsPath);
 
   var settingsMap = <String, dynamic>{
-    settingsAlarmVibrationKey: spotAlert.vibrationSetting,
     settingsShowClosestNonVisibleAlarmKey: spotAlert.showClosestNonVisibleAlarmSetting,
   };
 
@@ -207,16 +202,19 @@ Future<void> checkAlarms(SpotAlert spotAlert) async {
     updateAndSaveAlarm(spotAlert, alarm, isActive: false);
 
     var notificationDetails = const NotificationDetails(
-      iOS: DarwinNotificationDetails(presentAlert: true, presentBadge: true, presentBanner: true, presentSound: true),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentBanner: true,
+        presentSound: true,
+        interruptionLevel: InterruptionLevel.active,
+        // This .wav file is bundled with the ios/Runner.xcworkspace and is not using Flutter's asset system, despite being in the assets folder.
+        sound: 'slow_spring_board_repeated.wav',
+      ),
     );
     await flutterLocalNotificationsPlugin.show(notificationId++, 'Alarm Triggered', 'You have entered the radius of alarm: ${alarm.name}.', notificationDetails);
 
     showAlarmDialog(navigatorKey.currentContext!, alarm);
-  }
-
-  if (spotAlert.vibrationSetting) {
-    debugPrintInfo('Vibrating.');
-    await Vibration.vibrate(preset: VibrationPreset.urgentBuzzWave);
   }
 }
 

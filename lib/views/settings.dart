@@ -32,21 +32,6 @@ class SettingsView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: ListTile(
-                    title: const Text('Vibration'),
-                    trailing: Switch(
-                      value: spotAlert.vibrationSetting,
-                      thumbIcon: thumbIcon,
-                      onChanged: (value) {
-                        spotAlert.vibrationSetting = value;
-                        spotAlert.setState();
-                        saveSettings(spotAlert);
-                      },
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: ListTile(
                     title: const Text('Show Closest Alarm'),
                     trailing: Switch(
                       value: spotAlert.showClosestNonVisibleAlarmSetting,
