@@ -151,7 +151,7 @@ class MapView extends StatelessWidget {
   }
 }
 
-// Since we are using keepAlive = true, this function is only fired once throughout the app lifecycle.
+// Since we are using MapOptions: keepAlive = true, this function is only fired once throughout the app lifecycle.
 Future<void> onMapReady(SpotAlert spotAlert) async {
   // From this point on we can now use mapController outside the map widget.
   spotAlert.mapControllerIsAttached = true;
