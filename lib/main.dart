@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
@@ -16,7 +16,7 @@ import 'package:spot_alert/views/settings.dart';
 import 'package:uuid/uuid.dart';
 
 /*
-TODO:
+TODO: Set launch icon.
 */
 
 const author = 'James Moreau';
@@ -24,6 +24,7 @@ const websiteUrl = 'https://jamesmoreau.github.io';
 const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const mapTileCacheFilename = 'myMapTiles';
+const mapTileStoreName = 'mapStore';
 const settingsShowClosestNonVisibleAlarmKey = 'showClosestNonVisibleAlarm';
 const settingsFilename = 'settings.json';
 const alarmsFilename = 'alarms.json';
@@ -148,7 +149,7 @@ class MainApp extends StatelessWidget {
         () => SpotAlert(),
         builder: (spotAlert) {
           // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
-          var appIsInitialized = spotAlert.mapTileCacheStore != null;
+          var appIsInitialized = spotAlert.tileProvider != null;
           if (!appIsInitialized) {
             return const Scaffold(
               body: Center(
@@ -214,7 +215,10 @@ class MainApp extends StatelessWidget {
   }
 }
 
+// TODO(j): what should be setup in main() vs SpotAlert.initState()
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (!(Platform.isIOS || Platform.isAndroid)) {
     debugPrintError('This app is not supported on this platform. Supported platforms are iOS and Android.');
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
@@ -257,8 +261,10 @@ void main() async {
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();
 
-  var cacheDirectory = await getApplicationCacheDirectory();
-  var mapTileCachePath = '${cacheDirectory.path}${Platform.pathSeparator}$mapTileCacheFilename';
-  spotAlert.mapTileCacheStore = FileCacheStore(mapTileCachePath);
+  // Initialize map tile cache.
+  var documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+  await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+  await const FMTCStore(mapTileStoreName).manage.create();
+  spotAlert.tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: BrowseStoreStrategy.readUpdateCreate});
   spotAlert.setState(); // Notify the ui that the map tile cache is loaded.
 }

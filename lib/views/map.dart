@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
@@ -18,7 +17,7 @@ class MapView extends StatelessWidget {
     return JuneBuilder(
       () => SpotAlert(),
       builder: (spotAlert) {
-        if (spotAlert.mapTileCacheStore == null) {
+        if (spotAlert.tileProvider == null) {
           return const Center(
             child: CircularProgressIndicator(),
           );
@@ -42,10 +41,7 @@ class MapView extends StatelessWidget {
             TileLayer(
               urlTemplate: openStreetMapTemplateUrl,
               userAgentPackageName: spotAlert.packageInfo.packageName,
-              tileProvider: CachedTileProvider(
-                maxStale: const Duration(days: 30),
-                store: spotAlert.mapTileCacheStore!,
-              ),
+              tileProvider: spotAlert.tileProvider,
             ),
             Builder(
               builder: (context) {

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/main.dart';
@@ -79,13 +80,18 @@ class SettingsView extends StatelessWidget {
                     onTap: () async {
                       var scaffoldMessenger = ScaffoldMessenger.of(context); // Don't use Scaffold.of(context) across async gaps (according to flutter).
 
-                      await spotAlert.mapTileCacheStore?.clean();
-                      debugPrintInfo('Map tile cache cleared.');
+                      var size = await const FMTCStore(mapTileStoreName).stats.size;
+                      await const FMTCStore(mapTileStoreName).manage.reset();
+
+                      var sizeInMegabytes = size / (1024 * 1024);
+                      var message = 'Map tile cache cleared. $sizeInMegabytes MB freed.';
+
+                      debugPrintInfo(message);
 
                       scaffoldMessenger.showSnackBar(
                         SnackBar(
                           behavior: SnackBarBehavior.floating,
-                          content: Container(padding: const EdgeInsets.all(8), child: const Text('Map tile cache cleared.')),
+                          content: Container(padding: const EdgeInsets.all(8), child: Text(message)),
                           duration: const Duration(seconds: 3),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
