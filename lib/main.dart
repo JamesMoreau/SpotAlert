@@ -17,7 +17,9 @@ import 'package:spot_alert/views/settings.dart';
 import 'package:uuid/uuid.dart';
 
 /*
-TODO: Set launch icon.
+TODO: 
+ - Set launch icon.
+ - Maybe get rid of settings.
 */
 
 const author = 'James Moreau';
