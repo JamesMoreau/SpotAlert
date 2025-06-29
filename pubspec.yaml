@@ -39,6 +39,7 @@ dependencies:
   latlong2: any
   location: ^8.0.1
   package_info_plus: ^8.0.2
+  path: ^1.9.1
   path_provider: ^2.1.2
   url_launcher: ^6.3.0
   uuid: ^4.3.3

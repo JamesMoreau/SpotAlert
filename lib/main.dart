@@ -8,6 +8,7 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/spot_alert.dart';
 import 'package:spot_alert/views/alarms.dart';
@@ -263,8 +264,23 @@ void main() async {
 
   // Initialize map tile cache.
   var documentsDirectory = (await getApplicationDocumentsDirectory()).path;
-  await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+  try {
+    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+  // ignore: avoid_catches_without_on_clauses Many different kinds of errors can come from initialisation.
+  } catch (error, stackTrace) {
+    debugPrint('FMTC initialization failed: $error\n$stackTrace');
+
+    // Attempt to delete the corrupted FMTC directory.
+    var dir = Directory(path.join((await getApplicationDocumentsDirectory()).absolute.path, 'fmtc'));
+    await dir.delete(recursive: true);
+
+    // Retry FMTC initialization.
+    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+  }
+
   await const FMTCStore(mapTileStoreName).manage.create();
-  spotAlert.tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: BrowseStoreStrategy.readUpdateCreate});
-  spotAlert.setState(); // Notify the ui that the map tile cache is loaded.
+  spotAlert.tileProvider = FMTCTileProvider(
+    stores: const {mapTileStoreName: BrowseStoreStrategy.readUpdateCreate},
+  );
+  spotAlert.setState(); // Notify the UI that the map tile cache is loaded
 }
