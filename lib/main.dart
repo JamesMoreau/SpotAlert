@@ -24,7 +24,6 @@ const author = 'James Moreau';
 const websiteUrl = 'https://jamesmoreau.github.io';
 const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const mapTileCacheFilename = 'myMapTiles';
 const mapTileStoreName = 'mapStore';
 const settingsShowClosestNonVisibleAlarmKey = 'showClosestNonVisibleAlarm';
 const settingsFilename = 'settings.json';
