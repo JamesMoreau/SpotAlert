@@ -30,7 +30,6 @@ class SpotAlert extends JuneState {
   MapController mapController = MapController();
   bool mapControllerIsAttached = false; // This let's us know if we can use the controller.
   FMTCTileProvider? tileProvider;
-  // CacheStore? mapTileCacheStore;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = 100;
   bool followUserLocation = false;

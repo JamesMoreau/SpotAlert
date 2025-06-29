@@ -216,7 +216,6 @@ class MainApp extends StatelessWidget {
   }
 }
 
-// TODO(j): what should be setup in main() vs SpotAlert.initState()
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -225,8 +224,6 @@ void main() async {
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     return;
   }
-
-  runApp(const MainApp());
 
   var spotAlert = June.getState(() => SpotAlert());
 
@@ -279,8 +276,7 @@ void main() async {
   }
 
   await const FMTCStore(mapTileStoreName).manage.create();
-  spotAlert.tileProvider = FMTCTileProvider(
-    stores: const {mapTileStoreName: BrowseStoreStrategy.readUpdateCreate},
-  );
-  spotAlert.setState(); // Notify the UI that the map tile cache is loaded
+  spotAlert.tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: BrowseStoreStrategy.readUpdateCreate});
+
+  runApp(const MainApp());
 }

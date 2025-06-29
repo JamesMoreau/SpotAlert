@@ -83,7 +83,7 @@ class SettingsView extends StatelessWidget {
                       var size = await const FMTCStore(mapTileStoreName).stats.size;
                       await const FMTCStore(mapTileStoreName).manage.reset();
 
-                      var sizeInMegabytes = size / (1024 * 1024);
+                      var sizeInMegabytes = double.parse((size / (1024 * 1024)).toStringAsFixed(2));
                       var message = 'Map tile cache cleared. $sizeInMegabytes MB freed.';
 
                       debugPrintInfo(message);
