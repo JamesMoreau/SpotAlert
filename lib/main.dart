@@ -18,8 +18,8 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
- - Set launch icon.
  - Maybe get rid of settings.
+ - Upon map load for the first time, permissions snackbar showing despite them being granted
 */
 
 const author = 'James Moreau';
