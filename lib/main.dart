@@ -18,7 +18,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
- - Maybe get rid of settings.
  - Upon map load for the first time, permissions snackbar showing despite them being granted. maybe because location takes a moment to get initialized?
 */
 
