@@ -172,8 +172,6 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
         ),
       );
     }
-    
-    return;
   }
 
   await moveMapToUserLocation(spotAlert);
