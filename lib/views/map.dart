@@ -172,6 +172,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
         ),
       );
     }
+    
     return;
   }
 
