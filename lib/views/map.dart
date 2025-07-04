@@ -153,17 +153,25 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   spotAlert.mapControllerIsAttached = true;
 
   if (spotAlert.position == null) {
-    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Container(
-          padding: const EdgeInsets.all(8),
-          child: const Text('Are location permissions enabled?'),
+    // Sometimes the location package takes a while to start the position stream even if the location permissions are granted.
+    await Future<void>.delayed(const Duration(seconds: 10));
+
+    if (spotAlert.position == null) {
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Container(
+            padding: const EdgeInsets.all(8),
+            child: const Text('Are location permissions enabled?'),
+          ),
+          action: SnackBarAction(
+            label: 'Settings',
+            onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location),
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
-        action: SnackBarAction(label: 'Settings', onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+      );
+    }
     return;
   }
 
