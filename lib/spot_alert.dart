@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -29,7 +29,7 @@ class SpotAlert extends JuneState {
   // Map
   MapController mapController = MapController();
   bool mapControllerIsAttached = false; // This let's us know if we can use the controller.
-  CacheStore? mapTileCacheStore;
+  FMTCTileProvider? tileProvider;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = 100;
   bool followUserLocation = false;
@@ -49,7 +49,7 @@ class SpotAlert extends JuneState {
   void onClose() {
     pageController.dispose();
     mapController.dispose();
-    mapTileCacheStore?.close();
+    tileProvider?.dispose();
     super.onClose();
   }
 }

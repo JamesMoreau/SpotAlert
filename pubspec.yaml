@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.0.1
+version: 2.1.0
 
 environment:
   sdk: '>=3.0.3 <4.0.0'
@@ -30,24 +30,23 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   app_settings: ^6.1.1
-  dio_cache_interceptor: ^3.5.0
-  dio_cache_interceptor_file_store: ^1.2.3
   flutter:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
   flutter_local_notifications: ^19.3.0
   flutter_map: ^8.1.1
-  flutter_map_cache: ^1.5.2
+  flutter_map_tile_caching: ^10.1.1
   june: ^1.0.0+1
   latlong2: any
   location: ^8.0.1
   package_info_plus: ^8.0.2
+  path: ^1.9.1
   path_provider: ^2.1.2
   url_launcher: ^6.3.0
   uuid: ^4.3.3
 
 dev_dependencies:
   dependency_validator: ^5.0.2
-  flutter_launcher_icons: ^0.14.0
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

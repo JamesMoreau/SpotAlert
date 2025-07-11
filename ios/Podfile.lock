@@ -6,6 +6,10 @@ PODS:
     - Flutter
   - location (0.0.1):
     - Flutter
+  - ObjectBox (4.3.0)
+  - objectbox_flutter_libs (0.0.1):
+    - Flutter
+    - ObjectBox (= 4.3.0)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -19,9 +23,14 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - location (from `.symlinks/plugins/location/ios`)
+  - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+
+SPEC REPOS:
+  trunk:
+    - ObjectBox
 
 EXTERNAL SOURCES:
   app_settings:
@@ -32,6 +41,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   location:
     :path: ".symlinks/plugins/location/ios"
+  objectbox_flutter_libs:
+    :path: ".symlinks/plugins/objectbox_flutter_libs/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_foundation:
@@ -44,6 +55,8 @@ SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
   location: 155caecf9da4f280ab5fe4a55f94ceccfab838f8
+  ObjectBox: 7760fa9072adcffe102a6adf4646ca84ba70ab6b
+  objectbox_flutter_libs: 4014e38f57250b074b99893ae84579aba8f02876
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d

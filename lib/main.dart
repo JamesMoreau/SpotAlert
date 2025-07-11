@@ -1,13 +1,14 @@
 import 'dart:io';
 
-import 'package:dio_cache_interceptor_file_store/dio_cache_interceptor_file_store.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/spot_alert.dart';
 import 'package:spot_alert/views/alarms.dart';
@@ -16,14 +17,14 @@ import 'package:spot_alert/views/settings.dart';
 import 'package:uuid/uuid.dart';
 
 /*
-TODO:
+TODO: 
 */
 
 const author = 'James Moreau';
 const websiteUrl = 'https://jamesmoreau.github.io';
 const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const mapTileCacheFilename = 'myMapTiles';
+const mapTileStoreName = 'mapStore';
 const settingsShowClosestNonVisibleAlarmKey = 'showClosestNonVisibleAlarm';
 const settingsFilename = 'settings.json';
 const alarmsFilename = 'alarms.json';
@@ -148,7 +149,7 @@ class MainApp extends StatelessWidget {
         () => SpotAlert(),
         builder: (spotAlert) {
           // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
-          var appIsInitialized = spotAlert.mapTileCacheStore != null;
+          var appIsInitialized = spotAlert.tileProvider != null;
           if (!appIsInitialized) {
             return const Scaffold(
               body: Center(
@@ -215,13 +216,13 @@ class MainApp extends StatelessWidget {
 }
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (!(Platform.isIOS || Platform.isAndroid)) {
     debugPrintError('This app is not supported on this platform. Supported platforms are iOS and Android.');
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     return;
   }
-
-  runApp(const MainApp());
 
   var spotAlert = June.getState(() => SpotAlert());
 
@@ -257,8 +258,24 @@ void main() async {
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();
 
-  var cacheDirectory = await getApplicationCacheDirectory();
-  var mapTileCachePath = '${cacheDirectory.path}${Platform.pathSeparator}$mapTileCacheFilename';
-  spotAlert.mapTileCacheStore = FileCacheStore(mapTileCachePath);
-  spotAlert.setState(); // Notify the ui that the map tile cache is loaded.
+  // Initialize map tile cache.
+  var documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+  try {
+    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+  // ignore: avoid_catches_without_on_clauses Many different kinds of errors can come from initialisation.
+  } catch (error, stackTrace) {
+    debugPrint('FMTC initialization failed: $error\n$stackTrace');
+
+    // Attempt to delete the corrupted FMTC directory.
+    var dir = Directory(path.join((await getApplicationDocumentsDirectory()).absolute.path, 'fmtc'));
+    await dir.delete(recursive: true);
+
+    // Retry FMTC initialization.
+    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+  }
+
+  await const FMTCStore(mapTileStoreName).manage.create();
+  spotAlert.tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: BrowseStoreStrategy.readUpdateCreate});
+
+  runApp(const MainApp());
 }

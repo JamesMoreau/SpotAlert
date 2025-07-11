@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cache/flutter_map_cache.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
@@ -18,7 +17,7 @@ class MapView extends StatelessWidget {
     return JuneBuilder(
       () => SpotAlert(),
       builder: (spotAlert) {
-        if (spotAlert.mapTileCacheStore == null) {
+        if (spotAlert.tileProvider == null) {
           return const Center(
             child: CircularProgressIndicator(),
           );
@@ -42,10 +41,7 @@ class MapView extends StatelessWidget {
             TileLayer(
               urlTemplate: openStreetMapTemplateUrl,
               userAgentPackageName: spotAlert.packageInfo.packageName,
-              tileProvider: CachedTileProvider(
-                maxStale: const Duration(days: 30),
-                store: spotAlert.mapTileCacheStore!,
-              ),
+              tileProvider: spotAlert.tileProvider,
             ),
             Builder(
               builder: (context) {
@@ -157,18 +153,25 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   spotAlert.mapControllerIsAttached = true;
 
   if (spotAlert.position == null) {
-    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Container(
-          padding: const EdgeInsets.all(8),
-          child: const Text('Are location permissions enabled?'),
+    // Sometimes the location package takes a while to start the position stream even if the location permissions are granted.
+    await Future<void>.delayed(const Duration(seconds: 10));
+
+    if (spotAlert.position == null) {
+      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          content: Container(
+            padding: const EdgeInsets.all(8),
+            child: const Text('Are location permissions enabled?'),
+          ),
+          action: SnackBarAction(
+            label: 'Settings',
+            onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location),
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
-        action: SnackBarAction(label: 'Settings', onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-    return;
+      );
+    }
   }
 
   await moveMapToUserLocation(spotAlert);
