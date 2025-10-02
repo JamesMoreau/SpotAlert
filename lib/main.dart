@@ -18,6 +18,8 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - Change custom user location icon with package:
+    https://pub.dev/packages/flutter_map_location_marker
 */
 
 const author = 'James Moreau';
