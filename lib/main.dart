@@ -23,7 +23,7 @@ TODO:
 */
 
 const author = 'James Moreau';
-const websiteUrl = 'https://jamesmoreau.github.io';
+const kofi = 'https://ko-fi.com/jamesmoreau';
 const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const mapTileStoreName = 'mapStore';

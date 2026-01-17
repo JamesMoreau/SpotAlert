@@ -102,18 +102,32 @@ class SettingsView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8),
                   child: ListTile(
-                    title: const Text('Author:'),
-                    subtitle: const Text(author),
+                    title: const Text('Author: $author'),
+                    subtitle: RichText(
+                      text: TextSpan(
+                        style: DefaultTextStyle.of(context).style,
+                        children: const [
+                          TextSpan(text: 'If you like this app, consider supporting the author via '),
+                          TextSpan(
+                            text: 'Ko-fi',
+                            style: TextStyle(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                          TextSpan(text: '.'),
+                        ],
+                      ),
+                    ),
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () async {
-                      var uri = Uri.parse(websiteUrl);
+                      var uri = Uri.parse(kofi);
                       var canLaunch = await canLaunchUrl(uri);
                       if (!canLaunch) {
                         if (kDebugMode) print('Cannot launch url.');
                         return;
                       }
 
-                      debugPrintInfo('Opening app store page for feedback.');
+                      debugPrintInfo('Opening Ko-fi page.');
                       await launchUrl(uri);
                     },
                   ),

@@ -71,7 +71,7 @@ class AlarmsView extends StatelessWidget {
                     onTap: () => openAlarmEdit(context, spotAlert, alarm),
                     trailing: Switch(
                       value: alarm.active,
-                      activeColor: alarm.color,
+                      activeThumbColor: alarm.color,
                       thumbIcon: thumbIcon,
                       onChanged: (value) => updateAndSaveAlarm(spotAlert, alarm, isActive: value),
                     ),
