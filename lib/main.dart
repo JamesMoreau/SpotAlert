@@ -20,6 +20,9 @@ import 'package:uuid/uuid.dart';
 TODO: 
   - Change custom user location icon with package:
     https://pub.dev/packages/flutter_map_location_marker
+
+  - Update screenshots in app store and readme.
+
 */
 
 const author = 'James Moreau';
@@ -264,8 +267,7 @@ void main() async {
   var documentsDirectory = (await getApplicationDocumentsDirectory()).path;
   try {
     await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
-  // ignore: avoid_catches_without_on_clauses Many different kinds of errors can come from initialisation.
-  } catch (error, stackTrace) {
+  } on Exception catch (error, stackTrace) {
     debugPrint('FMTC initialization failed: $error\n$stackTrace');
 
     // Attempt to delete the corrupted FMTC directory.
