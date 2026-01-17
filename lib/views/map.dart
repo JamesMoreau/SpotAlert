@@ -44,26 +44,37 @@ class MapView extends StatelessWidget {
               tileProvider: spotAlert.tileProvider,
             ),
             AlarmLayer(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
-            if (spotAlert.position != null) ...[
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: spotAlert.position!,
-                    child: const Icon(Icons.circle, color: Colors.blue),
-                  ),
-                  Marker(
-                    point: spotAlert.position!,
-                    child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
-                  ),
-                ],
-              ),
-            ],
+            UserPositionLayer(position: spotAlert.position),
             AlarmPlacementLayer(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
             const Compass(),
             const Overlay(),
           ],
         );
       },
+    );
+  }
+}
+
+class UserPositionLayer extends StatelessWidget {
+  final LatLng? position;
+
+  const UserPositionLayer({required this.position, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (position == null) return const SizedBox.shrink();
+
+    return MarkerLayer(
+      markers: [
+        Marker(
+          point: position!,
+          child: const Icon(Icons.circle, color: Colors.blue),
+        ),
+        Marker(
+          point: position!,
+          child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
+        ),
+      ],
     );
   }
 }
