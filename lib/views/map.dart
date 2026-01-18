@@ -372,16 +372,9 @@ class Overlay extends StatelessWidget {
           children: [
             Positioned(
               top: statusBarHeight + 5,
-              child: IgnorePointer(
+              child: const IgnorePointer(
                 child: Align(
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Text('© OpenStreetMap contributors'),
-                  ),
+                  child: OpenStreetMapAttribution()
                 ),
               ),
             ),
@@ -492,6 +485,24 @@ class Overlay extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class OpenStreetMapAttribution extends StatelessWidget {
+  const OpenStreetMapAttribution({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        padding: const EdgeInsets.all(3),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Text('© OpenStreetMap contributors'),
+      ),
     );
   }
 }
