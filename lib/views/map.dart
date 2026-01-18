@@ -43,9 +43,9 @@ class MapView extends StatelessWidget {
               userAgentPackageName: spotAlert.packageInfo.packageName,
               tileProvider: spotAlert.tileProvider,
             ),
-            AlarmLayer(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
-            UserPositionLayer(position: spotAlert.position),
-            AlarmPlacementLayer(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
+            AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
+            UserPosition(position: spotAlert.position),
+            AlarmPlacementDisplay(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
             Compass(alarms: spotAlert.alarms, showClosestNonVisibleAlarmSetting: spotAlert.showClosestNonVisibleAlarmSetting, userPosition: spotAlert.position),
             const Overlay(),
           ],
@@ -55,10 +55,10 @@ class MapView extends StatelessWidget {
   }
 }
 
-class UserPositionLayer extends StatelessWidget {
+class UserPosition extends StatelessWidget {
   final LatLng? position;
 
-  const UserPositionLayer({required this.position, super.key});
+  const UserPosition({required this.position, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +79,11 @@ class UserPositionLayer extends StatelessWidget {
   }
 }
 
-class AlarmLayer extends StatelessWidget {
+class AlarmMarkers extends StatelessWidget {
   final List<Alarm> alarms;
   final double circleToMarkerZoomThreshold;
 
-  const AlarmLayer({
+  const AlarmMarkers({
     required this.alarms,
     required this.circleToMarkerZoomThreshold,
     super.key,
@@ -148,11 +148,11 @@ class AlarmLayer extends StatelessWidget {
   }
 }
 
-class AlarmPlacementLayer extends StatelessWidget {
+class AlarmPlacementDisplay extends StatelessWidget {
   final bool isPlacingAlarm;
   final double alarmPlacementRadius;
 
-  const AlarmPlacementLayer({required this.isPlacingAlarm, required this.alarmPlacementRadius, super.key});
+  const AlarmPlacementDisplay({required this.isPlacingAlarm, required this.alarmPlacementRadius, super.key});
 
   @override
   Widget build(BuildContext context) {
