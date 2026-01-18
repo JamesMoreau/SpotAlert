@@ -24,14 +24,15 @@ class AlarmsView extends StatelessWidget {
   }
 
   void addSampleAlarms(SpotAlert spotAlert) {
-    addAlarm(spotAlert, Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value));
-    addAlarm(spotAlert, Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value));
-    addAlarm(spotAlert, Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AvailableAlarmColors.purple.value));
-    addAlarm(
-      spotAlert,
+    var sampleAlarms = [
+      Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value),
+      Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value),
+      Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AvailableAlarmColors.purple.value),
       Alarm(name: 'Saint Petersburg', position: const LatLng(59.9310, 30.3609), radius: 2000, color: AvailableAlarmColors.redAccent.value),
-    );
-    addAlarm(spotAlert, Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value));
+      Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value),
+    ];
+
+    for (var a in sampleAlarms) addAlarm(spotAlert, a);
   }
 
   @override
@@ -189,9 +190,9 @@ class EditAlarmDialog extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).colorScheme.primary,
                           ),
-                          onPressed: () async { // TODO: factor out
+                          onPressed: () async {
                             Navigator.pop(context); // Close the edit alarm bottom sheet.
-                            navigateToView(spotAlert, SpotAlertView.map);
+                            navigateToView(spotAlert, .map);
 
                             // This is a hack but we need to be sure that map controller is attached before moving.
                             await Future.doWhile(() async {
