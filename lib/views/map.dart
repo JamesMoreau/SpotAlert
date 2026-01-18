@@ -111,7 +111,7 @@ class AlarmMarkers extends StatelessWidget {
       height: 65,
       point: alarm.position,
       child: Stack(
-        alignment: Alignment.center,
+        alignment: .center,
         children: [
           Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
           Positioned(
@@ -121,12 +121,12 @@ class AlarmMarkers extends StatelessWidget {
               padding: const .symmetric(horizontal: 2),
               decoration: BoxDecoration(
                 color: paleBlue.withValues(alpha: 0.7),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: .circular(8),
               ),
               child: Text(
                 alarm.name,
                 style: const TextStyle(fontSize: 10),
-                overflow: TextOverflow.ellipsis,
+                overflow: .ellipsis,
                 maxLines: 1,
               ),
             ),
@@ -185,7 +185,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
     if (spotAlert.position == null) {
       ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
         SnackBar(
-          behavior: SnackBarBehavior.floating,
+          behavior: .floating,
           content: Container(
             padding: const .all(8),
             child: const Text('Are location permissions enabled?'),
@@ -194,7 +194,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
             label: 'Settings',
             onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location),
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(borderRadius: .circular(10)),
         ),
       );
     }
@@ -253,7 +253,7 @@ class Compass extends StatelessWidget {
     return IgnorePointer(
       child: Center(
         child: Stack(
-          alignment: Alignment.center,
+          alignment: .center,
           children: [
             Builder(
               builder: (context) {
@@ -269,7 +269,7 @@ class Compass extends StatelessWidget {
 
                 return IgnorePointer(
                   child: Stack(
-                    alignment: Alignment.center,
+                    alignment: .center,
                     children: [
                       Transform.translate(
                         offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
@@ -338,7 +338,7 @@ class Compass extends StatelessWidget {
                               child: Text(
                                 closestAlarm.name,
                                 style: const TextStyle(fontSize: 10),
-                                overflow: TextOverflow.ellipsis,
+                                overflow: .ellipsis,
                                 maxLines: 1,
                               ),
                             ),
@@ -368,7 +368,7 @@ class Overlay extends StatelessWidget {
         var statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Stack(
-          alignment: Alignment.center,
+          alignment: .center,
           children: [
             Positioned(
               top: statusBarHeight + 5,
@@ -382,8 +382,8 @@ class Overlay extends StatelessWidget {
               top: statusBarHeight + 10,
               right: 15,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: .end,
+                mainAxisAlignment: .spaceAround,
                 children: [
                   FloatingActionButton(
                     child: const Icon(Icons.info_outline_rounded),
@@ -394,7 +394,7 @@ class Overlay extends StatelessWidget {
                     FloatingActionButton(
                       onPressed: () => followOrUnfollowUser(spotAlert),
                       elevation: 4,
-                      backgroundColor: const Color.fromARGB(255, 216, 255, 218),
+                      backgroundColor: const .fromARGB(255, 216, 255, 218),
                       child: const Icon(Icons.near_me_rounded),
                     ),
                   ] else ...[
@@ -463,7 +463,7 @@ class Overlay extends StatelessWidget {
                     padding: const .symmetric(horizontal: 15, vertical: 5),
                     child: Row(
                       children: [
-                        const Text('Size:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        const Text('Size:', style: TextStyle(fontWeight: .bold)),
                         Expanded(
                           child: Slider(
                             value: spotAlert.alarmPlacementRadius,
@@ -515,21 +515,21 @@ void showInfoDialog(BuildContext context) {
         padding: const .all(24),
         child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
             children: <Widget>[
               Icon(Icons.info_outline_rounded, size: 40, color: Theme.of(context).colorScheme.primary),
               const SizedBox(height: 15),
               const Text(
                 'Here you can place new alarms by tapping the marker button. You can also follow / unfollow your location by tapping the lock button.',
-                textAlign: TextAlign.center,
+                textAlign: .center,
               ),
               const SizedBox(height: 15),
-              const Text('Staying on the map view for long periods of time may drain your battery.', textAlign: TextAlign.center),
+              const Text('Staying on the map view for long periods of time may drain your battery.', textAlign: .center),
               const SizedBox(height: 15),
               const Text(
                 'Set location permissions to "While Using" or "Always" and enable notifications to use the app when running in background. Also make sure to disable Silent mode.',
-                textAlign: TextAlign.center,
+                textAlign: .center,
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),

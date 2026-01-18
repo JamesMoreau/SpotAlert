@@ -207,7 +207,7 @@ Future<void> checkAlarms(SpotAlert spotAlert) async {
         presentBadge: true,
         presentBanner: true,
         presentSound: true,
-        interruptionLevel: InterruptionLevel.active,
+        interruptionLevel: .active,
         // This .wav file is bundled with the ios/Runner.xcworkspace and is not using Flutter's asset system, despite being in the assets folder.
         sound: 'slow_spring_board_repeated.wav',
       ),

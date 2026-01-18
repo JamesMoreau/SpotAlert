@@ -31,7 +31,7 @@ class AlarmsView extends StatelessWidget {
         if (spotAlert.alarms.isEmpty) {
           return Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: [
                 const Text('No alarms.'),
                 ElevatedButton(
@@ -64,7 +64,7 @@ class AlarmsView extends StatelessWidget {
                 return Padding(
                   padding: const .all(8),
                   child: ListTile(
-                    title: Text(alarm.name, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    title: Text(alarm.name, maxLines: 1, overflow: .ellipsis),
                     leading: Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
                     subtitle: Text(alarm.position.toSexagesimal(), style: TextStyle(fontSize: 9, color: Colors.grey[700])),
                     onLongPress: () => openAlarmEdit(context, spotAlert, alarm),
@@ -101,7 +101,7 @@ class EditAlarmDialog extends StatelessWidget {
             child: Column(
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: .spaceBetween,
                   children: [
                     TextButton(
                       child: const Text('Cancel'),
@@ -109,7 +109,7 @@ class EditAlarmDialog extends StatelessWidget {
                     ),
                     const Text(
                       'Edit Alarm',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontSize: 18, fontWeight: .bold),
                     ),
                     TextButton(
                       child: const Text('Save'),
@@ -148,7 +148,7 @@ class EditAlarmDialog extends StatelessWidget {
                       const SizedBox(height: 30),
                       Text('Color', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
                       SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
+                        scrollDirection: .horizontal,
                         child: Row(
                           children: [
                             Padding(
@@ -180,14 +180,14 @@ class EditAlarmDialog extends StatelessWidget {
                       ),
                       const SizedBox(height: 30),
                       Text('Position', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
-                      Text(spotAlert.editAlarm.position.toSexagesimal(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(spotAlert.editAlarm.position.toSexagesimal(), style: const TextStyle(fontWeight: .bold)),
                       const SizedBox(height: 10),
                       Align(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).colorScheme.primary,
                           ),
-                          onPressed: () async {
+                          onPressed: () async { // TODO: factor out
                             Navigator.pop(context); // Close the edit alarm bottom sheet.
                             navigateToView(spotAlert, SpotAlertView.map);
 
@@ -207,7 +207,7 @@ class EditAlarmDialog extends StatelessWidget {
                       ),
                       const SizedBox(height: 30),
                       Text('Radius / Size (in meters)', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
-                      Text(spotAlert.editAlarm.radius.toInt().toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(spotAlert.editAlarm.radius.toInt().toString(), style: const TextStyle(fontWeight: .bold)),
                       const SizedBox(height: 30),
                       Align(
                         child: ElevatedButton(

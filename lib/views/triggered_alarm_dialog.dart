@@ -21,15 +21,15 @@ void showAlarmDialog(BuildContext context, Alarm triggeredAlarm) {
                   children: [
                     const Text(
                       'Alarm Triggered',
-                      style: TextStyle(fontSize: 30, fontWeight: FontWeight.w300),
+                      style: TextStyle(fontSize: 30, fontWeight: .w300),
                     ),
                     const SizedBox(height: 16),
                     const Text(
                       'You have entered the radius of an alarm.',
-                      textAlign: TextAlign.center,
+                      textAlign: .center,
                       style: TextStyle(
                         fontSize: 20,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: .w300,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -41,7 +41,7 @@ void showAlarmDialog(BuildContext context, Alarm triggeredAlarm) {
                 flex: 2,
                 child: Column(
                   children: [
-                    Text(triggeredAlarm.name, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+                    Text(triggeredAlarm.name, style: const TextStyle(fontSize: 30, fontWeight: .bold)),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context), // Close the dialog

@@ -111,7 +111,7 @@ class SettingsView extends StatelessWidget {
                           TextSpan(
                             text: 'Ko-fi',
                             style: TextStyle(
-                              decoration: TextDecoration.underline,
+                              decoration: .underline,
                             ),
                           ),
                           TextSpan(text: '.'),

@@ -58,7 +58,7 @@ enum AvailableAlarmColors {
 
 ThemeData locationAlarmTheme = ThemeData(
   colorScheme: const ColorScheme(
-    brightness: Brightness.light,
+    brightness: .light,
     primary: Color(0xff006493),
     onPrimary: Colors.white,
     primaryContainer: .fromARGB(255, 216, 237, 255),
@@ -183,13 +183,13 @@ class MainApp extends StatelessWidget {
                     blurRadius: 5,
                   ),
                 ],
-                borderRadius: const BorderRadius.only(
+                borderRadius: const .only(
                   topLeft: .circular(50),
                   topRight: .circular(50),
                 ),
               ),
               child: ClipRRect(
-                borderRadius: const BorderRadius.only(
+                borderRadius: const .only(
                   topLeft: .circular(50),
                   topRight: .circular(50),
                 ),
@@ -279,7 +279,7 @@ void main() async {
   }
 
   await const FMTCStore(mapTileStoreName).manage.create();
-  spotAlert.tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: BrowseStoreStrategy.readUpdateCreate});
+  spotAlert.tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: .readUpdateCreate});
 
   runApp(const MainApp());
 }
