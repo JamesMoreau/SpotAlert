@@ -61,7 +61,7 @@ ThemeData locationAlarmTheme = ThemeData(
     brightness: Brightness.light,
     primary: Color(0xff006493),
     onPrimary: Colors.white,
-    primaryContainer: Color.fromARGB(255, 216, 237, 255),
+    primaryContainer: .fromARGB(255, 216, 237, 255),
     onPrimaryContainer: Color(0xff001e30),
     secondary: Color(0xff50606e),
     onSecondary: Color(0xffffffff),
@@ -87,16 +87,16 @@ ThemeData locationAlarmTheme = ThemeData(
     surfaceTint: Color(0xff006493),
   ),
   listTileTheme: ListTileThemeData(
-    contentPadding: const EdgeInsets.all(25),
-    tileColor: const Color.fromARGB(255, 234, 239, 246), // Background color of the ListTile
+    contentPadding: const .all(25),
+    tileColor: const .fromARGB(255, 234, 239, 246), // Background color of the ListTile
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: .circular(8),
     ),
   ),
   sliderTheme: const SliderThemeData(
     thumbShape: RoundSliderThumbShape(enabledThumbRadius: 13),
   ),
-  iconTheme: const IconThemeData(color: Color(0xff50606e)),
+  iconTheme: const IconThemeData(color: .new(0xff50606e)),
 );
 
 const paleBlue = Color(0xffeaf0f5);
@@ -184,14 +184,14 @@ class MainApp extends StatelessWidget {
                   ),
                 ],
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(50),
-                  topRight: Radius.circular(50),
+                  topLeft: .circular(50),
+                  topRight: .circular(50),
                 ),
               ),
               child: ClipRRect(
                 borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(50),
-                  topRight: Radius.circular(50),
+                  topLeft: .circular(50),
+                  topRight: .circular(50),
                 ),
                 child: NavigationBar(
                   onDestinationSelected: (int index) {
@@ -201,9 +201,9 @@ class MainApp extends StatelessWidget {
                   selectedIndex: spotAlert.view.index,
                   destinations: SpotAlertView.values.map((view) {
                     var (icon, label) = switch (view) {
-                      SpotAlertView.alarms => (Icons.pin_drop_rounded, 'Alarms'),
-                      SpotAlertView.map => (Icons.map_rounded, 'Map'),
-                      SpotAlertView.settings => (Icons.settings_rounded, 'Settings'),
+                      .alarms => (Icons.pin_drop_rounded, 'Alarms'),
+                      .map => (Icons.map_rounded, 'Map'),
+                      .settings => (Icons.settings_rounded, 'Settings'),
                     };
 
                     return NavigationDestination(icon: Icon(icon), label: label);

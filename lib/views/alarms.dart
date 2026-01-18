@@ -62,7 +62,7 @@ class AlarmsView extends StatelessWidget {
               itemBuilder: (context, index) {
                 var alarm = spotAlert.alarms[index];
                 return Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const .all(8),
                   child: ListTile(
                     title: Text(alarm.name, maxLines: 1, overflow: TextOverflow.ellipsis),
                     leading: Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
@@ -97,7 +97,7 @@ class EditAlarmDialog extends StatelessWidget {
         return SizedBox(
           height: MediaQuery.of(context).size.height * 0.9,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const .symmetric(horizontal: 20, vertical: 12),
             child: Column(
               children: [
                 Row(
@@ -132,7 +132,7 @@ class EditAlarmDialog extends StatelessWidget {
                     children: [
                       Text('Name', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
                       TextFormField(
-                        textAlign: TextAlign.center,
+                        textAlign: .center,
                         controller: spotAlert.nameInput,
                         onChanged: (value) => spotAlert.setState(),
                         decoration: InputDecoration(
@@ -152,7 +152,7 @@ class EditAlarmDialog extends StatelessWidget {
                         child: Row(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.all(8),
+                              padding: const .all(8),
                               child: CircleAvatar(
                                 backgroundColor: spotAlert.colorInput,
                                 radius: 20,
@@ -161,7 +161,7 @@ class EditAlarmDialog extends StatelessWidget {
                             ),
                             for (var color in AvailableAlarmColors.values) ...[
                               Padding(
-                                padding: const EdgeInsets.all(8),
+                                padding: const .all(8),
                                 child: GestureDetector(
                                   onTap: () {
                                     spotAlert.colorInput = color.value;

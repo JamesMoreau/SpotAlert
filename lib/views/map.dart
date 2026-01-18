@@ -118,7 +118,7 @@ class AlarmMarkers extends StatelessWidget {
             bottom: 0,
             child: Container(
               constraints: const BoxConstraints(maxWidth: 100),
-              padding: const EdgeInsets.symmetric(horizontal: 2),
+              padding: const .symmetric(horizontal: 2),
               decoration: BoxDecoration(
                 color: paleBlue.withValues(alpha: 0.7),
                 borderRadius: BorderRadius.circular(8),
@@ -187,7 +187,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
         SnackBar(
           behavior: SnackBarBehavior.floating,
           content: Container(
-            padding: const EdgeInsets.all(8),
+            padding: const .all(8),
             child: const Text('Are location permissions enabled?'),
           ),
           action: SnackBarAction(
@@ -330,7 +330,7 @@ class Compass extends StatelessWidget {
                             offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
                             child: Container(
                               constraints: const BoxConstraints(maxWidth: 100),
-                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              padding: const .symmetric(horizontal: 2),
                               decoration: BoxDecoration(
                                 color: paleBlue.withValues(alpha: 0.7),
                                 borderRadius: BorderRadius.circular(8),
@@ -460,7 +460,7 @@ class Overlay extends StatelessWidget {
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                    padding: const .symmetric(horizontal: 15, vertical: 5),
                     child: Row(
                       children: [
                         const Text('Size:', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -496,7 +496,7 @@ class OpenStreetMapAttribution extends StatelessWidget {
   Widget build(BuildContext context) {
     return IgnorePointer(
       child: Container(
-        padding: const EdgeInsets.all(3),
+        padding: const .all(3),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(8),
@@ -512,7 +512,7 @@ void showInfoDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) => Dialog(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const .all(24),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

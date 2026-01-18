@@ -23,7 +23,7 @@ class SettingsView extends StatelessWidget {
             child: ListView(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const .all(8),
                   child: ListTile(
                     title: Text(spotAlert.packageInfo.appName),
                     subtitle: Text('Version: ${spotAlert.packageInfo.version}'),
@@ -31,7 +31,7 @@ class SettingsView extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const .all(8),
                   child: ListTile(
                     title: const Text('Show Closest Alarm'),
                     trailing: Switch(
@@ -46,15 +46,15 @@ class SettingsView extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const .all(8),
                   child: ListTile(
                     title: const Text('Open Settings'),
                     trailing: const Icon(Icons.keyboard_arrow_right),
-                    onTap: () => AppSettings.openAppSettings(type: AppSettingsType.location),
+                    onTap: () => AppSettings.openAppSettings(type: .location),
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const .all(8),
                   child: ListTile(
                     title: const Text('Review App'),
                     trailing: const Icon(Icons.feedback_rounded),
@@ -72,7 +72,7 @@ class SettingsView extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const .all(8),
                   child: ListTile(
                     title: const Text('Clear Map Cache'),
                     subtitle: const Text('This can free up storage on your device.'),
@@ -90,17 +90,17 @@ class SettingsView extends StatelessWidget {
 
                       scaffoldMessenger.showSnackBar(
                         SnackBar(
-                          behavior: SnackBarBehavior.floating,
-                          content: Container(padding: const EdgeInsets.all(8), child: Text(message)),
+                          behavior: .floating,
+                          content: Container(padding: const .all(8), child: Text(message)),
                           duration: const Duration(seconds: 3),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(borderRadius: .circular(10)),
                         ),
                       );
                     },
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8),
+                  padding: const .all(8),
                   child: ListTile(
                     title: const Text('Author: $author'),
                     subtitle: RichText(
@@ -134,7 +134,7 @@ class SettingsView extends StatelessWidget {
                 ),
                 if (kDebugMode)
                   Padding(
-                    padding: const EdgeInsets.all(8),
+                    padding: const .all(8),
                     child: ListTile(
                       title: const Text('DEBUG: Print Alarms In Storage.'),
                       trailing: const Icon(Icons.alarm_rounded),

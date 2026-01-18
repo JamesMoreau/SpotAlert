@@ -10,14 +10,14 @@ void showAlarmDialog(BuildContext context, Alarm triggeredAlarm) {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         color: paleBlue,
-        padding: const EdgeInsets.all(20),
+        padding: const .all(20),
         child: SafeArea(
           child: Column(
             children: [
               Expanded(
                 flex: 3,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: .center,
                   children: [
                     const Text(
                       'Alarm Triggered',

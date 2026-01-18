@@ -18,16 +18,16 @@ class SpotAlert extends JuneState {
   List<Alarm> alarms = <Alarm>[];
   LatLng? position; // The user's position.
 
-  SpotAlertView view = SpotAlertView.alarms;
+  SpotAlertView view = .alarms;
   late PageController pageController;
 
   // Alarms
   Alarm editAlarm = Alarm(name: '', position: const LatLng(0, 0), radius: 100);
-  TextEditingController nameInput = TextEditingController();
+  TextEditingController nameInput = .new();
   Color colorInput = AvailableAlarmColors.blue.value;
 
   // Map
-  MapController mapController = MapController();
+  MapController mapController = .new();
   bool mapControllerIsAttached = false; // This let's us know if we can use the controller.
   FMTCTileProvider? tileProvider;
   bool isPlacingAlarm = false;
