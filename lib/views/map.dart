@@ -46,7 +46,7 @@ class MapView extends StatelessWidget {
             AlarmLayer(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
             UserPositionLayer(position: spotAlert.position),
             AlarmPlacementLayer(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
-            const Compass(),
+            Compass(alarms: spotAlert.alarms, showClosestNonVisibleAlarmSetting: spotAlert.showClosestNonVisibleAlarmSetting, userPosition: spotAlert.position),
             const Overlay(),
           ],
         );
@@ -233,122 +233,126 @@ Future<void> moveMapToUserLocation(SpotAlert spotAlert) async {
 }
 
 class Compass extends StatelessWidget {
-  const Compass({super.key});
+  final LatLng? userPosition;
+  final List<Alarm> alarms;
+  final bool showClosestNonVisibleAlarmSetting;
+
+  const Compass({
+    required this.userPosition,
+    required this.alarms,
+    required this.showClosestNonVisibleAlarmSetting,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return JuneBuilder(
-      () => SpotAlert(),
-      builder: (spotAlert) {
-        var screenSize = MediaQuery.of(context).size;
-        var ellipseWidth = screenSize.width * 0.8;
-        var ellipseHeight = screenSize.height * 0.65;
+    var screenSize = MediaQuery.of(context).size;
+    var ellipseWidth = screenSize.width * 0.8;
+    var ellipseHeight = screenSize.height * 0.65;
 
-        return IgnorePointer(
-          child: Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Builder(
-                  builder: (context) {
-                    // If the user's position is not visible, show an arrow pointing towards them.
+    return IgnorePointer(
+      child: Center(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Builder(
+              builder: (context) {
+                // If the user's position is not visible, show an arrow pointing towards them.
 
-                    if (spotAlert.position == null) return const SizedBox.shrink();
+                if (userPosition == null) return const SizedBox.shrink();
 
-                    var userIsVisible = MapCamera.of(context).visibleBounds.contains(spotAlert.position!);
-                    if (userIsVisible) return const SizedBox.shrink();
+                var userIsVisible = MapCamera.of(context).visibleBounds.contains(userPosition!);
+                if (userIsVisible) return const SizedBox.shrink();
 
-                    var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, spotAlert.position!);
-                    var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+                var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, userPosition!);
+                var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
-                    return IgnorePointer(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Transform.translate(
-                            offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                            child: Transform.rotate(
-                              angle: arrowRotation,
-                              child: Transform.rotate(angle: -pi / 2, child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28)),
-                            ),
-                          ),
-                          Transform.translate(
-                            offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                            child: const Stack(
-                              children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))],
-                            ),
-                          ),
-                        ],
+                return IgnorePointer(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Transform.translate(
+                        offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+                        child: Transform.rotate(
+                          angle: arrowRotation,
+                          child: Transform.rotate(angle: -pi / 2, child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28)),
+                        ),
                       ),
-                    );
-                  },
-                ),
-                Builder(
-                  builder: (context) {
-                    // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
+                      Transform.translate(
+                        offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+                        child: const Stack(
+                          children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            Builder(
+              builder: (context) {
+                // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
 
-                    if (spotAlert.position == null) return const SizedBox.shrink();
+                if (userPosition == null) return const SizedBox.shrink();
 
-                    var closestAlarm = getClosest(spotAlert.position!, spotAlert.alarms, (alarm) => alarm.position);
-                    if (closestAlarm == null) return const SizedBox.shrink();
+                var closestAlarm = getClosest(userPosition!, alarms, (alarm) => alarm.position);
+                if (closestAlarm == null) return const SizedBox.shrink();
 
-                    var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
+                var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
 
-                    var showClosestNonVisibleAlarm = !closestAlarmIsVisible && spotAlert.showClosestNonVisibleAlarmSetting;
-                    if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
+                var showClosestNonVisibleAlarm = !closestAlarmIsVisible && showClosestNonVisibleAlarmSetting;
+                if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
 
-                    var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-                    var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
-                    var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi);
+                var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
+                var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
+                var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi);
 
-                    return IgnorePointer(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Transform.translate(
-                            offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                            child: Transform.rotate(
-                              angle: arrowRotation,
-                              child: Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28)),
-                            ),
-                          ),
-                          Transform.translate(
-                            offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                            child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
-                          ),
-                          if (closestAlarm.name.isNotEmpty) ...[
-                            Transform.translate(
-                              offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
-                              child: Transform.translate(
-                                // Move the text up or down depending on the angle to now overlap with the arrow.
-                                offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
-                                child: Container(
-                                  constraints: const BoxConstraints(maxWidth: 100),
-                                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                                  decoration: BoxDecoration(
-                                    color: paleBlue.withValues(alpha: 0.7),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    closestAlarm.name,
-                                    style: const TextStyle(fontSize: 10),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
-                                  ),
-                                ),
+                return IgnorePointer(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Transform.translate(
+                        offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+                        child: Transform.rotate(
+                          angle: arrowRotation,
+                          child: Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28)),
+                        ),
+                      ),
+                      Transform.translate(
+                        offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+                        child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
+                      ),
+                      if (closestAlarm.name.isNotEmpty) ...[
+                        Transform.translate(
+                          offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
+                          child: Transform.translate(
+                            // Move the text up or down depending on the angle to now overlap with the arrow.
+                            offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 100),
+                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              decoration: BoxDecoration(
+                                color: paleBlue.withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                closestAlarm.name,
+                                style: const TextStyle(fontSize: 10),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
                             ),
-                          ],
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                );
+              },
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
