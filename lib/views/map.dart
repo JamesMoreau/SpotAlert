@@ -171,7 +171,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
           content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
           action: SnackBarAction(
             label: 'Settings',
-            onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location),
+            onPressed: () => AppSettings.openAppSettings(type: .location),
           ),
           shape: RoundedRectangleBorder(borderRadius: .circular(10)),
         ),

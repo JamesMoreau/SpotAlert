@@ -1,8 +1,10 @@
 PODS:
+  - alarm (0.0.1):
+    - Flutter
   - app_settings (6.1.2):
     - Flutter
   - Flutter (1.0.0)
-  - flutter_local_notifications (0.0.1):
+  - flutter_fgbg (0.0.1):
     - Flutter
   - location (0.0.1):
     - Flutter
@@ -12,16 +14,21 @@ PODS:
     - ObjectBox (= 4.4.1)
   - package_info_plus (0.4.5):
     - Flutter
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - url_launcher_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
+  - alarm (from `.symlinks/plugins/alarm/ios`)
   - app_settings (from `.symlinks/plugins/app_settings/ios`)
   - Flutter (from `Flutter`)
-  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
+  - flutter_fgbg (from `.symlinks/plugins/flutter_fgbg/ios`)
   - location (from `.symlinks/plugins/location/ios`)
   - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 SPEC REPOS:
@@ -29,29 +36,35 @@ SPEC REPOS:
     - ObjectBox
 
 EXTERNAL SOURCES:
+  alarm:
+    :path: ".symlinks/plugins/alarm/ios"
   app_settings:
     :path: ".symlinks/plugins/app_settings/ios"
   Flutter:
     :path: Flutter
-  flutter_local_notifications:
-    :path: ".symlinks/plugins/flutter_local_notifications/ios"
+  flutter_fgbg:
+    :path: ".symlinks/plugins/flutter_fgbg/ios"
   location:
     :path: ".symlinks/plugins/location/ios"
   objectbox_flutter_libs:
     :path: ".symlinks/plugins/objectbox_flutter_libs/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
+  alarm: 9ff6d2dae9bd69c4022622f7e0a1e9c1dd70064e
   app_settings: 0341ec6daa4f0c50f5a421bf0ad7c36084db6e90
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
-  flutter_local_notifications: a5a732f069baa862e728d839dd2ebb904737effb
+  flutter_fgbg: d3da78df78454b1808f0829a5da9cd17dfe16444
   location: 155caecf9da4f280ab5fe4a55f94ceccfab838f8
   ObjectBox: 7da4aceb5013d041bfafdbc6d744a26918b09757
   objectbox_flutter_libs: 09b1dec1b4cd27bf1a5f9bae7ccaa7e43588bf31
   package_info_plus: af8e2ca6888548050f16fa2f1938db7b5a5df499
+  shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
 
 PODFILE CHECKSUM: 1959d098c91d8a792531a723c4a9d7e9f6a01e38
