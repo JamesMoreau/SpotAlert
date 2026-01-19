@@ -40,7 +40,7 @@ class MapView extends StatelessWidget {
             AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
             UserPosition(position: spotAlert.position),
             AlarmPlacementDisplay(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
-            Compass(alarms: spotAlert.alarms, showClosestNonVisibleAlarmSetting: spotAlert.showClosestNonVisibleAlarmSetting, userPosition: spotAlert.position),
+            Compass(alarms: spotAlert.alarms, userPosition: spotAlert.position),
             const Overlay(),
           ],
         );
@@ -214,9 +214,8 @@ Future<void> moveMapToUserLocation(SpotAlert spotAlert) async {
 class Compass extends StatelessWidget {
   final LatLng? userPosition;
   final List<Alarm> alarms;
-  final bool showClosestNonVisibleAlarmSetting;
 
-  const Compass({required this.userPosition, required this.alarms, required this.showClosestNonVisibleAlarmSetting, super.key});
+  const Compass({required this.userPosition, required this.alarms, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -280,8 +279,7 @@ class Compass extends StatelessWidget {
 
                 var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
 
-                var showClosestNonVisibleAlarm = !closestAlarmIsVisible && showClosestNonVisibleAlarmSetting;
-                if (!showClosestNonVisibleAlarm) return const SizedBox.shrink();
+                if (closestAlarmIsVisible) return const SizedBox.shrink();
 
                 var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
                 var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);

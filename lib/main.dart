@@ -28,8 +28,6 @@ const kofi = 'https://ko-fi.com/jamesmoreau';
 const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const mapTileStoreName = 'mapStore';
-const settingsShowClosestNonVisibleAlarmKey = 'showClosestNonVisibleAlarm';
-const settingsFilename = 'settings.json';
 const alarmsFilename = 'alarms.json';
 
 const initialZoom = 15.0;
@@ -255,7 +253,6 @@ void main() async {
     },
   );
 
-  await loadSettings(spotAlert);
   await loadAlarms(spotAlert);
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.

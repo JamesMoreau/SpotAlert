@@ -33,21 +33,6 @@ class SettingsView extends StatelessWidget {
                 Padding(
                   padding: const .all(8),
                   child: ListTile(
-                    title: const Text('Show Closest Alarm'),
-                    trailing: Switch(
-                      value: spotAlert.showClosestNonVisibleAlarmSetting,
-                      onChanged: (value) {
-                        spotAlert.showClosestNonVisibleAlarmSetting = value;
-                        spotAlert.setState();
-                        saveSettings(spotAlert);
-                      },
-                      thumbIcon: thumbIcon,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const .all(8),
-                  child: ListTile(
                     title: const Text('Open Settings'),
                     trailing: const Icon(Icons.keyboard_arrow_right),
                     onTap: () => AppSettings.openAppSettings(type: .location),

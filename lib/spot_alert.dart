@@ -36,7 +36,6 @@ class SpotAlert extends JuneState {
 
   // Settings
   late PackageInfo packageInfo;
-  bool showClosestNonVisibleAlarmSetting = true;
 
   @override
   Future<void> onInit() async {
@@ -135,40 +134,6 @@ Future<void> loadAlarms(SpotAlert spotAlert) async {
 
   spotAlert.setState();
   debugPrintInfo('Loaded alarms from storage.');
-}
-
-Future<void> loadSettings(SpotAlert spotAlert) async {
-  var directory = await getApplicationDocumentsDirectory();
-  var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
-  var settingsFile = File(settingsPath);
-
-  if (!settingsFile.existsSync()) {
-    debugPrintWarning('No settings file found in storage.');
-    return;
-  }
-
-  var settingsJson = await settingsFile.readAsString();
-  if (settingsJson.isEmpty) {
-    debugPrintError('No settings found in storage.');
-    return;
-  }
-
-  var settingsMap = jsonDecode(settingsJson) as Map<String, dynamic>;
-  spotAlert.showClosestNonVisibleAlarmSetting = settingsMap[settingsShowClosestNonVisibleAlarmKey] as bool;
-  debugPrintInfo('Loaded settings from storage.');
-}
-
-Future<void> saveSettings(SpotAlert spotAlert) async {
-  var directory = await getApplicationDocumentsDirectory();
-  var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
-  var settingsFile = File(settingsPath);
-
-  var settingsMap = <String, dynamic>{settingsShowClosestNonVisibleAlarmKey: spotAlert.showClosestNonVisibleAlarmSetting};
-
-  var settingsJson = jsonEncode(settingsMap);
-  await settingsFile.writeAsString(settingsJson);
-
-  debugPrintInfo('Saved settings to storage.');
 }
 
 Future<void> checkAlarms(SpotAlert spotAlert) async {
