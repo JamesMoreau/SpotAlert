@@ -333,7 +333,7 @@ class Compass extends StatelessWidget {
                               padding: const .symmetric(horizontal: 2),
                               decoration: BoxDecoration(
                                 color: paleBlue.withValues(alpha: 0.7),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: .circular(8),
                               ),
                               child: Text(
                                 closestAlarm.name,
@@ -449,7 +449,7 @@ class Overlay extends StatelessWidget {
                   width: MediaQuery.of(context).size.width * 0.9,
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: const BorderRadius.all(Radius.circular(15)),
+                    borderRadius: const .all(.circular(15)),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withValues(alpha: 0.5),
@@ -499,7 +499,7 @@ class OpenStreetMapAttribution extends StatelessWidget {
         padding: const .all(3),
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.7),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: .circular(8),
         ),
         child: const Text('© OpenStreetMap contributors'),
       ),

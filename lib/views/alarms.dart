@@ -217,7 +217,7 @@ class EditAlarmDialog extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: .circular(8),
                               side: const BorderSide(color: Colors.redAccent, width: 2),
                             ),
                           ),
