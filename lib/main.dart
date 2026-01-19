@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:alarm/alarm.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
@@ -18,6 +18,8 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - make sure settings file not found is ok.
+  - just remove settings altogether.
   - Update screenshots in app store and readme.
 */
 
@@ -102,9 +104,6 @@ final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Ico
   if (states.contains(WidgetState.selected)) return const Icon(Icons.check_rounded);
   return const Icon(Icons.close_rounded);
 });
-
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-int notificationId = 0;
 
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -229,10 +228,13 @@ void main() async {
 
   await SystemChrome.setPreferredOrientations([.portraitUp]);
 
-  var initializationSettings = const InitializationSettings(iOS: DarwinInitializationSettings());
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  await Alarm.init();
 
-  await location.enableBackgroundMode();
+  var success = await location.enableBackgroundMode();
+  if (!success) {
+    debugPrintWarning("Failed to initialize the location package's background mode");
+  }
+
   location.onLocationChanged.listen(
     (location) async {
       if (location.latitude != null && location.longitude != null) {

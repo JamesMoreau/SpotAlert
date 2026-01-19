@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:alarm/alarm.dart' as alarm_package;
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
@@ -191,18 +191,19 @@ Future<void> checkAlarms(SpotAlert spotAlert) async {
     // Deactivate the alarm so it doesn't trigger again upon next call to checkAlarms.
     updateAndSaveAlarm(spotAlert, alarm, isActive: false);
 
-    var notificationDetails = const NotificationDetails(
-      iOS: .new(
-        presentAlert: true,
-        presentBadge: true,
-        presentBanner: true,
-        presentSound: true,
-        interruptionLevel: .active,
-        // This .wav file is bundled with the ios/Runner.xcworkspace and is not using Flutter's asset system, despite being in the assets folder.
-        sound: 'slow_spring_board_repeated.wav',
+    // Setup and fire the alarm package to bring the user's attention.
+    var alarmSettings = alarm_package.AlarmSettings(
+      id: alarm.id.hashCode,
+      dateTime: .now(),
+      assetAudioPath: 'assets/slow_spring_board_repeated.wav',
+      volumeSettings: const .fixed(volume: 0.8, volumeEnforced: true),
+      notificationSettings: .new(
+        title: 'Alarm Triggered',
+        body: 'You have entered the radius of alarm: ${alarm.name}',
+        stopButton: 'Stop',
       ),
     );
-    await flutterLocalNotificationsPlugin.show(notificationId++, 'Alarm Triggered', 'You have entered the radius of alarm: ${alarm.name}.', notificationDetails);
+    await alarm_package.Alarm.set(alarmSettings: alarmSettings);
 
     showAlarmDialog(navigatorKey.currentContext!, alarm);
   }
