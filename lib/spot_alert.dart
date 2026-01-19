@@ -15,7 +15,7 @@ import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 
 class SpotAlert extends JuneState {
-  List<Alarm> alarms = <Alarm>[];
+  List<Alarm> alarms = [];
   LatLng? position; // The user's position.
 
   SpotAlertView view = .alarms;
@@ -75,15 +75,7 @@ Alarm? getAlarmById(SpotAlert spotAlert, String id) {
   return null;
 }
 
-void updateAndSaveAlarm(
-  SpotAlert spotAlert,
-  Alarm alarm, {
-  String? newName,
-  LatLng? newPosition,
-  double? newRadius,
-  Color? newColor,
-  bool? isActive,
-}) {
+void updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatLng? newPosition, double? newRadius, Color? newColor, bool? isActive}) {
   if (newName != null) alarm.name = newName;
   if (newPosition != null) alarm.position = newPosition;
   if (newRadius != null) alarm.radius = newRadius;
@@ -171,9 +163,7 @@ Future<void> saveSettings(SpotAlert spotAlert) async {
   var settingsPath = '${directory.path}${Platform.pathSeparator}$settingsFilename';
   var settingsFile = File(settingsPath);
 
-  var settingsMap = <String, dynamic>{
-    settingsShowClosestNonVisibleAlarmKey: spotAlert.showClosestNonVisibleAlarmSetting,
-  };
+  var settingsMap = <String, dynamic>{settingsShowClosestNonVisibleAlarmKey: spotAlert.showClosestNonVisibleAlarmSetting};
 
   var settingsJson = jsonEncode(settingsMap);
   await settingsFile.writeAsString(settingsJson);
@@ -202,7 +192,7 @@ Future<void> checkAlarms(SpotAlert spotAlert) async {
     updateAndSaveAlarm(spotAlert, alarm, isActive: false);
 
     var notificationDetails = const NotificationDetails(
-      iOS: DarwinNotificationDetails(
+      iOS: .new(
         presentAlert: true,
         presentBadge: true,
         presentBanner: true,
