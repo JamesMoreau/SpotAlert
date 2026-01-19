@@ -173,7 +173,7 @@ class MainApp extends StatelessWidget {
             bottomNavigationBar: Container(
               decoration: BoxDecoration(
                 boxShadow: [
-                  BoxShadow(
+                  .new(
                     color: Colors.black.withValues(alpha: 0.1),
                     spreadRadius: 2,
                     blurRadius: 5,
@@ -227,7 +227,7 @@ void main() async {
 
   var spotAlert = June.getState(() => SpotAlert());
 
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  await SystemChrome.setPreferredOrientations([.portraitUp]);
 
   var initializationSettings = const InitializationSettings(iOS: DarwinInitializationSettings());
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);

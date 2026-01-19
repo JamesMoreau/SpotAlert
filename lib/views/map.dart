@@ -18,9 +18,7 @@ class MapView extends StatelessWidget {
       () => SpotAlert(),
       builder: (spotAlert) {
         if (spotAlert.tileProvider == null) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         // If the map is locked to the user's location, disable move interaction.
@@ -38,11 +36,7 @@ class MapView extends StatelessWidget {
             onMapReady: () => onMapReady(spotAlert),
           ),
           children: [
-            TileLayer(
-              urlTemplate: openStreetMapTemplateUrl,
-              userAgentPackageName: spotAlert.packageInfo.packageName,
-              tileProvider: spotAlert.tileProvider,
-            ),
+            TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: spotAlert.tileProvider),
             AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
             UserPosition(position: spotAlert.position),
             AlarmPlacementDisplay(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
@@ -66,11 +60,11 @@ class UserPosition extends StatelessWidget {
 
     return MarkerLayer(
       markers: [
-        Marker(
+        .new(
           point: position!,
           child: const Icon(Icons.circle, color: Colors.blue),
         ),
-        Marker(
+        .new(
           point: position!,
           child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
         ),
@@ -83,11 +77,7 @@ class AlarmMarkers extends StatelessWidget {
   final List<Alarm> alarms;
   final double circleToMarkerZoomThreshold;
 
-  const AlarmMarkers({
-    required this.alarms,
-    required this.circleToMarkerZoomThreshold,
-    super.key,
-  });
+  const AlarmMarkers({required this.alarms, required this.circleToMarkerZoomThreshold, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -117,18 +107,10 @@ class AlarmMarkers extends StatelessWidget {
           Positioned(
             bottom: 0,
             child: Container(
-              constraints: const BoxConstraints(maxWidth: 100),
+              constraints: const .new(maxWidth: 100),
               padding: const .symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                color: paleBlue.withValues(alpha: 0.7),
-                borderRadius: .circular(8),
-              ),
-              child: Text(
-                alarm.name,
-                style: const TextStyle(fontSize: 10),
-                overflow: .ellipsis,
-                maxLines: 1,
-              ),
+              decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
+              child: Text(alarm.name, style: const TextStyle(fontSize: 10), overflow: .ellipsis, maxLines: 1),
             ),
           ),
         ],
@@ -160,7 +142,7 @@ class AlarmPlacementDisplay extends StatelessWidget {
 
     return CircleLayer(
       circles: [
-        CircleMarker(
+        .new(
           point: MapCamera.of(context).center,
           radius: alarmPlacementRadius,
           color: Colors.redAccent.withValues(alpha: 0.5),
@@ -186,10 +168,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
       ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
         SnackBar(
           behavior: .floating,
-          content: Container(
-            padding: const .all(8),
-            child: const Text('Are location permissions enabled?'),
-          ),
+          content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
           action: SnackBarAction(
             label: 'Settings',
             onPressed: () => AppSettings.openAppSettings(type: AppSettingsType.location),
@@ -237,12 +216,7 @@ class Compass extends StatelessWidget {
   final List<Alarm> alarms;
   final bool showClosestNonVisibleAlarmSetting;
 
-  const Compass({
-    required this.userPosition,
-    required this.alarms,
-    required this.showClosestNonVisibleAlarmSetting,
-    super.key,
-  });
+  const Compass({required this.userPosition, required this.alarms, required this.showClosestNonVisibleAlarmSetting, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -275,13 +249,19 @@ class Compass extends StatelessWidget {
                         offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
                         child: Transform.rotate(
                           angle: arrowRotation,
-                          child: Transform.rotate(angle: -pi / 2, child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28)),
+                          child: Transform.rotate(
+                            angle: -pi / 2,
+                            child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28),
+                          ),
                         ),
                       ),
                       Transform.translate(
                         offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
                         child: const Stack(
-                          children: [Center(child: Icon(Icons.circle, color: Colors.blue)), Center(child: Icon(Icons.person, color: Colors.white, size: 18))],
+                          children: [
+                            Center(child: Icon(Icons.circle, color: Colors.blue)),
+                            Center(child: Icon(Icons.person, color: Colors.white, size: 18)),
+                          ],
                         ),
                       ),
                     ],
@@ -315,7 +295,10 @@ class Compass extends StatelessWidget {
                         offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
                         child: Transform.rotate(
                           angle: arrowRotation,
-                          child: Transform.rotate(angle: -pi / 2, child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28)),
+                          child: Transform.rotate(
+                            angle: -pi / 2,
+                            child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28),
+                          ),
                         ),
                       ),
                       Transform.translate(
@@ -329,18 +312,10 @@ class Compass extends StatelessWidget {
                             // Move the text up or down depending on the angle to now overlap with the arrow.
                             offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
                             child: Container(
-                              constraints: const BoxConstraints(maxWidth: 100),
+                              constraints: const .new(maxWidth: 100),
                               padding: const .symmetric(horizontal: 2),
-                              decoration: BoxDecoration(
-                                color: paleBlue.withValues(alpha: 0.7),
-                                borderRadius: .circular(8),
-                              ),
-                              child: Text(
-                                closestAlarm.name,
-                                style: const TextStyle(fontSize: 10),
-                                overflow: .ellipsis,
-                                maxLines: 1,
-                              ),
+                              decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
+                              child: Text(closestAlarm.name, style: const TextStyle(fontSize: 10), overflow: .ellipsis, maxLines: 1),
                             ),
                           ),
                         ),
@@ -372,11 +347,7 @@ class Overlay extends StatelessWidget {
           children: [
             Positioned(
               top: statusBarHeight + 5,
-              child: const IgnorePointer(
-                child: Align(
-                  child: OpenStreetMapAttribution()
-                ),
-              ),
+              child: const IgnorePointer(child: Align(child: OpenStreetMapAttribution())),
             ),
             Positioned(
               top: statusBarHeight + 10,
@@ -385,10 +356,7 @@ class Overlay extends StatelessWidget {
                 crossAxisAlignment: .end,
                 mainAxisAlignment: .spaceAround,
                 children: [
-                  FloatingActionButton(
-                    child: const Icon(Icons.info_outline_rounded),
-                    onPressed: () => showInfoDialog(context),
-                  ),
+                  FloatingActionButton(child: const Icon(Icons.info_outline_rounded), onPressed: () => showInfoDialog(context)),
                   const SizedBox(height: 10),
                   if (spotAlert.followUserLocation) ...[
                     FloatingActionButton(
@@ -398,11 +366,7 @@ class Overlay extends StatelessWidget {
                       child: const Icon(Icons.near_me_rounded),
                     ),
                   ] else ...[
-                    FloatingActionButton(
-                      onPressed: () => followOrUnfollowUser(spotAlert),
-                      elevation: 4,
-                      child: const Icon(Icons.lock_rounded),
-                    ),
+                    FloatingActionButton(onPressed: () => followOrUnfollowUser(spotAlert), elevation: 4, child: const Icon(Icons.lock_rounded)),
                   ],
                   const SizedBox(height: 10),
                   if (spotAlert.isPlacingAlarm) ...[
@@ -450,14 +414,7 @@ class Overlay extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: const .all(.circular(15)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withValues(alpha: 0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
+                    boxShadow: [.new(color: Colors.grey.withValues(alpha: 0.5), spreadRadius: 2, blurRadius: 5, offset: const Offset(0, 3))],
                   ),
                   child: Padding(
                     padding: const .symmetric(horizontal: 15, vertical: 5),
@@ -497,10 +454,7 @@ class OpenStreetMapAttribution extends StatelessWidget {
     return IgnorePointer(
       child: Container(
         padding: const .all(3),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.7),
-          borderRadius: .circular(8),
-        ),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), borderRadius: .circular(8)),
         child: const Text('© OpenStreetMap contributors'),
       ),
     );
@@ -517,7 +471,7 @@ void showInfoDialog(BuildContext context) {
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .center,
-            children: <Widget>[
+            children: [
               Icon(Icons.info_outline_rounded, size: 40, color: Theme.of(context).colorScheme.primary),
               const SizedBox(height: 15),
               const Text(
@@ -531,10 +485,7 @@ void showInfoDialog(BuildContext context) {
                 'Set location permissions to "While Using" or "Always" and enable notifications to use the app when running in background. Also make sure to disable Silent mode.',
                 textAlign: .center,
               ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
             ],
           ),
         ),
