@@ -84,13 +84,9 @@ ThemeData locationAlarmTheme = ThemeData(
   listTileTheme: ListTileThemeData(
     contentPadding: const .all(25),
     tileColor: const .fromARGB(255, 234, 239, 246), // Background color of the ListTile
-    shape: RoundedRectangleBorder(
-      borderRadius: .circular(8),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: .circular(8)),
   ),
-  sliderTheme: const SliderThemeData(
-    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 13),
-  ),
+  sliderTheme: const SliderThemeData(thumbShape: RoundSliderThumbShape(enabledThumbRadius: 13)),
   iconTheme: const IconThemeData(color: .new(0xff50606e)),
 );
 
@@ -148,43 +144,23 @@ class MainApp extends StatelessWidget {
           // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
           var appIsInitialized = spotAlert.tileProvider != null;
           if (!appIsInitialized) {
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
           }
 
           return Scaffold(
             body: PageView(
               controller: spotAlert.pageController,
               physics: const NeverScrollableScrollPhysics(), // Disable swipe gesture to change pages
-              children: [
-                const AlarmsView(),
-                const MapView(),
-                const SettingsView(),
-              ],
+              children: [const AlarmsView(), const MapView(), const SettingsView()],
             ),
             extendBody: true,
             bottomNavigationBar: Container(
               decoration: BoxDecoration(
-                boxShadow: [
-                  .new(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                  ),
-                ],
-                borderRadius: const .only(
-                  topLeft: .circular(50),
-                  topRight: .circular(50),
-                ),
+                boxShadow: [.new(color: Colors.black.withValues(alpha: 0.1), spreadRadius: 2, blurRadius: 5)],
+                borderRadius: const .only(topLeft: .circular(50), topRight: .circular(50)),
               ),
               child: ClipRRect(
-                borderRadius: const .only(
-                  topLeft: .circular(50),
-                  topRight: .circular(50),
-                ),
+                borderRadius: const .only(topLeft: .circular(50), topRight: .circular(50)),
                 child: NavigationBar(
                   onDestinationSelected: (int index) {
                     var newView = SpotAlertView.values[index];
