@@ -18,8 +18,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - make sure settings file not found is ok.
-  - just remove settings altogether.
+  - test long term background mode.
   - Update screenshots in app store and readme.
 */
 
