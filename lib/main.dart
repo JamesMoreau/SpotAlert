@@ -5,9 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:location/location.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/spot_alert.dart';
@@ -51,8 +51,8 @@ enum AvailableAlarmColors {
   final Color value;
 }
 
-ThemeData locationAlarmTheme = ThemeData(
-  colorScheme: const ColorScheme(
+ThemeData spotAlertTheme = .new(
+  colorScheme: const .new(
     brightness: .light,
     primary: Color(0xff006493),
     onPrimary: Colors.white,
@@ -81,13 +81,13 @@ ThemeData locationAlarmTheme = ThemeData(
     inversePrimary: Color(0xff8dcdff),
     surfaceTint: Color(0xff006493),
   ),
-  listTileTheme: ListTileThemeData(
+  listTileTheme: .new(
     contentPadding: const .all(25),
     tileColor: const .fromARGB(255, 234, 239, 246), // Background color of the ListTile
     shape: RoundedRectangleBorder(borderRadius: .circular(8)),
   ),
-  sliderTheme: const SliderThemeData(thumbShape: RoundSliderThumbShape(enabledThumbRadius: 13)),
-  iconTheme: const IconThemeData(color: .new(0xff50606e)),
+  sliderTheme: const .new(thumbShape: RoundSliderThumbShape(enabledThumbRadius: 13)),
+  iconTheme: const .new(color: .new(0xff50606e)),
 );
 
 const paleBlue = Color(0xffeaf0f5);
@@ -109,8 +109,6 @@ class MyHttpOverrides extends HttpOverrides {
     return client;
   }
 }
-
-Location location = Location();
 
 const Uuid idGenerator = Uuid();
 
@@ -182,7 +180,7 @@ class MainApp extends StatelessWidget {
           );
         },
       ),
-      theme: locationAlarmTheme,
+      theme: spotAlertTheme,
       navigatorKey: navigatorKey,
     );
   }
@@ -203,26 +201,19 @@ void main() async {
 
   await Alarm.init();
 
-  var success = await location.enableBackgroundMode();
-  if (!success) {
-    debugPrintWarning("Failed to initialize the location package's background mode.");
-  }
-
-  location.onLocationChanged.listen(
+  var locationSettings = const LocationSettings(accuracy: .bestForNavigation, distanceFilter: 100);
+  var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
+  stream.listen(
     (location) async {
-      if (location.latitude != null && location.longitude != null) {
-        spotAlert.position = LatLng(location.latitude!, location.longitude!);
-        spotAlert.setState();
-      } else {
-        debugPrintError('Location unable to be determined.');
-      }
+      spotAlert.position = LatLng(location.latitude, location.longitude);
+      spotAlert.setState();
 
       await checkAlarms(spotAlert);
 
       if (spotAlert.followUserLocation) await moveMapToUserLocation(spotAlert);
     },
     onError: (error) async {
-      debugPrintError('onLOcationChanged() callback error.');
+      debugPrintError('Gelocator position stream error.');
 
       spotAlert.position = null;
       spotAlert.followUserLocation = false;
