@@ -201,7 +201,7 @@ void main() async {
 
   await Alarm.init();
 
-  var locationSettings = const LocationSettings(accuracy: .bestForNavigation, distanceFilter: 100);
+  var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
   var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
   stream.listen(
     (location) async {
