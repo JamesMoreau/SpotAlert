@@ -143,6 +143,10 @@ Future<void> checkAlarms(SpotAlert spotAlert) async {
   }
 
   var activeAlarms = spotAlert.alarms.where((alarm) => alarm.active).toList();
+  if (activeAlarms.isEmpty) {
+    debugPrintInfo('Alarm Check: No active alarms.');
+    return;
+  }
 
   var triggeredAlarms = detectTriggeredAlarms(spotAlert.position!, activeAlarms);
   if (triggeredAlarms.isEmpty) {

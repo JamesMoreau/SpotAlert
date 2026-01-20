@@ -18,7 +18,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - test long term background mode.
+  - use a default system sound for the notification.
   - Update screenshots in app store and readme.
 */
 
@@ -205,7 +205,7 @@ void main() async {
 
   var success = await location.enableBackgroundMode();
   if (!success) {
-    debugPrintWarning("Failed to initialize the location package's background mode");
+    debugPrintWarning("Failed to initialize the location package's background mode.");
   }
 
   location.onLocationChanged.listen(
@@ -222,6 +222,8 @@ void main() async {
       if (spotAlert.followUserLocation) await moveMapToUserLocation(spotAlert);
     },
     onError: (error) async {
+      debugPrintError('onLOcationChanged() callback error.');
+
       spotAlert.position = null;
       spotAlert.followUserLocation = false;
       spotAlert.setState();
