@@ -18,6 +18,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - use int instead of double for alarm.radius.
   - use a default system sound for the notification.
   - Update screenshots in app store and readme.
 */
@@ -32,6 +33,7 @@ const alarmsFilename = 'alarms.json';
 const initialZoom = 15.0;
 const circleToMarkerZoomThreshold = 10.0;
 const maxZoomSupported = 18.0;
+const initialAlarmPlacementRadius = 800.0;
 
 enum AvailableAlarmColors {
   blue(Colors.blue),

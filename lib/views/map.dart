@@ -29,17 +29,17 @@ class MapView extends StatelessWidget {
 
         return FlutterMap(
           mapController: spotAlert.mapController,
-          options: MapOptions(
+          options: .new(
             keepAlive: true, // Since the app has multiple pages, we want to map widget to stay alive so we can still use MapController in other places.
             initialZoom: initialZoom,
-            interactionOptions: InteractionOptions(flags: myInteractiveFlags),
+            interactionOptions: .new(flags: myInteractiveFlags),
             onMapReady: () => onMapReady(spotAlert),
           ),
           children: [
             TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: spotAlert.tileProvider),
             AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
             UserPosition(position: spotAlert.position),
-            AlarmPlacementDisplay(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
+            AlarmPlacementMarker(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
             Compass(alarms: spotAlert.alarms, userPosition: spotAlert.position),
             const Overlay(),
           ],
@@ -130,11 +130,11 @@ class AlarmMarkers extends StatelessWidget {
   }
 }
 
-class AlarmPlacementDisplay extends StatelessWidget {
+class AlarmPlacementMarker extends StatelessWidget {
   final bool isPlacingAlarm;
   final double alarmPlacementRadius;
 
-  const AlarmPlacementDisplay({required this.isPlacingAlarm, required this.alarmPlacementRadius, super.key});
+  const AlarmPlacementMarker({required this.isPlacingAlarm, required this.alarmPlacementRadius, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -374,7 +374,7 @@ class Overlay extends StatelessWidget {
                         addAlarm(spotAlert, alarm);
 
                         spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = 100;
+                        spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;
                         spotAlert.setState();
                       },
                       elevation: 4,
@@ -384,7 +384,7 @@ class Overlay extends StatelessWidget {
                     FloatingActionButton(
                       onPressed: () {
                         spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = 100;
+                        spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;
                         spotAlert.setState();
                       },
                       elevation: 4,
@@ -426,8 +426,8 @@ class Overlay extends StatelessWidget {
                               spotAlert.alarmPlacementRadius = value;
                               spotAlert.setState();
                             },
-                            min: 100,
-                            max: 3000,
+                            min: minimumAlarmRadius,
+                            max: maximumAlarmRadius,
                             divisions: 100,
                           ),
                         ),
