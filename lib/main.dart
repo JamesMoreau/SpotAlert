@@ -18,8 +18,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - use int instead of double for alarm.radius.
-  - use a default system sound for the notification.
   - Update screenshots in app store and readme.
 */
 
