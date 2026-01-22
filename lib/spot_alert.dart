@@ -74,12 +74,11 @@ Alarm? getAlarmById(SpotAlert spotAlert, String id) {
   return null;
 }
 
-void updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatLng? newPosition, double? newRadius, Color? newColor, bool? isActive}) {
+void updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatLng? newPosition, double? newRadius, Color? newColor}) {
   if (newName != null) alarm.name = newName;
   if (newPosition != null) alarm.position = newPosition;
   if (newRadius != null) alarm.radius = newRadius;
   if (newColor != null) alarm.color = newColor;
-  if (isActive != null) alarm.active = isActive;
 
   spotAlert.setState();
   saveAlarms(spotAlert);
@@ -92,16 +91,15 @@ Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async {
 }
 
 Future<void> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  if (alarm.active) return;
-
   final geofence = buildGeofence(alarm);
 
   try {
     await NativeGeofenceManager.instance.createGeofence(geofence, geofenceTriggered);
 
-    alarm.active = true;
+    spotAlert.activeGeofences.add(alarm.id);
     spotAlert.setState();
-    await saveAlarms(spotAlert);
+
+    debugPrintInfo('Added geofence for alarm: ${alarm.id}');
   } on NativeGeofenceException catch (e) {
     if (e.code == .missingLocationPermission || e.code == .missingBackgroundLocationPermission) {
       debugPrintError('Error creating geofence. Did the user grant us the location permission yet?');
@@ -124,13 +122,9 @@ Future<void> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
 }
 
 Future<void> deactivateAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  if (!alarm.active) return;
-
-  alarm.active = false;
-  spotAlert.setState();
-  await saveAlarms(spotAlert);
-
-  // await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
+  spotAlert.activeGeofences.remove(alarm.id);
+  await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
+  debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
 }
 
 Geofence buildGeofence(Alarm alarm) {

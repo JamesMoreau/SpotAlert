@@ -11,7 +11,6 @@ class Alarm {
   Color color;
   LatLng position;
   double radius; // Meters
-  bool active;
 
   Alarm({
     required this.name,
@@ -19,7 +18,6 @@ class Alarm {
     required this.radius,
     String? id,
     Color? color,
-    this.active = true,
   })  : assert(radius > 0),
         id = id ?? idGenerator.v1(),
         color = color ?? AvailableAlarmColors.redAccent.value;
@@ -35,7 +33,6 @@ Map<String, dynamic> alarmToMap(Alarm alarm) {
       'longitude': alarm.position.longitude,
     },
     'radius': alarm.radius,
-    'active': alarm.active,
   };
 }
 
@@ -49,6 +46,5 @@ Alarm alarmFromMap(Map<String, dynamic> alarmJson) {
       (alarmJson['position'] as Map<String, dynamic>)['longitude'] as double,
     ),
     radius: alarmJson['radius'] as double,
-    active: alarmJson['active'] as bool,
   );
 }

@@ -16,11 +16,7 @@ class AlarmsView extends StatelessWidget {
     spotAlert.colorInput = alarm.color;
     spotAlert.nameInput.text = alarm.name;
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => const EditAlarmDialog(),
-    );
+    showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (context) => const EditAlarmDialog());
   }
 
   void addSampleAlarms(SpotAlert spotAlert) {
@@ -47,11 +43,9 @@ class AlarmsView extends StatelessWidget {
               children: [
                 const Text('No alarms.'),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                   onPressed: () => addSampleAlarms(spotAlert),
-                  child: const Text('Add Some Alarms', style: TextStyle(color: Colors.white)),
+                  child: const Text('Add Some Alarms', style: .new(color: Colors.white)),
                 ),
               ],
             ),
@@ -69,14 +63,14 @@ class AlarmsView extends StatelessWidget {
                   child: ListTile(
                     title: Text(alarm.name, maxLines: 1, overflow: .ellipsis),
                     leading: Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
-                    subtitle: Text(alarm.position.toSexagesimal(), style: TextStyle(fontSize: 9, color: Colors.grey[700])),
+                    subtitle: Text(alarm.position.toSexagesimal(), style: .new(fontSize: 9, color: Colors.grey[700])),
                     onLongPress: () => openAlarmEdit(context, spotAlert, alarm),
                     onTap: () => openAlarmEdit(context, spotAlert, alarm),
                     trailing: Switch(
-                      value: alarm.active,
+                      value: spotAlert.activeGeofences.contains(alarm.id),
                       activeThumbColor: alarm.color,
                       thumbIcon: thumbIcon,
-                      onChanged: (value) => updateAndSaveAlarm(spotAlert, alarm, isActive: value),
+                      onChanged: (value) => value ? activateAlarm(spotAlert, alarm) : deactivateAlarm(spotAlert, alarm),
                     ),
                   ),
                 );
@@ -106,24 +100,13 @@ class EditAlarmDialog extends StatelessWidget {
                 Row(
                   mainAxisAlignment: .spaceBetween,
                   children: [
-                    TextButton(
-                      child: const Text('Cancel'),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const Text(
-                      'Edit Alarm',
-                      style: TextStyle(fontSize: 18, fontWeight: .bold),
-                    ),
+                    TextButton(child: const Text('Cancel'), onPressed: () => Navigator.pop(context)),
+                    const Text('Edit Alarm', style: TextStyle(fontSize: 18, fontWeight: .bold)),
                     TextButton(
                       child: const Text('Save'),
                       onPressed: () {
                         // Replace the actual alarm data with the buffer data.
-                        updateAndSaveAlarm(
-                          spotAlert,
-                          spotAlert.editAlarm,
-                          newName: spotAlert.nameInput.text.trim(),
-                          newColor: spotAlert.colorInput,
-                        );
+                        updateAndSaveAlarm(spotAlert, spotAlert.editAlarm, newName: spotAlert.nameInput.text.trim(), newColor: spotAlert.colorInput);
                         Navigator.pop(context);
                       },
                     ),
@@ -133,7 +116,7 @@ class EditAlarmDialog extends StatelessWidget {
                 Expanded(
                   child: ListView(
                     children: [
-                      Text('Name', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
+                      Text('Name', style: .new(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
                       TextFormField(
                         textAlign: .center,
                         controller: spotAlert.nameInput,
@@ -149,7 +132,7 @@ class EditAlarmDialog extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      Text('Color', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
+                      Text('Color', style: .new(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
                       SingleChildScrollView(
                         scrollDirection: .horizontal,
                         child: Row(
@@ -187,9 +170,7 @@ class EditAlarmDialog extends StatelessWidget {
                       const SizedBox(height: 10),
                       Align(
                         child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                          ),
+                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                           onPressed: () async {
                             Navigator.pop(context); // Close the edit alarm bottom sheet.
                             navigateToView(spotAlert, .map);
