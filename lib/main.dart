@@ -19,7 +19,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - convert TextStyle -> .new()
   - deal with callback being fired twice.
   - cope with 20 geofence limit.
   - should be able to remove position from the app state and just listen to the stream.

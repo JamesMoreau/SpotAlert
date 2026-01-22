@@ -95,7 +95,7 @@ class SettingsView extends StatelessWidget {
                           TextSpan(text: 'If you like this app, consider supporting the author via '),
                           TextSpan(
                             text: 'Ko-fi',
-                            style: TextStyle(
+                            style: .new(
                               decoration: .underline,
                             ),
                           ),

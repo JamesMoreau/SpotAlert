@@ -110,7 +110,7 @@ class AlarmMarkers extends StatelessWidget {
               constraints: const .new(maxWidth: 100),
               padding: const .symmetric(horizontal: 2),
               decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
-              child: Text(alarm.name, style: const TextStyle(fontSize: 10), overflow: .ellipsis, maxLines: 1),
+              child: Text(alarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
             ),
           ),
         ],
@@ -196,7 +196,7 @@ void followOrUnfollowUser(SpotAlert spotAlert) {
   if (spotAlert.followUserLocation) moveMapToUserLocation(spotAlert);
 }
 
-void moveMapToUserLocation(SpotAlert spotAlert)  {
+void moveMapToUserLocation(SpotAlert spotAlert) {
   if (!spotAlert.mapControllerIsAttached) {
     debugPrintError('The map controller is not attached. Cannot move to user location.');
     return;
@@ -313,7 +313,7 @@ class Compass extends StatelessWidget {
                               constraints: const .new(maxWidth: 100),
                               padding: const .symmetric(horizontal: 2),
                               decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
-                              child: Text(closestAlarm.name, style: const TextStyle(fontSize: 10), overflow: .ellipsis, maxLines: 1),
+                              child: Text(closestAlarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
                             ),
                           ),
                         ),
@@ -419,7 +419,7 @@ class Overlay extends StatelessWidget {
                     padding: const .symmetric(horizontal: 15, vertical: 5),
                     child: Row(
                       children: [
-                        const Text('Size:', style: TextStyle(fontWeight: .bold)),
+                        const Text('Size:', style: .new(fontWeight: .bold)),
                         Expanded(
                           child: Slider(
                             value: spotAlert.alarmPlacementRadius,

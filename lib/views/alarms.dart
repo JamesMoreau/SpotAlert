@@ -101,7 +101,7 @@ class EditAlarmDialog extends StatelessWidget {
                   mainAxisAlignment: .spaceBetween,
                   children: [
                     TextButton(child: const Text('Cancel'), onPressed: () => Navigator.pop(context)),
-                    const Text('Edit Alarm', style: TextStyle(fontSize: 18, fontWeight: .bold)),
+                    const Text('Edit Alarm', style: .new(fontSize: 18, fontWeight: .bold)),
                     TextButton(
                       child: const Text('Save'),
                       onPressed: () {
@@ -165,8 +165,8 @@ class EditAlarmDialog extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      Text('Position', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
-                      Text(spotAlert.editAlarm.position.toSexagesimal(), style: const TextStyle(fontWeight: .bold)),
+                      Text('Position', style: .new(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
+                      Text(spotAlert.editAlarm.position.toSexagesimal(), style: const .new(fontWeight: .bold)),
                       const SizedBox(height: 10),
                       Align(
                         child: ElevatedButton.icon(
@@ -186,12 +186,12 @@ class EditAlarmDialog extends StatelessWidget {
                             spotAlert.mapController.move(position, initialZoom);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
-                          label: const Text('Go To Alarm', style: TextStyle(color: Colors.white)),
+                          label: const Text('Go To Alarm', style: .new(color: Colors.white)),
                         ),
                       ),
                       const SizedBox(height: 30),
-                      Text('Radius / Size (in meters)', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
-                      Text(spotAlert.editAlarm.radius.toInt().toString(), style: const TextStyle(fontWeight: .bold)),
+                      Text('Radius / Size (in meters)', style: .new(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
+                      Text(spotAlert.editAlarm.radius.toInt().toString(), style: const .new(fontWeight: .bold)),
                       const SizedBox(height: 30),
                       Align(
                         child: ElevatedButton(
@@ -210,7 +210,7 @@ class EditAlarmDialog extends StatelessWidget {
                             }
                             Navigator.pop(context);
                           },
-                          child: const Text('Delete Alarm', style: TextStyle(color: Colors.redAccent)),
+                          child: const Text('Delete Alarm', style: .new(color: Colors.redAccent)),
                         ),
                       ),
                     ],
