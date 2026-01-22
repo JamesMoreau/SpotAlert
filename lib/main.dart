@@ -8,6 +8,7 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/spot_alert.dart';
@@ -18,6 +19,10 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - remove active field from alarm.
+  - deal with callback being fired twice.
+  - cope with 20 geofence limit.
+  - should be able to remove position from the app state and just listen to the stream.
   - Update screenshots in app store and readme.
 */
 
@@ -201,6 +206,14 @@ void main() async {
 
   await Alarm.init();
 
+  var permission = await Geolocator.checkPermission();
+  if (permission == .denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == .denied) {
+      return Future.error('Location permissions are denied');
+    }
+  }
+
   var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
   var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
   stream.listen(
@@ -208,18 +221,18 @@ void main() async {
       spotAlert.position = LatLng(location.latitude, location.longitude);
       spotAlert.setState();
 
-      await checkAlarms(spotAlert);
-
-      if (spotAlert.followUserLocation) await moveMapToUserLocation(spotAlert);
+      if (spotAlert.followUserLocation) moveMapToUserLocation(spotAlert);
     },
     onError: (error) async {
-      debugPrintError('Gelocator position stream error.');
+      debugPrintError('Gelocator position stream error');
 
       spotAlert.position = null;
       spotAlert.followUserLocation = false;
       spotAlert.setState();
     },
   );
+
+  await NativeGeofenceManager.instance.initialize();
 
   await loadAlarms(spotAlert);
 

@@ -43,6 +43,7 @@ dependencies:
   geolocator: ^14.0.2
   june: ^1.0.0+1
   latlong2: 0.9.1
+  native_geofence: ^1.2.0
   package_info_plus: ^9.0.0
   path: ^1.9.1
   path_provider: ^2.1.2

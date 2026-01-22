@@ -179,7 +179,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
     }
   }
 
-  await moveMapToUserLocation(spotAlert);
+  moveMapToUserLocation(spotAlert);
 }
 
 void followOrUnfollowUser(SpotAlert spotAlert) {
@@ -196,7 +196,7 @@ void followOrUnfollowUser(SpotAlert spotAlert) {
   if (spotAlert.followUserLocation) moveMapToUserLocation(spotAlert);
 }
 
-Future<void> moveMapToUserLocation(SpotAlert spotAlert) async {
+void moveMapToUserLocation(SpotAlert spotAlert)  {
   if (!spotAlert.mapControllerIsAttached) {
     debugPrintError('The map controller is not attached. Cannot move to user location.');
     return;
@@ -372,6 +372,7 @@ class Overlay extends StatelessWidget {
                       onPressed: () {
                         var alarm = Alarm(name: 'Alarm', position: MapCamera.of(context).center, radius: spotAlert.alarmPlacementRadius);
                         addAlarm(spotAlert, alarm);
+                        activateAlarm(spotAlert, alarm);
 
                         spotAlert.isPlacingAlarm = false;
                         spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;

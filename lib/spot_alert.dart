@@ -2,20 +2,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:alarm/alarm.dart' as alarm_package;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:native_geofence/native_geofence.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
-import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
+  List<String> activeGeofences = [];
   LatLng? position; // The user's position.
 
   SpotAlertView view = .alarms;
@@ -85,10 +85,63 @@ void updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatL
   saveAlarms(spotAlert);
 }
 
-void addAlarm(SpotAlert spotAlert, Alarm alarm) {
+Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async {
   spotAlert.alarms.add(alarm);
   spotAlert.setState();
-  saveAlarms(spotAlert);
+  await saveAlarms(spotAlert);
+}
+
+Future<void> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
+  if (alarm.active) return;
+
+  final geofence = buildGeofence(alarm);
+
+  try {
+    await NativeGeofenceManager.instance.createGeofence(geofence, geofenceTriggered);
+
+    alarm.active = true;
+    spotAlert.setState();
+    await saveAlarms(spotAlert);
+  } on NativeGeofenceException catch (e) {
+    if (e.code == .missingLocationPermission || e.code == .missingBackgroundLocationPermission) {
+      debugPrintError('Error creating geofence. Did the user grant us the location permission yet?');
+    } else if (e.code == .pluginInternal) {
+      debugPrintError(
+        'Internal geofence error: '
+        'message=${e.message}, '
+        'detail=${e.details}, '
+        'stackTrace=${e.stacktrace}',
+      );
+    } else {
+      debugPrintError(
+        'Error creating geofence (${e.code.name}): '
+        'message=${e.message}, '
+        'detail=${e.details}, '
+        'stackTrace=${e.stacktrace}',
+      );
+    }
+  }
+}
+
+Future<void> deactivateAlarm(SpotAlert spotAlert, Alarm alarm) async {
+  if (!alarm.active) return;
+
+  alarm.active = false;
+  spotAlert.setState();
+  await saveAlarms(spotAlert);
+
+  // await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
+}
+
+Geofence buildGeofence(Alarm alarm) {
+  return Geofence(
+    id: alarm.id,
+    location: .new(latitude: alarm.position.latitude, longitude: alarm.position.longitude),
+    radiusMeters: alarm.radius,
+    triggers: {.enter},
+    iosSettings: const .new(initialTrigger: true),
+    androidSettings: const .new(initialTriggers: {.enter}), // Android settings currently unused.
+  );
 }
 
 // This should be called everytime the alarms state is changed.
@@ -136,48 +189,6 @@ Future<void> loadAlarms(SpotAlert spotAlert) async {
   debugPrintInfo('Loaded alarms from storage.');
 }
 
-Future<void> checkAlarms(SpotAlert spotAlert) async {
-  if (spotAlert.position == null) {
-    debugPrintInfo('Alarm Check: User position not available.');
-    return;
-  }
-
-  var activeAlarms = spotAlert.alarms.where((alarm) => alarm.active).toList();
-  if (activeAlarms.isEmpty) {
-    debugPrintInfo('Alarm Check: No active alarms.');
-    return;
-  }
-
-  var triggeredAlarms = detectTriggeredAlarms(spotAlert.position!, activeAlarms);
-  if (triggeredAlarms.isEmpty) {
-    debugPrintInfo('Alarm Check: No alarms triggered.');
-    return;
-  }
-
-  for (var alarm in triggeredAlarms) {
-    debugPrintInfo('Alarm Check: Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
-
-    // Deactivate the alarm so it doesn't trigger again upon next call to checkAlarms.
-    updateAndSaveAlarm(spotAlert, alarm, isActive: false);
-
-    // Setup and fire the alarm package to bring the user's attention.
-    var alarmSettings = alarm_package.AlarmSettings(
-      id: alarm.id.hashCode,
-      dateTime: .now(),
-      assetAudioPath: 'assets/slow_spring_board_repeated.wav',
-      volumeSettings: const .fixed(volume: 0.8, volumeEnforced: true),
-      notificationSettings: .new(
-        title: 'Alarm Triggered',
-        body: 'You have entered the radius of alarm: ${alarm.name}',
-        stopButton: 'Stop',
-      ),
-    );
-    await alarm_package.Alarm.set(alarmSettings: alarmSettings);
-
-    showAlarmDialog(navigatorKey.currentContext!, alarm);
-  }
-}
-
 List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
   var triggeredAlarms = <Alarm>[];
 
@@ -203,4 +214,24 @@ T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
   }
 
   return closestItem;
+}
+
+@pragma('vm:entry-point')
+Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
+  debugPrint('Geofence triggered with params: $params');
+  // debugPrintInfo('Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
+
+  // updateAndSaveAlarm(spotAlert, alarm, isActive: false);
+
+  // Setup and fire the alarm package to bring the user's attention.
+  // var alarmSettings = alarm_package.AlarmSettings(
+  //   id: alarm.id.hashCode,
+  //   dateTime: .now(),
+  //   assetAudioPath: 'assets/slow_spring_board_repeated.wav',
+  //   volumeSettings: const .fixed(volume: 0.8, volumeEnforced: true),
+  //   notificationSettings: .new(title: 'Alarm Triggered', body: 'You have entered the radius of alarm: ${alarm.name}', stopButton: 'Stop'),
+  // );
+  // await alarm_package.Alarm.set(alarmSettings: alarmSettings);
+
+  // showAlarmDialog(navigatorKey.currentContext!, alarm);
 }
