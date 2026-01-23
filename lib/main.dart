@@ -19,8 +19,8 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - deal with callback being fired twice.
-  - cope with 20 geofence limit.
+  - load geofences at startup.
+  - deal with callback being fired twice at a time from different alarms.
   - should be able to remove position from the app state and just listen to the stream.
   - Update screenshots in app store and readme.
 */
@@ -36,6 +36,7 @@ const initialZoom = 15.0;
 const circleToMarkerZoomThreshold = 10.0;
 const maxZoomSupported = 18.0;
 const initialAlarmPlacementRadius = 800.0;
+const maxGeofenceCount = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
 
 enum AvailableAlarmColors {
   blue(Colors.blue),

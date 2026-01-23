@@ -31,6 +31,35 @@ class AlarmsView extends StatelessWidget {
     for (var a in sampleAlarms) addAlarm(spotAlert, a);
   }
 
+  Future<void> handleAlarmSwitch(SpotAlert spotAlert, Alarm alarm, {required bool shouldActivate}) async {
+    if (!shouldActivate) {
+      await deactivateAlarm(spotAlert, alarm);
+      return;
+    }
+
+    var result = await activateAlarm(spotAlert, alarm);
+
+    String? message;
+    switch (result) {
+      case .success:
+        return;
+
+      case .limitReached:
+        message = 'Maximum number of geofences allowed by iOS reached. Turn off one to add another.';
+
+      case .failed:
+        message = 'Failed to activate the alarm.';
+    }
+
+    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        content: Padding(padding: const EdgeInsets.all(8), child: Text(message)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
@@ -70,7 +99,7 @@ class AlarmsView extends StatelessWidget {
                       value: spotAlert.activeGeofences.contains(alarm.id),
                       activeThumbColor: alarm.color,
                       thumbIcon: thumbIcon,
-                      onChanged: (value) => value ? activateAlarm(spotAlert, alarm) : deactivateAlarm(spotAlert, alarm),
+                      onChanged: (value) => handleAlarmSwitch(spotAlert, alarm, shouldActivate: value),
                     ),
                   ),
                 );

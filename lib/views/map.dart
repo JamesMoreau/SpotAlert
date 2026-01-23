@@ -166,10 +166,10 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
 
     if (spotAlert.position == null) {
       ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-        SnackBar(
+        .new(
           behavior: .floating,
           content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
-          action: SnackBarAction(
+          action: .new(
             label: 'Settings',
             onPressed: () => AppSettings.openAppSettings(type: .location),
           ),

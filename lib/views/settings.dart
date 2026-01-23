@@ -74,10 +74,10 @@ class SettingsView extends StatelessWidget {
                       debugPrintInfo(message);
 
                       scaffoldMessenger.showSnackBar(
-                        SnackBar(
+                        .new(
                           behavior: .floating,
                           content: Container(padding: const .all(8), child: Text(message)),
-                          duration: const Duration(seconds: 3),
+                          duration: const .new(seconds: 3),
                           shape: RoundedRectangleBorder(borderRadius: .circular(10)),
                         ),
                       );
@@ -95,9 +95,7 @@ class SettingsView extends StatelessWidget {
                           TextSpan(text: 'If you like this app, consider supporting the author via '),
                           TextSpan(
                             text: 'Ko-fi',
-                            style: .new(
-                              decoration: .underline,
-                            ),
+                            style: .new(decoration: .underline),
                           ),
                           TextSpan(text: '.'),
                         ],

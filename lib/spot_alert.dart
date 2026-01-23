@@ -90,8 +90,22 @@ Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async {
   await saveAlarms(spotAlert);
 }
 
-Future<void> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  final geofence = buildGeofence(alarm);
+enum ActivateAlarmResult { success, limitReached, failed }
+
+Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
+  var maxGeofenceCountReached = spotAlert.activeGeofences.length >= maxGeofenceCount;
+  if (maxGeofenceCountReached) {
+    return .limitReached;
+  }
+
+  var geofence = Geofence(
+    id: alarm.id,
+    location: .new(latitude: alarm.position.latitude, longitude: alarm.position.longitude),
+    radiusMeters: alarm.radius,
+    triggers: {.enter},
+    iosSettings: const .new(initialTrigger: true),
+    androidSettings: const .new(initialTriggers: {.enter}), // Android settings currently unused.
+  );
 
   try {
     await NativeGeofenceManager.instance.createGeofence(geofence, geofenceTriggered);
@@ -100,6 +114,7 @@ Future<void> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
     spotAlert.setState();
 
     debugPrintInfo('Added geofence for alarm: ${alarm.id}');
+    return .success;
   } on NativeGeofenceException catch (e) {
     if (e.code == .missingLocationPermission || e.code == .missingBackgroundLocationPermission) {
       debugPrintError('Error creating geofence. Did the user grant us the location permission yet?');
@@ -118,6 +133,8 @@ Future<void> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
         'stackTrace=${e.stacktrace}',
       );
     }
+
+    return .failed;
   }
 }
 
@@ -125,17 +142,6 @@ Future<void> deactivateAlarm(SpotAlert spotAlert, Alarm alarm) async {
   spotAlert.activeGeofences.remove(alarm.id);
   await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
   debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
-}
-
-Geofence buildGeofence(Alarm alarm) {
-  return Geofence(
-    id: alarm.id,
-    location: .new(latitude: alarm.position.latitude, longitude: alarm.position.longitude),
-    radiusMeters: alarm.radius,
-    triggers: {.enter},
-    iosSettings: const .new(initialTrigger: true),
-    androidSettings: const .new(initialTriggers: {.enter}), // Android settings currently unused.
-  );
 }
 
 // This should be called everytime the alarms state is changed.
