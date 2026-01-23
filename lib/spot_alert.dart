@@ -139,8 +139,11 @@ Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) asyn
 }
 
 Future<void> deactivateAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  spotAlert.activeGeofences.remove(alarm.id);
   await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
+
+  spotAlert.activeGeofences.remove(alarm.id);
+  spotAlert.setState();
+
   debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
 }
 
