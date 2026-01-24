@@ -19,7 +19,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - load geofences at startup.
   - deal with callback being fired twice at a time from different alarms.
   - should be able to remove position from the app state and just listen to the stream.
   - Update screenshots in app store and readme.
