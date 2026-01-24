@@ -96,7 +96,7 @@ class AlarmsView extends StatelessWidget {
                     onLongPress: () => openAlarmEdit(context, spotAlert, alarm),
                     onTap: () => openAlarmEdit(context, spotAlert, alarm),
                     trailing: Switch(
-                      value: spotAlert.activeGeofences.contains(alarm.id),
+                      value: spotAlert.activeGeofenceIds.contains(alarm.id),
                       activeThumbColor: alarm.color,
                       thumbIcon: thumbIcon,
                       onChanged: (value) => handleAlarmSwitch(spotAlert, alarm, shouldActivate: value),

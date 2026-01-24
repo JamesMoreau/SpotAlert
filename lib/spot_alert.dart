@@ -15,7 +15,7 @@ import 'package:spot_alert/models/alarm.dart';
 
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
-  List<String> activeGeofences = [];
+  List<String> activeGeofenceIds = [];
   LatLng? position; // The user's position.
 
   SpotAlertView view = .alarms;
@@ -93,7 +93,7 @@ Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async {
 enum ActivateAlarmResult { success, limitReached, failed }
 
 Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  var maxGeofenceCountReached = spotAlert.activeGeofences.length >= maxGeofenceCount;
+  var maxGeofenceCountReached = spotAlert.activeGeofenceIds.length >= maxGeofenceCount;
   if (maxGeofenceCountReached) {
     return .limitReached;
   }
@@ -110,7 +110,7 @@ Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) asyn
   try {
     await NativeGeofenceManager.instance.createGeofence(geofence, geofenceTriggered);
 
-    spotAlert.activeGeofences.add(alarm.id);
+    spotAlert.activeGeofenceIds.add(alarm.id);
     spotAlert.setState();
 
     debugPrintInfo('Added geofence for alarm: ${alarm.id}');
@@ -141,10 +141,30 @@ Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) asyn
 Future<void> deactivateAlarm(SpotAlert spotAlert, Alarm alarm) async {
   await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
 
-  spotAlert.activeGeofences.remove(alarm.id);
+  spotAlert.activeGeofenceIds.remove(alarm.id);
   spotAlert.setState();
 
   debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
+}
+
+Future<void> loadGeofences(SpotAlert spotAlert) async {
+  var geofenceIds = await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
+
+  spotAlert.activeGeofenceIds.clear();
+
+  for (var geofenceId in geofenceIds) {
+    var alarmExists = spotAlert.alarms.any((alarm) => alarm.id == geofenceId);
+    if (alarmExists) {
+      // Alarm exists -> mark active
+      spotAlert.activeGeofenceIds.add(geofenceId);
+    } else {
+      // Orphaned geofence -> remove it
+      debugPrintInfo('Removing orphaned geofence: $geofenceId');
+      await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
+    }
+  }
+
+  spotAlert.setState();
 }
 
 // This should be called everytime the alarms state is changed.
@@ -182,9 +202,17 @@ Future<void> loadAlarms(SpotAlert spotAlert) async {
   }
 
   var alarmJsonsList = jsonDecode(alarmJsons) as List;
+  var seenIds = <String>{};
   for (var alarmJson in alarmJsonsList) {
     var alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
     var alarm = alarmFromMap(alarmMap);
+
+    var idAlreadySeen = !seenIds.add(alarm.id);
+    if (idAlreadySeen) {
+      debugPrintError('Duplicate alarm id detected while loading: ${alarm.id}. Skipping duplicate.');
+      continue;
+    }
+
     spotAlert.alarms.add(alarm);
   }
 

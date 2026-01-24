@@ -232,9 +232,10 @@ void main() async {
     },
   );
 
-  await NativeGeofenceManager.instance.initialize();
-
   await loadAlarms(spotAlert);
+
+  await NativeGeofenceManager.instance.initialize();
+  await loadGeofences(spotAlert);
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();
