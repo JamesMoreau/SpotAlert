@@ -15,7 +15,7 @@ import 'package:spot_alert/models/alarm.dart';
 
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
-  List<String> activeGeofenceIds = [];
+  List<String> activeGeofenceIds = []; // Each geofence ID corresponds to it's respective alarm ID.
   LatLng? position; // The user's position.
 
   SpotAlertView view = .alarms;
