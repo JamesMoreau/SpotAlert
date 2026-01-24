@@ -19,7 +19,7 @@ class AlarmsView extends StatelessWidget {
     showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (context) => const EditAlarmDialog());
   }
 
-  void addSampleAlarms(SpotAlert spotAlert) {
+  Future<void> addSampleAlarms(SpotAlert spotAlert) async {
     var sampleAlarms = [
       Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value),
       Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value),
@@ -28,13 +28,17 @@ class AlarmsView extends StatelessWidget {
       Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value),
     ];
 
-    for (var a in sampleAlarms) addAlarm(spotAlert, a);
+    for (var a in sampleAlarms) {
+      await addAlarm(spotAlert, a);
+      var success = await handleAlarmSwitch(spotAlert, a, shouldActivate: true);
+      if (!success) break;
+    }
   }
 
-  Future<void> handleAlarmSwitch(SpotAlert spotAlert, Alarm alarm, {required bool shouldActivate}) async {
+  Future<bool> handleAlarmSwitch(SpotAlert spotAlert, Alarm alarm, {required bool shouldActivate}) async {
     if (!shouldActivate) {
       await deactivateAlarm(spotAlert, alarm);
-      return;
+      return true;
     }
 
     var result = await activateAlarm(spotAlert, alarm);
@@ -42,7 +46,7 @@ class AlarmsView extends StatelessWidget {
     String? message;
     switch (result) {
       case .success:
-        return;
+        return true;
 
       case .limitReached:
         message = 'Maximum number of geofences allowed by iOS reached. Turn off one to add another.';
@@ -52,12 +56,13 @@ class AlarmsView extends StatelessWidget {
     }
 
     ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        content: Padding(padding: const EdgeInsets.all(8), child: Text(message)),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      .new(
+        behavior: .floating,
+        content: Padding(padding: const .all(8), child: Text(message)),
+        shape: RoundedRectangleBorder(borderRadius: .circular(10)),
       ),
     );
+    return false;
   }
 
   @override
