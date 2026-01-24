@@ -11,13 +11,15 @@ class Alarm {
   Color color;
   LatLng position;
   double radius; // Meters
-
+  bool active; // Corresponds to a geofence being registered with the OS. For this reason it is not serialized.
+  
   Alarm({
     required this.name,
     required this.position,
     required this.radius,
     String? id,
     Color? color,
+    this.active = false,
   })  : assert(radius > 0),
         id = id ?? idGenerator.v1(),
         color = color ?? AvailableAlarmColors.redAccent.value;
@@ -46,5 +48,6 @@ Alarm alarmFromMap(Map<String, dynamic> alarmJson) {
       (alarmJson['position'] as Map<String, dynamic>)['longitude'] as double,
     ),
     radius: alarmJson['radius'] as double,
+    // active defaults to false
   );
 }

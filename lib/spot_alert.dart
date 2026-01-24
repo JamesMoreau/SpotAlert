@@ -15,7 +15,6 @@ import 'package:spot_alert/models/alarm.dart';
 
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
-  List<String> activeGeofenceIds = []; // Each geofence ID corresponds to it's respective alarm ID.
   LatLng? position; // The user's position.
 
   SpotAlertView view = .alarms;
@@ -93,7 +92,7 @@ Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async {
 enum ActivateAlarmResult { success, limitReached, failed }
 
 Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  var maxGeofenceCountReached = spotAlert.activeGeofenceIds.length >= maxGeofenceCount;
+  var maxGeofenceCountReached = spotAlert.alarms.where((a) => a.active).length >= maxGeofenceCount;
   if (maxGeofenceCountReached) {
     return .limitReached;
   }
@@ -110,7 +109,7 @@ Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) asyn
   try {
     await NativeGeofenceManager.instance.createGeofence(geofence, geofenceTriggered);
 
-    spotAlert.activeGeofenceIds.add(alarm.id);
+    alarm.active = true;
     spotAlert.setState();
 
     debugPrintInfo('Added geofence for alarm: ${alarm.id}');
@@ -139,32 +138,65 @@ Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) asyn
 }
 
 Future<void> deactivateAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
+  try {
+    await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
+  } on NativeGeofenceException catch (e) {
+    debugPrintError(
+      'Unable to remove geofence (${e.code.name}): '
+      'message=${e.message}, '
+      'detail=${e.details}, '
+      'stackTrace=${e.stacktrace}',
+    );
 
-  spotAlert.activeGeofenceIds.remove(alarm.id);
+    return;
+  }
+
+  alarm.active = false;
   spotAlert.setState();
 
   debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
 }
 
 Future<void> loadGeofences(SpotAlert spotAlert) async {
-  var geofenceIds = await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
+  List<String> geofenceIds;
+  try {
+    geofenceIds = await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
+  } on NativeGeofenceException catch (e) {
+    debugPrintError(
+      'Unable to retrieve geofences (${e.code.name}): '
+      'message=${e.message}, '
+      'detail=${e.details}, '
+      'stackTrace=${e.stacktrace}',
+    );
 
-  spotAlert.activeGeofenceIds.clear();
+    return;
+  }
 
-  for (var geofenceId in geofenceIds) {
-    var alarmExists = spotAlert.alarms.any((alarm) => alarm.id == geofenceId);
-    if (alarmExists) {
-      // Alarm exists -> mark active
-      spotAlert.activeGeofenceIds.add(geofenceId);
-    } else {
-      // Orphaned geofence -> remove it
-      debugPrintInfo('Removing orphaned geofence: $geofenceId');
-      await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
-    }
+  var geofenceIdSet = geofenceIds.toSet();
+
+  for (var alarm in spotAlert.alarms) {
+    var hasMatchingGeofence = geofenceIdSet.contains(alarm.id);
+    alarm.active = hasMatchingGeofence;
   }
 
   spotAlert.setState();
+
+  for (var geofenceId in geofenceIds) {
+    var isOrphanGeofence = !spotAlert.alarms.any((a) => a.id == geofenceId);
+
+    if (isOrphanGeofence) {
+      try {
+        await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
+      } on NativeGeofenceException catch (e) {
+        debugPrintError(
+          'Unable to remove geofence (${e.code.name}): '
+          'message=${e.message}, '
+          'detail=${e.details}, '
+          'stackTrace=${e.stacktrace}',
+        );
+      }
+    }
+  }
 }
 
 // This should be called everytime the alarms state is changed.
