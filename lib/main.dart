@@ -241,18 +241,18 @@ void main() async {
   HttpOverrides.global = MyHttpOverrides();
 
   // Initialize map tile cache.
-  var documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+  var documentsDir = await getApplicationDocumentsDirectory();
   try {
-    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   } on Exception catch (error, stackTrace) {
     debugPrint('FMTC initialization failed: $error\n$stackTrace');
 
     // Attempt to delete the corrupted FMTC directory.
-    var dir = Directory(path.join((await getApplicationDocumentsDirectory()).absolute.path, 'fmtc'));
-    await dir.delete(recursive: true);
+    var fmtcDir = Directory(path.join(documentsDir.path, 'fmtc'));
+    await fmtcDir.delete(recursive: true);
 
     // Retry FMTC initialization.
-    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   }
 
   await const FMTCStore(mapTileStoreName).manage.create();
