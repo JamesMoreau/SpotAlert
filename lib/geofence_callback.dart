@@ -14,10 +14,10 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 }
 
 // Handles delivery of notifications.
-// Is a singleton to avoid repeated initializations of FlutterLocalNotificationsPlugin.
+// Is a lazy singleton to avoid repeated initializations of FlutterLocalNotificationsPlugin.
 class NotificationService {
   NotificationService._internal();
-  static NotificationService instance = NotificationService._internal();
+  static final NotificationService instance = NotificationService._internal();
   bool _initialized = false;
 
   final _plugin = FlutterLocalNotificationsPlugin();
@@ -26,19 +26,19 @@ class NotificationService {
     if (_initialized) return;
 
     var success = await _plugin.initialize(const InitializationSettings(iOS: .new()));
-    if (success == null || !success) {
-      debugPrintInfo('Notifications plugin initialized.');
-      return;
-    }
 
-    _initialized = true;
-    debugPrintError('Failed to initialize notifications plugin.');
+    var didInitialize = success ?? false;
+    if (didInitialize) {
+      _initialized = true;
+      debugPrintInfo('Notifications plugin initialized.');
+    } else {
+      debugPrintError('Notifications unavailable (permission denied or init failed).');
+    }
   }
 
   Future<void> showGeofenceTriggerNotification(String title, String message) async {
     if (!_initialized) {
       await initialize();
-      return;
     }
 
     if (!_initialized) {

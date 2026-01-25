@@ -19,7 +19,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - don't we have to set alarm active status true or false at startup, in loadAlarms()?
   - sometimes phantom geofence gets set up and fires. different alarm between runs. doesn't seem to happen when there are no geofences.
   - deal with callback being fired twice at a time from different alarms.
   - should be able to remove position from the app state and just listen to the stream.
