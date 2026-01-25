@@ -30,12 +30,12 @@ class AlarmsView extends StatelessWidget {
 
     for (var a in sampleAlarms) {
       await addAlarm(spotAlert, a);
-      var success = await handleAlarmSwitch(spotAlert, a, shouldActivate: true);
+      var success = await activateOrDeactivateAlarm(spotAlert, a, shouldActivate: true);
       if (!success) break;
     }
   }
 
-  Future<bool> handleAlarmSwitch(SpotAlert spotAlert, Alarm alarm, {required bool shouldActivate}) async {
+  Future<bool> activateOrDeactivateAlarm(SpotAlert spotAlert, Alarm alarm, {required bool shouldActivate}) async {
     if (!shouldActivate) {
       await deactivateAlarm(spotAlert, alarm);
       return true;
@@ -104,7 +104,7 @@ class AlarmsView extends StatelessWidget {
                       value: alarm.active,
                       activeThumbColor: alarm.color,
                       thumbIcon: thumbIcon,
-                      onChanged: (value) => handleAlarmSwitch(spotAlert, alarm, shouldActivate: value),
+                      onChanged: (value) => activateOrDeactivateAlarm(spotAlert, alarm, shouldActivate: value),
                     ),
                   ),
                 );
