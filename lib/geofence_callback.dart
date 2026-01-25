@@ -19,10 +19,9 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 class NotificationService {
   NotificationService._internal();
   static NotificationService instance = NotificationService._internal();
+  bool _initialized = false;
 
   final _plugin = FlutterLocalNotificationsPlugin();
-  bool _initialized = false;
-  bool get isInitialized => _initialized;
 
   Future<void> initialize() async {
     if (_initialized) return;
@@ -39,12 +38,18 @@ class NotificationService {
 
   Future<void> showGeofenceTriggerNotification(String title, String message) async {
     if (!_initialized) {
-      debugPrintError('Notifications plugin is not initialized. Cannot show notification.');
+      await initialize();
+      return;
+    }
+
+    if (!_initialized) {
+      debugPrintError('Notifications unavailable. Cannot show notification.');
       return;
     }
 
     try {
-      await _plugin.show(DateTime.now().millisecondsSinceEpoch.remainder(100000), title, message, const .new(iOS: .new(interruptionLevel: .active)));
+      var notificationDetails = const NotificationDetails(iOS: .new(interruptionLevel: .active));
+      await _plugin.show(DateTime.now().millisecondsSinceEpoch.remainder(100000), title, message, notificationDetails);
     } on Exception catch (_) {
       debugPrintError('Failed to send notification.');
     }
