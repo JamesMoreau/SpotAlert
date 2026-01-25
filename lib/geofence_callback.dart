@@ -6,60 +6,32 @@ import 'package:spot_alert/main.dart';
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   debugPrintInfo('geofenceTriggered params: $params');
 
+  var id = params.geofences.first.id;
+
+  var success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
+  var didInitialize = success ?? false;
+  if (!didInitialize) {
+    debugPrintError('Notifications unavailable (permission denied or init failed).');
+  }
+
   var title = 'Alarm Triggered';
   var message = 'You have entered the radius of an alarm.';
-  await AlarmNotificationService.instance.showGeofenceTriggerNotification(title, message);
+  var notificationDetails = const NotificationDetails(iOS: .new(interruptionLevel: .active));
+
+  try {
+    await FlutterLocalNotificationsPlugin().show(id.hashCode, title, message, notificationDetails);
+  } on Exception catch (_) {
+    debugPrintError('Failed to send notification.');
+  }
 
   await Future<void>.delayed(const Duration(seconds: 1));
-}
-
-// Handles delivery of notifications.
-// Is a lazy singleton to avoid repeated initializations of FlutterLocalNotificationsPlugin.
-class AlarmNotificationService {
-  AlarmNotificationService._internal();
-  static final AlarmNotificationService instance = AlarmNotificationService._internal();
-  bool _initialized = false;
-
-  final _plugin = FlutterLocalNotificationsPlugin();
-
-  Future<void> initialize() async {
-    if (_initialized) return;
-
-    var success = await _plugin.initialize(const InitializationSettings(iOS: .new()));
-
-    var didInitialize = success ?? false;
-    if (didInitialize) {
-      _initialized = true;
-      debugPrintInfo('Notifications plugin initialized.');
-    } else {
-      debugPrintError('Notifications unavailable (permission denied or init failed).');
-    }
-  }
-
-  Future<void> showGeofenceTriggerNotification(String title, String message) async {
-    if (!_initialized) {
-      await initialize();
-    }
-
-    if (!_initialized) {
-      debugPrintError('Notifications unavailable. Cannot show notification.');
-      return;
-    }
-
-    try {
-      var notificationDetails = const NotificationDetails(iOS: .new(interruptionLevel: .active));
-      await _plugin.show(DateTime.now().millisecondsSinceEpoch.remainder(100000), title, message, notificationDetails);
-    } on Exception catch (_) {
-      debugPrintError('Failed to send notification.');
-    }
-  }
 }
 
   // final SendPort? send =
   //     IsolateNameServer.lookupPortByName('native_geofence_send_port');
   // send?.send(params.event.name);
 
-  // var id = params.geofences.first.id;
+  // 
   // debugPrint('Alarm with id $id triggered.');
 
   // WidgetsFlutterBinding.ensureInitialized();
