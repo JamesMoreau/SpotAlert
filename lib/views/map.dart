@@ -480,7 +480,7 @@ void showInfoDialog(BuildContext context) {
               const SizedBox(height: 15),
               const Text('Staying on the map view for long periods of time may drain your battery.', textAlign: .center),
               const SizedBox(height: 15),
-              const Text('Set location permissions to "While Using" or "Always" to use the app when running in background.', textAlign: .center),
+              const Text('Set location permissions to "While Using" or "Always" and enable notifications to use the app when running in background.', textAlign: .center),
               TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
             ],
           ),

@@ -190,7 +190,7 @@ Future<void> loadGeofences(SpotAlert spotAlert) async {
         await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
       } on NativeGeofenceException catch (e) {
         debugPrintError(
-          'Unable to remove geofence (${e.code.name}): '
+          'Unable to remove orphaned geofence (${e.code.name}): '
           'message=${e.message}, '
           'detail=${e.details}, '
           'stackTrace=${e.stacktrace}',
