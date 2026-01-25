@@ -33,7 +33,6 @@ platforms:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  alarm: ^5.1.5
   app_settings: ^7.0.0
   flutter:
     sdk: flutter
@@ -41,6 +40,7 @@ dependencies:
   flutter_local_notifications: ^19.5.0
   flutter_map: ^8.1.1
   flutter_map_tile_caching: ^10.1.1
+  flutter_vibrate: ^1.4.0
   geolocator: ^14.0.2
   june: ^1.0.0+1
   latlong2: 0.9.1

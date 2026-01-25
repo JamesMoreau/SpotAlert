@@ -1,4 +1,5 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:spot_alert/main.dart';
 
@@ -22,6 +23,17 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
     await FlutterLocalNotificationsPlugin().show(id.hashCode, title, message, notificationDetails);
   } on Exception catch (_) {
     debugPrintError('Failed to send notification.');
+  }
+
+  var canVibrate = await Vibrate.canVibrate;
+  if (canVibrate) {
+    var pauses = const [
+      Duration(milliseconds: 500), // Vibrate
+      Duration(milliseconds: 1000), // Wait
+      Duration(milliseconds: 500), // Vibrate
+    ];
+
+    await Vibrate.vibrateWithPauses(pauses);
   }
 
   await Future<void>.delayed(const Duration(seconds: 1));
