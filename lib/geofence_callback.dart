@@ -1,7 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:spot_alert/main.dart';
+import 'package:vibration/vibration.dart';
 
 @pragma('vm:entry-point')
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
@@ -12,7 +12,7 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   var success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
   var didInitialize = success ?? false;
   if (!didInitialize) {
-    debugPrintError('Notifications unavailable (permission denied or init failed).');
+    debugPrintError('Notifications unavailable (permission denied or initialization failed).');
   }
 
   var title = 'Alarm Triggered';
@@ -25,15 +25,8 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
     debugPrintError('Failed to send notification.');
   }
 
-  var canVibrate = await Vibrate.canVibrate;
-  if (canVibrate) {
-    var pauses = const [
-      Duration(milliseconds: 500), // Vibrate
-      Duration(milliseconds: 1000), // Wait
-      Duration(milliseconds: 500), // Vibrate
-    ];
-
-    await Vibrate.vibrateWithPauses(pauses);
+  if (await Vibration.hasVibrator()) {
+    await Vibration.vibrate(pattern: [500, 1000, 500, 2000]);
   }
 
   await Future<void>.delayed(const Duration(seconds: 1));

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:alarm/alarm.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -205,8 +204,6 @@ void main() async {
   var spotAlert = June.getState(() => SpotAlert());
 
   await SystemChrome.setPreferredOrientations([.portraitUp]);
-
-  await Alarm.init();
 
   var permission = await Geolocator.checkPermission();
   if (permission == .denied) {

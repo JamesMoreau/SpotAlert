@@ -1,4 +1,3 @@
-import 'package:alarm/alarm.dart' as alarm_package;
 import 'package:flutter/material.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
@@ -40,7 +39,6 @@ void showAlarmDialog(BuildContext context, Alarm triggeredAlarm) {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () {
-                        alarm_package.Alarm.stopAll();
                         Navigator.pop(context); // Close the dialog
                       },
                       style: ElevatedButton.styleFrom(

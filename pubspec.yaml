@@ -40,7 +40,6 @@ dependencies:
   flutter_local_notifications: ^19.5.0
   flutter_map: ^8.1.1
   flutter_map_tile_caching: ^10.1.1
-  flutter_vibrate: ^1.4.0
   geolocator: ^14.0.2
   june: ^1.0.0+1
   latlong2: 0.9.1
@@ -50,6 +49,7 @@ dependencies:
   path_provider: ^2.1.2
   url_launcher: ^6.3.0
   uuid: ^4.3.3
+  vibration: ^3.1.5
 
 dev_dependencies:
   dependency_validator: ^5.0.3
