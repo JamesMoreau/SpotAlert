@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:spot_alert/main.dart';
@@ -8,59 +6,47 @@ import 'package:spot_alert/main.dart';
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   debugPrintInfo('geofenceTriggered params: $params');
 
-  final notificationsRepository = NotificationsRepository();
-  await notificationsRepository.init();
+  var notificationsService = NotificationService.instance;
+  await notificationsService.initialize();
 
-  var title = 'Alarm Triggered';
-  await notificationsRepository.showGeofenceTriggerNotification(title, '');
+  await notificationsService.showGeofenceTriggerNotification('Alarm Triggered', 'You have entered the radius of an alarm.');
 
   await Future<void>.delayed(const Duration(seconds: 1));
 }
 
-class NotificationsRepository {
+// Handles delivery of notifications. 
+// Is a singleton to avoid repeated initializations of FlutterLocalNotificationsPlugin.
+class NotificationService {
+  NotificationService._internal();
+  static NotificationService instance = NotificationService._internal();
+
   final _plugin = FlutterLocalNotificationsPlugin();
-  bool _isInitialized = false;
-  bool get isInitialized => _isInitialized;
+  bool _initialized = false;
+  bool get isInitialized => _initialized;
 
-  Future<void> init() async {
-    if (_isInitialized) return; // prevent re-initialization
+  Future<void> initialize() async {
+    if (_initialized) return;
 
-    var initSettingsAndroid = const AndroidInitializationSettings('@mipmap/ic_launcher');
-    var initSettingsIOs = const DarwinInitializationSettings(defaultPresentBanner: false);
-
-    try {
-      final success = await _plugin.initialize( InitializationSettings(android: initSettingsAndroid, iOS: initSettingsIOs));
-      if (success == true) {
-        _isInitialized = true;
-        debugPrintInfo('Notifications plugin initialized.');
-        return;
-      }
-      debugPrintInfo('Failed to initialize notifications plugin.');
-    } catch (e) {
-      debugPrintInfo('Error while initializing notifications plugin: $e');
+    var success = await _plugin.initialize(const InitializationSettings(iOS: .new()));
+    if (success == null || !success) {
+      debugPrintInfo('Notifications plugin initialized.');
+      return;
     }
+
+    _initialized = true;
+    debugPrintError('Failed to initialize notifications plugin.');
   }
 
   Future<void> showGeofenceTriggerNotification(String title, String message) async {
-    if (!_isInitialized) {
-      debugPrintInfo('Notifications plugin is not initialized.');
+    if (!_initialized) {
+      debugPrintError('Notifications plugin is not initialized. Cannot show notification.');
       return;
     }
 
     try {
-      await _plugin.show(
-        Random().nextInt(100000),
-        title,
-        message,
-        NotificationDetails(
-          android: .new('geofence_triggers', 'Geofence Triggers', styleInformation: BigTextStyleInformation(message)),
-          iOS: const .new(interruptionLevel: InterruptionLevel.active),
-        ),
-        payload: 'item x',
-      );
-      debugPrintInfo('Notification sent.');
-    } catch (e) {
-      debugPrintInfo('Failed to send notification: $e');
+      await _plugin.show(DateTime.now().millisecondsSinceEpoch.remainder(100000), title, message, const .new(iOS: .new(interruptionLevel: .active)));
+    } on Exception catch (_) {
+      debugPrintError('Failed to send notification.');
     }
   }
 }
