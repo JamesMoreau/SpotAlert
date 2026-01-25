@@ -6,15 +6,14 @@ import 'package:spot_alert/main.dart';
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   debugPrintInfo('geofenceTriggered params: $params');
 
-  var notificationsService = NotificationService.instance;
-  await notificationsService.initialize();
-
-  await notificationsService.showGeofenceTriggerNotification('Alarm Triggered', 'You have entered the radius of an alarm.');
+  var title = 'Alarm Triggered';
+  var message = 'You have entered the radius of an alarm.';
+  await NotificationService.instance.showGeofenceTriggerNotification(title, message);
 
   await Future<void>.delayed(const Duration(seconds: 1));
 }
 
-// Handles delivery of notifications. 
+// Handles delivery of notifications.
 // Is a singleton to avoid repeated initializations of FlutterLocalNotificationsPlugin.
 class NotificationService {
   NotificationService._internal();
