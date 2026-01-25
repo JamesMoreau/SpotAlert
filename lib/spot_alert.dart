@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:spot_alert/geofence_callback.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 
@@ -277,24 +278,4 @@ T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
   }
 
   return closestItem;
-}
-
-@pragma('vm:entry-point')
-Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
-  debugPrint('Geofence triggered with params: $params');
-  // debugPrintInfo('Triggered alarm ${alarm.name} at timestamp ${DateTime.now()}.');
-
-  // updateAndSaveAlarm(spotAlert, alarm, isActive: false);
-
-  // Setup and fire the alarm package to bring the user's attention.
-  // var alarmSettings = alarm_package.AlarmSettings(
-  //   id: alarm.id.hashCode,
-  //   dateTime: .now(),
-  //   assetAudioPath: 'assets/slow_spring_board_repeated.wav',
-  //   volumeSettings: const .fixed(volume: 0.8, volumeEnforced: true),
-  //   notificationSettings: .new(title: 'Alarm Triggered', body: 'You have entered the radius of alarm: ${alarm.name}', stopButton: 'Stop'),
-  // );
-  // await alarm_package.Alarm.set(alarmSettings: alarmSettings);
-
-  // showAlarmDialog(navigatorKey.currentContext!, alarm);
 }

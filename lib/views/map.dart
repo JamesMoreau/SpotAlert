@@ -184,7 +184,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
 
 void followOrUnfollowUser(SpotAlert spotAlert) {
   if (spotAlert.position == null) {
-    debugPrint('Cannot follow the user since there is no position.');
+    debugPrintInfo('Cannot follow the user since there is no position.');
     return;
   }
 

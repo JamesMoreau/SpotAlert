@@ -21,6 +21,7 @@ import 'package:uuid/uuid.dart';
 TODO: 
   - deal with callback being fired twice at a time from different alarms.
   - should be able to remove position from the app state and just listen to the stream.
+  - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - Update screenshots in app store and readme.
 */
 
@@ -244,7 +245,7 @@ void main() async {
   try {
     await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   } on Exception catch (error, stackTrace) {
-    debugPrint('FMTC initialization failed: $error\n$stackTrace');
+    debugPrintInfo('FMTC initialization failed: $error\n$stackTrace');
 
     // Attempt to delete the corrupted FMTC directory.
     var fmtcDir = Directory(path.join(documentsDir.path, 'fmtc'));
