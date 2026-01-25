@@ -8,16 +8,16 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 
   var title = 'Alarm Triggered';
   var message = 'You have entered the radius of an alarm.';
-  await NotificationService.instance.showGeofenceTriggerNotification(title, message);
+  await AlarmNotificationService.instance.showGeofenceTriggerNotification(title, message);
 
   await Future<void>.delayed(const Duration(seconds: 1));
 }
 
 // Handles delivery of notifications.
 // Is a lazy singleton to avoid repeated initializations of FlutterLocalNotificationsPlugin.
-class NotificationService {
-  NotificationService._internal();
-  static final NotificationService instance = NotificationService._internal();
+class AlarmNotificationService {
+  AlarmNotificationService._internal();
+  static final AlarmNotificationService instance = AlarmNotificationService._internal();
   bool _initialized = false;
 
   final _plugin = FlutterLocalNotificationsPlugin();
