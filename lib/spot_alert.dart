@@ -171,6 +171,7 @@ Future<void> loadGeofences(SpotAlert spotAlert) async {
   }
 }
 
+// TODO this should also take a file and be moved to alarm.dart.
 // This should be called everytime the alarms state is changed.
 Future<void> saveAlarms(SpotAlert spotAlert) async {
   var directory = await getApplicationDocumentsDirectory();

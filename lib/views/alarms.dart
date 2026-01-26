@@ -136,7 +136,6 @@ class AlarmsView extends StatelessWidget {
 class EditAlarmDialog extends StatelessWidget {
   const EditAlarmDialog({super.key});
 
-  // TODO: should have snackbar response.
   Future<void> handleAlarmDeletion(SpotAlert spotAlert) async {
     var id = spotAlert.editAlarm.id;
 
@@ -144,7 +143,17 @@ class EditAlarmDialog extends StatelessWidget {
     if (isActive) {
       var success = await deactivateAlarm(spotAlert.editAlarm);
       if (!success) {
-        debugPrintError('Alarm $id could not be deactivated for deletion.');
+        var message = 'Alarm $id could not be deactivated for deletion.';
+
+        debugPrintError(message);
+
+        ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+          .new(
+            behavior: .floating,
+            content: Padding(padding: const .all(8), child: Text(message)),
+            shape: RoundedRectangleBorder(borderRadius: .circular(10)),
+          ),
+        );
         return;
       }
     }
