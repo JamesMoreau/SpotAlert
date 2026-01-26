@@ -51,3 +51,12 @@ Alarm alarmFromMap(Map<String, dynamic> alarmJson) {
     // active defaults to false
   );
 }
+
+extension AlarmIterable on Iterable<Alarm> {
+  Alarm? findById(String id) {
+    for (final alarm in this) {
+      if (alarm.id == id) return alarm;
+    }
+    return null;
+  }
+}

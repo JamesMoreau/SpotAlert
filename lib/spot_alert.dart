@@ -53,7 +53,7 @@ class SpotAlert extends JuneState {
   }
 }
 
-bool deleteAlarmById(SpotAlert spotAlert, String id) {
+bool deleteAlarmById(SpotAlert spotAlert, String id) { // TODO: make async
   for (var i = 0; i < spotAlert.alarms.length; i++) {
     if (spotAlert.alarms[i].id == id) {
       spotAlert.alarms.removeAt(i);
@@ -66,25 +66,17 @@ bool deleteAlarmById(SpotAlert spotAlert, String id) {
   return false;
 }
 
-Alarm? getAlarmById(SpotAlert spotAlert, String id) {
-  for (var alarm in spotAlert.alarms) {
-    if (alarm.id == id) return alarm;
-  }
-
-  return null;
-}
-
-void updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatLng? newPosition, double? newRadius, Color? newColor}) {
+Future<void> updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatLng? newPosition, double? newRadius, Color? newColor}) async {
   if (newName != null) alarm.name = newName;
   if (newPosition != null) alarm.position = newPosition;
   if (newRadius != null) alarm.radius = newRadius;
   if (newColor != null) alarm.color = newColor;
 
   spotAlert.setState();
-  saveAlarms(spotAlert);
+  await saveAlarms(spotAlert);
 }
 
-Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async {
+Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async { // TODO: make async
   spotAlert.alarms.add(alarm);
   spotAlert.setState();
   await saveAlarms(spotAlert);
@@ -181,7 +173,7 @@ Future<void> loadGeofences(SpotAlert spotAlert) async {
   spotAlert.setState();
 
   for (var geofenceId in geofenceIds) {
-    var isOrphanGeofence = spotAlert.alarms.where((a) => a.id == geofenceId).isEmpty;
+    var isOrphanGeofence = spotAlert.alarms.findById(geofenceId) == null;
     if (isOrphanGeofence) {
       try {
         await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
@@ -204,8 +196,15 @@ Future<void> saveAlarms(SpotAlert spotAlert) async {
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
   var file = File(alarmsPath);
 
+  var seenIds = <String>{};
   var alarmJsons = List<String>.empty(growable: true);
   for (var alarm in spotAlert.alarms) {
+    var alreadySeen = !seenIds.add(alarm.id);
+    if (alreadySeen) {
+      debugPrintError('Duplicate alarm id detected while saving: ${alarm.id}. Skipping duplicate.');
+      continue;
+    }
+
     var alarmMap = alarmToMap(alarm);
     var alarmJson = jsonEncode(alarmMap);
     alarmJsons.add(alarmJson);
