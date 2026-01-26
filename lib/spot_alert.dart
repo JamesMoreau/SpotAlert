@@ -63,13 +63,6 @@ Future<void> updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newNa
   await saveAlarms(spotAlert);
 }
 
-// TODO: make async
-Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  spotAlert.alarms.add(alarm);
-  spotAlert.setState();
-  await saveAlarms(spotAlert);
-}
-
 enum ActivateAlarmResult { success, limitReached, failed }
 
 Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {

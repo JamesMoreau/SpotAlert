@@ -29,7 +29,9 @@ class AlarmsView extends StatelessWidget {
     ];
 
     for (var a in sampleAlarms) {
-      await addAlarm(spotAlert, a);
+      spotAlert.alarms.add(a);
+      spotAlert.setState();
+
       var success = await setAlarmActiveState(spotAlert, a, setToActive: true);
       if (!success) break;
     }

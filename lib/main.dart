@@ -19,6 +19,8 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - why do we save alarms when deactivating an alarm and not when activating?
+  - change default zoom level to be bigger and make initial placement radius bigger as well.
   - deal with callback being fired twice at a time from different alarms.
   - ask for permissions to notification and location at startup.
   - should be able to remove position from the app state and just listen to the stream.

@@ -369,10 +369,10 @@ class Overlay extends StatelessWidget {
                   const SizedBox(height: 10),
                   if (spotAlert.isPlacingAlarm) ...[
                     FloatingActionButton(
-                      onPressed: () {
+                      onPressed: () async {
                         var alarm = Alarm(name: 'Alarm', position: MapCamera.of(context).center, radius: spotAlert.alarmPlacementRadius);
-                        addAlarm(spotAlert, alarm);
-                        activateAlarm(spotAlert, alarm);
+                        spotAlert.alarms.add(alarm);
+                        await activateAlarm(spotAlert, alarm);
 
                         spotAlert.isPlacingAlarm = false;
                         spotAlert.alarmPlacementRadius = minimumAlarmRadius;
