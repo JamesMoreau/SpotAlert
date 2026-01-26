@@ -173,21 +173,19 @@ Future<void> loadGeofences(SpotAlert spotAlert) async {
     return;
   }
 
-  var geofenceIdSet = geofenceIds.toSet();
-
   for (var alarm in spotAlert.alarms) {
-    var hasMatchingGeofence = geofenceIdSet.contains(alarm.id);
+    var hasMatchingGeofence = geofenceIds.contains(alarm.id);
     alarm.active = hasMatchingGeofence;
   }
 
   spotAlert.setState();
 
   for (var geofenceId in geofenceIds) {
-    var isOrphanGeofence = !spotAlert.alarms.any((a) => a.id == geofenceId);
-
+    var isOrphanGeofence = spotAlert.alarms.where((a) => a.id == geofenceId).isEmpty;
     if (isOrphanGeofence) {
       try {
         await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
+        debugPrintWarning('Found and removed orphan geofence $geofenceId');
       } on NativeGeofenceException catch (e) {
         debugPrintError(
           'Unable to remove orphaned geofence (${e.code.name}): '

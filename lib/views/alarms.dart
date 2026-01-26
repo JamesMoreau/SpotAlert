@@ -237,6 +237,11 @@ class EditAlarmDialog extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
+                            var isActive = spotAlert.editAlarm.active;
+                            if (isActive) {
+                              deactivateAlarm(spotAlert, spotAlert.editAlarm);
+                            }
+
                             var id = spotAlert.editAlarm.id;
                             var ok = deleteAlarmById(spotAlert, id);
                             if (!ok) {

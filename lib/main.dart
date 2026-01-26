@@ -18,12 +18,13 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - sometimes phantom geofence gets set up and fires. different alarm between runs. doesn't seem to happen when there are no geofences.
   - deal with callback being fired twice at a time from different alarms.
+  - ask for permissions to notification and location at startup.
   - should be able to remove position from the app state and just listen to the stream.
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
+  - startup screen icon.
 */
 
 const author = 'James Moreau';
