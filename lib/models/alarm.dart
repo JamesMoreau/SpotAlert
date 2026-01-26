@@ -110,3 +110,24 @@ Future<List<Alarm>> loadAlarmsFromFile(File file) async {
   debugPrintInfo('Loaded ${alarms.length} alarms from ${file.path}.');
   return alarms;
 }
+
+Future<void> saveAlarmsToFile(File file, List<Alarm> alarms) async {
+  var seenIds = <String>{};
+  var alarmJsons = <String>[];
+
+  for (var alarm in alarms) {
+    if (!seenIds.add(alarm.id)) {
+      debugPrintError('Duplicate alarm id detected while saving: ${alarm.id}. Skipping duplicate.');
+      continue;
+    }
+
+    var alarmMap = alarmToMap(alarm);
+    var alarmJson = jsonEncode(alarmMap);
+    alarmJsons.add(alarmJson);
+  }
+
+  var json = jsonEncode(alarmJsons);
+  await file.writeAsString(json);
+
+  debugPrintInfo('Saved ${alarmJsons.length} alarms to ${file.path}.');
+}

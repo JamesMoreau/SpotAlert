@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -53,6 +52,7 @@ class SpotAlert extends JuneState {
   }
 }
 
+// TODO remove
 Future<void> updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatLng? newPosition, double? newRadius, Color? newColor}) async {
   if (newName != null) alarm.name = newName;
   if (newPosition != null) alarm.position = newPosition;
@@ -60,7 +60,6 @@ Future<void> updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newNa
   if (newColor != null) alarm.color = newColor;
 
   spotAlert.setState();
-  await saveAlarms(spotAlert);
 }
 
 enum ActivateAlarmResult { success, limitReached, failed }
@@ -171,28 +170,10 @@ Future<void> loadGeofences(SpotAlert spotAlert) async {
   }
 }
 
-// TODO this should also take a file and be moved to alarm.dart.
 // This should be called everytime the alarms state is changed.
 Future<void> saveAlarms(SpotAlert spotAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
   var file = File(alarmsPath);
-
-  var seenIds = <String>{};
-  var alarmJsons = List<String>.empty(growable: true);
-  for (var alarm in spotAlert.alarms) {
-    var alreadySeen = !seenIds.add(alarm.id);
-    if (alreadySeen) {
-      debugPrintError('Duplicate alarm id detected while saving: ${alarm.id}. Skipping duplicate.');
-      continue;
-    }
-
-    var alarmMap = alarmToMap(alarm);
-    var alarmJson = jsonEncode(alarmMap);
-    alarmJsons.add(alarmJson);
-  }
-
-  var json = jsonEncode(alarmJsons);
-  await file.writeAsString(json);
-  debugPrintInfo('Saved alarms to storage: $alarmJsons.');
+  await saveAlarmsToFile(file, spotAlert.alarms);
 }
