@@ -147,10 +147,9 @@ class EditAlarmDialog extends StatelessWidget {
       }
     }
 
-    var ok = deleteAlarmById(spotAlert, id);
-    if (!ok) {
-      debugPrintError('Alarm $id could not be deleted.');
-    }
+    spotAlert.alarms.removeWhere((a) => a.id == id);
+    spotAlert.setState();
+    await saveAlarms(spotAlert);
   }
 
   @override

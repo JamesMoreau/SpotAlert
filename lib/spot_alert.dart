@@ -53,20 +53,6 @@ class SpotAlert extends JuneState {
   }
 }
 
-// TODO: make async and use removeWhere.
-bool deleteAlarmById(SpotAlert spotAlert, String id) {
-  for (var i = 0; i < spotAlert.alarms.length; i++) {
-    if (spotAlert.alarms[i].id == id) {
-      spotAlert.alarms.removeAt(i);
-      spotAlert.setState();
-      saveAlarms(spotAlert);
-      return true;
-    }
-  }
-
-  return false;
-}
-
 Future<void> updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatLng? newPosition, double? newRadius, Color? newColor}) async {
   if (newName != null) alarm.name = newName;
   if (newPosition != null) alarm.position = newPosition;
