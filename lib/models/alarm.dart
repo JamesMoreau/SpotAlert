@@ -45,7 +45,7 @@ Alarm alarmFromMap(Map<String, dynamic> alarmJson) {
 
 extension AlarmIterable on Iterable<Alarm> {
   Alarm? findById(String id) {
-    for (final alarm in this) {
+    for (var alarm in this) {
       if (alarm.id == id) return alarm;
     }
     return null;

@@ -207,7 +207,7 @@ void moveMapToUserLocation(SpotAlert spotAlert) {
     return;
   }
 
-  final zoom = spotAlert.mapController.camera.zoom;
+  var zoom = spotAlert.mapController.camera.zoom;
   spotAlert.mapController.move(spotAlert.position!, zoom);
 }
 
