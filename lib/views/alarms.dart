@@ -30,14 +30,28 @@ class AlarmsView extends StatelessWidget {
 
     for (var a in sampleAlarms) {
       await addAlarm(spotAlert, a);
-      var success = await setAlarmActiveState(spotAlert, a, isActive: true);
+      var success = await setAlarmActiveState(spotAlert, a, setToActive: true);
       if (!success) break;
     }
   }
 
-  Future<bool> setAlarmActiveState(SpotAlert spotAlert, Alarm alarm, {required bool isActive}) async {
-    if (!isActive) {
-      await deactivateAlarm(spotAlert, alarm);
+  Future<bool> setAlarmActiveState(SpotAlert spotAlert, Alarm alarm, {required bool setToActive}) async {
+    if (!setToActive) {
+      var success = await deactivateAlarm(alarm);
+      if (!success) {
+        ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+          .new(
+            behavior: .floating,
+            content: const Padding(padding: .all(8), child: Text('Failed to deactivate the alarm.')),
+            shape: RoundedRectangleBorder(borderRadius: .circular(10)),
+          ),
+        );
+
+        return false;
+      }
+
+      spotAlert.setState();
+      await saveAlarms(spotAlert);
       return true;
     }
 
@@ -104,7 +118,7 @@ class AlarmsView extends StatelessWidget {
                       value: alarm.active,
                       activeThumbColor: alarm.color,
                       thumbIcon: thumbIcon,
-                      onChanged: (value) => setAlarmActiveState(spotAlert, alarm, isActive: value),
+                      onChanged: (value) => setAlarmActiveState(spotAlert, alarm, setToActive: value),
                     ),
                   ),
                 );
@@ -119,6 +133,25 @@ class AlarmsView extends StatelessWidget {
 
 class EditAlarmDialog extends StatelessWidget {
   const EditAlarmDialog({super.key});
+
+  // TODO: should have snackbar response.
+  Future<void> handleAlarmDeletion(SpotAlert spotAlert) async {
+    var id = spotAlert.editAlarm.id;
+
+    var isActive = spotAlert.editAlarm.active;
+    if (isActive) {
+      var success = await deactivateAlarm(spotAlert.editAlarm);
+      if (!success) {
+        debugPrintError('Alarm $id could not be deactivated for deletion.');
+        return;
+      }
+    }
+
+    var ok = deleteAlarmById(spotAlert, id);
+    if (!ok) {
+      debugPrintError('Alarm $id could not be deleted.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -237,16 +270,7 @@ class EditAlarmDialog extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            var isActive = spotAlert.editAlarm.active;
-                            if (isActive) {
-                              deactivateAlarm(spotAlert, spotAlert.editAlarm);
-                            }
-
-                            var id = spotAlert.editAlarm.id;
-                            var ok = deleteAlarmById(spotAlert, id);
-                            if (!ok) {
-                              debugPrintError('Alarm $id could not be deleted.');
-                            }
+                            handleAlarmDeletion(spotAlert);
                             Navigator.pop(context);
                           },
                           child: const Text('Delete Alarm', style: .new(color: Colors.redAccent)),

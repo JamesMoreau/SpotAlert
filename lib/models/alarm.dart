@@ -60,3 +60,30 @@ extension AlarmIterable on Iterable<Alarm> {
     return null;
   }
 }
+
+List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
+  var triggeredAlarms = <Alarm>[];
+
+  for (var alarm in alarms) {
+    var distance = const Distance().distance(alarm.position, position);
+    if (distance <= alarm.radius) triggeredAlarms.add(alarm);
+  }
+
+  return triggeredAlarms;
+}
+
+T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
+  T? closestItem;
+  var closestDistance = double.infinity;
+
+  for (var item in items) {
+    var itemPositon = getPosition(item);
+    var d = const Distance().distance(itemPositon, target);
+    if (d < closestDistance) {
+      closestDistance = d;
+      closestItem = item;
+    }
+  }
+
+  return closestItem;
+}

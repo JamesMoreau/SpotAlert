@@ -375,7 +375,7 @@ class Overlay extends StatelessWidget {
                         activateAlarm(spotAlert, alarm);
 
                         spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;
+                        spotAlert.alarmPlacementRadius = minimumAlarmRadius;
                         spotAlert.setState();
                       },
                       elevation: 4,
@@ -385,7 +385,7 @@ class Overlay extends StatelessWidget {
                     FloatingActionButton(
                       onPressed: () {
                         spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;
+                        spotAlert.alarmPlacementRadius = minimumAlarmRadius;
                         spotAlert.setState();
                       },
                       elevation: 4,

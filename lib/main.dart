@@ -37,7 +37,6 @@ const alarmsFilename = 'alarms.json';
 const initialZoom = 15.0;
 const circleToMarkerZoomThreshold = 10.0;
 const maxZoomSupported = 18.0;
-const initialAlarmPlacementRadius = 800.0;
 const maxGeofenceCount = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
 
 enum AvailableAlarmColors {
@@ -232,7 +231,8 @@ void main() async {
     },
   );
 
-  await loadAlarms(spotAlert);
+  spotAlert.alarms = await loadAlarmsFromStorage();
+  spotAlert.setState();
 
   await NativeGeofenceManager.instance.initialize();
   await loadGeofences(spotAlert);

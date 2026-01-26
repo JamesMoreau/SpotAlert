@@ -31,7 +31,7 @@ class SpotAlert extends JuneState {
   bool mapControllerIsAttached = false; // This let's us know if we can use the controller.
   FMTCTileProvider? tileProvider;
   bool isPlacingAlarm = false;
-  double alarmPlacementRadius = initialAlarmPlacementRadius;
+  double alarmPlacementRadius = minimumAlarmRadius;
   bool followUserLocation = false;
 
   // Settings
@@ -53,7 +53,8 @@ class SpotAlert extends JuneState {
   }
 }
 
-bool deleteAlarmById(SpotAlert spotAlert, String id) { // TODO: make async
+// TODO: make async and use removeWhere.
+bool deleteAlarmById(SpotAlert spotAlert, String id) {
   for (var i = 0; i < spotAlert.alarms.length; i++) {
     if (spotAlert.alarms[i].id == id) {
       spotAlert.alarms.removeAt(i);
@@ -76,7 +77,8 @@ Future<void> updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newNa
   await saveAlarms(spotAlert);
 }
 
-Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async { // TODO: make async
+// TODO: make async
+Future<void> addAlarm(SpotAlert spotAlert, Alarm alarm) async {
   spotAlert.alarms.add(alarm);
   spotAlert.setState();
   await saveAlarms(spotAlert);
@@ -130,7 +132,7 @@ Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) asyn
   }
 }
 
-Future<void> deactivateAlarm(SpotAlert spotAlert, Alarm alarm) async {
+Future<bool> deactivateAlarm(Alarm alarm) async {
   try {
     await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
   } on NativeGeofenceException catch (e) {
@@ -141,13 +143,13 @@ Future<void> deactivateAlarm(SpotAlert spotAlert, Alarm alarm) async {
       'stackTrace=${e.stacktrace}',
     );
 
-    return;
+    return false;
   }
 
   alarm.active = false;
-  spotAlert.setState();
-
   debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
+
+  return true;
 }
 
 Future<void> loadGeofences(SpotAlert spotAlert) async {
@@ -215,64 +217,40 @@ Future<void> saveAlarms(SpotAlert spotAlert) async {
   debugPrintInfo('Saved alarms to storage: $alarmJsons.');
 }
 
-Future<void> loadAlarms(SpotAlert spotAlert) async {
+// TODO: should this take a path instead to avoid global dependency? also move to alarms code.
+Future<List<Alarm>> loadAlarmsFromStorage() async {
   var directory = await getApplicationDocumentsDirectory();
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
   var file = File(alarmsPath);
 
   if (!file.existsSync()) {
     debugPrintWarning('No alarms file found in storage.');
-    return;
+    return [];
   }
 
   var alarmJsons = await file.readAsString();
   if (alarmJsons.isEmpty) {
     debugPrintWarning('No alarms found in storage.');
-    return;
+    return [];
   }
 
-  var alarmJsonsList = jsonDecode(alarmJsons) as List;
+  var decoded = jsonDecode(alarmJsons) as List;
   var seenIds = <String>{};
-  for (var alarmJson in alarmJsonsList) {
+  var alarms = <Alarm>[];
+
+  for (final alarmJson in decoded) {
     var alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
     var alarm = alarmFromMap(alarmMap);
 
-    var idAlreadySeen = !seenIds.add(alarm.id);
-    if (idAlreadySeen) {
+    var alreadySeen = !seenIds.add(alarm.id);
+    if (alreadySeen) {
       debugPrintError('Duplicate alarm id detected while loading: ${alarm.id}. Skipping duplicate.');
       continue;
     }
 
-    spotAlert.alarms.add(alarm);
+    alarms.add(alarm);
   }
 
-  spotAlert.setState();
-  debugPrintInfo('Loaded alarms from storage.');
-}
-
-List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
-  var triggeredAlarms = <Alarm>[];
-
-  for (var alarm in alarms) {
-    var distance = const Distance().distance(alarm.position, position);
-    if (distance <= alarm.radius) triggeredAlarms.add(alarm);
-  }
-
-  return triggeredAlarms;
-}
-
-T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
-  T? closestItem;
-  var closestDistance = double.infinity;
-
-  for (var item in items) {
-    var itemPositon = getPosition(item);
-    var d = const Distance().distance(itemPositon, target);
-    if (d < closestDistance) {
-      closestDistance = d;
-      closestItem = item;
-    }
-  }
-
-  return closestItem;
+  debugPrintInfo('Loaded ${alarms.length} alarms from storage.');
+  return alarms;
 }
