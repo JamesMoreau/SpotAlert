@@ -20,37 +20,35 @@ class Alarm {
     : assert(radius > 0),
       id = id ?? idGenerator.v1(),
       color = color ?? AvailableAlarmColors.redAccent.value;
-}
 
-extension AlarmUpdate on Alarm {
   void update({String? name, LatLng? position, double? radius, Color? color}) {
     if (name != null) this.name = name;
     if (position != null) this.position = position;
     if (radius != null) this.radius = radius;
     if (color != null) this.color = color;
   }
-}
 
-// TODO: refactor these to be extensions.
-Map<String, dynamic> alarmToMap(Alarm alarm) {
-  return {
-    'id': alarm.id,
-    'name': alarm.name,
-    'color': alarm.color.toARGB32(),
-    'position': {'latitude': alarm.position.latitude, 'longitude': alarm.position.longitude},
-    'radius': alarm.radius,
-  };
-}
+  factory Alarm.fromMap(Map<String, dynamic> map) {
+    final pos = map['position'] as Map<String, dynamic>;
+    return Alarm(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      color: Color(map['color'] as int),
+      position: LatLng(pos['latitude'] as double, pos['longitude'] as double),
+      radius: map['radius'] as double,
+      // active defaults to false
+    );
+  }
 
-Alarm alarmFromMap(Map<String, dynamic> alarmJson) {
-  return Alarm(
-    id: alarmJson['id'] as String,
-    name: alarmJson['name'] as String,
-    color: Color(alarmJson['color'] as int),
-    position: LatLng((alarmJson['position'] as Map<String, dynamic>)['latitude'] as double, (alarmJson['position'] as Map<String, dynamic>)['longitude'] as double),
-    radius: alarmJson['radius'] as double,
-    // active defaults to false
-  );
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'color': color.toARGB32(),
+      'position': {'latitude': position.latitude, 'longitude': position.longitude},
+      'radius': radius,
+    };
+  }
 }
 
 extension AlarmIterable on Iterable<Alarm> {
@@ -107,7 +105,7 @@ Future<List<Alarm>> loadAlarmsFromFile(File file) async {
 
   for (var alarmJson in decoded) {
     var alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
-    var alarm = alarmFromMap(alarmMap);
+    var alarm = Alarm.fromMap(alarmMap);
 
     if (!seenIds.add(alarm.id)) {
       debugPrintError('Duplicate alarm id detected while loading: ${alarm.id}. Skipping duplicate.');
@@ -131,7 +129,7 @@ Future<void> saveAlarmsToFile(File file, List<Alarm> alarms) async {
       continue;
     }
 
-    var alarmMap = alarmToMap(alarm);
+    var alarmMap = alarm.toMap();
     var alarmJson = jsonEncode(alarmMap);
     alarmJsons.add(alarmJson);
   }
