@@ -22,6 +22,16 @@ class Alarm {
       color = color ?? AvailableAlarmColors.redAccent.value;
 }
 
+extension AlarmUpdate on Alarm {
+  void update({String? name, LatLng? position, double? radius, Color? color}) {
+    if (name != null) this.name = name;
+    if (position != null) this.position = position;
+    if (radius != null) this.radius = radius;
+    if (color != null) this.color = color;
+  }
+}
+
+// TODO: refactor these to be extensions.
 Map<String, dynamic> alarmToMap(Alarm alarm) {
   return {
     'id': alarm.id,

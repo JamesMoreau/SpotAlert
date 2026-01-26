@@ -183,7 +183,8 @@ class EditAlarmDialog extends StatelessWidget {
                       child: const Text('Save'),
                       onPressed: () {
                         // Replace the actual alarm data with the buffer data.
-                        updateAndSaveAlarm(spotAlert, spotAlert.editAlarm, newName: spotAlert.nameInput.text.trim(), newColor: spotAlert.colorInput);
+                        spotAlert.editAlarm.update(name: spotAlert.nameInput.text.trim(), color: spotAlert.colorInput);
+                        spotAlert.setState();
                         Navigator.pop(context);
                       },
                     ),

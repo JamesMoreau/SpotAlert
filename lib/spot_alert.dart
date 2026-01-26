@@ -52,16 +52,6 @@ class SpotAlert extends JuneState {
   }
 }
 
-// TODO remove
-Future<void> updateAndSaveAlarm(SpotAlert spotAlert, Alarm alarm, {String? newName, LatLng? newPosition, double? newRadius, Color? newColor}) async {
-  if (newName != null) alarm.name = newName;
-  if (newPosition != null) alarm.position = newPosition;
-  if (newRadius != null) alarm.radius = newRadius;
-  if (newColor != null) alarm.color = newColor;
-
-  spotAlert.setState();
-}
-
 enum ActivateAlarmResult { success, limitReached, failed }
 
 Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
