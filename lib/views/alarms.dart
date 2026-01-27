@@ -58,7 +58,7 @@ class AlarmsView extends StatelessWidget {
       return true;
     }
 
-    var result = await activateAlarm(spotAlert, alarm);
+    var result = await activateAlarm(alarm);
 
     String? message;
     switch (result) {

@@ -342,7 +342,7 @@ class Overlay extends StatelessWidget {
     spotAlert.alarms.add(alarm);
 
     // We allow the user to have more alarms than amount of allowed geofences. The alarm will just remain unactive.
-    var result = await activateAlarm(spotAlert, alarm);
+    var result = await activateAlarm(alarm);
     switch (result) {
       case ActivateAlarmResult.success:
         spotAlert.isPlacingAlarm = false;

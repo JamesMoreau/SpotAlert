@@ -13,7 +13,7 @@ import 'package:spot_alert/geofence_callback.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 
-const maxGeofenceCount = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
+const geofenceNumberLimit = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
 
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
@@ -56,9 +56,17 @@ class SpotAlert extends JuneState {
 
 enum ActivateAlarmResult { success, limitReached, failed }
 
-Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) async {
-  var maxGeofenceCountReached = spotAlert.alarms.where((a) => a.active).length >= maxGeofenceCount;
-  if (maxGeofenceCountReached) {
+Future<ActivateAlarmResult> activateAlarm(Alarm alarm) async {
+  var geofenceIds = await getGeofenceIds();
+
+  var geofenceAlreadyExistsForAlarm = geofenceIds.contains(alarm.id);
+  if (geofenceAlreadyExistsForAlarm) {
+    alarm.active = true;
+    return ActivateAlarmResult.success;
+  }
+
+  var maxGeofenceLimitReached = geofenceIds.length >= geofenceNumberLimit;
+  if (maxGeofenceLimitReached) {
     return .limitReached;
   }
 
