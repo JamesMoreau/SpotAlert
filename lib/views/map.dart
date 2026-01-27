@@ -333,6 +333,24 @@ class Compass extends StatelessWidget {
 class Overlay extends StatelessWidget {
   const Overlay({super.key});
 
+  Future<void> placeAlarm(SpotAlert spotAlert, LatLng position) async {
+    var alarm = Alarm(name: 'Alarm', position: position, radius: spotAlert.alarmPlacementRadius);
+    spotAlert.alarms.add(alarm);
+
+    // We allow the user to have more alarms than amount of allowed geofences. The alarm will just remain unactive.
+    var result = await activateAlarm(spotAlert, alarm);
+    switch (result) {
+      case ActivateAlarmResult.success:
+        spotAlert.isPlacingAlarm = false;
+        spotAlert.alarmPlacementRadius = minimumAlarmRadius;
+        spotAlert.setState();
+      case ActivateAlarmResult.limitReached:
+        debugPrintWarning('Newly placed alarm could not be activated due to the limit on the number of geofences.');
+      case ActivateAlarmResult.failed:
+        debugPrintError('Could not activate newly placed alarm.');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
@@ -368,19 +386,7 @@ class Overlay extends StatelessWidget {
                   ],
                   const SizedBox(height: 10),
                   if (spotAlert.isPlacingAlarm) ...[
-                    FloatingActionButton(
-                      onPressed: () async {
-                        var alarm = Alarm(name: 'Alarm', position: MapCamera.of(context).center, radius: spotAlert.alarmPlacementRadius);
-                        spotAlert.alarms.add(alarm);
-                        await activateAlarm(spotAlert, alarm);
-
-                        spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = minimumAlarmRadius;
-                        spotAlert.setState();
-                      },
-                      elevation: 4,
-                      child: const Icon(Icons.check),
-                    ),
+                    FloatingActionButton(onPressed: () => placeAlarm(spotAlert, MapCamera.of(context).center), elevation: 4, child: const Icon(Icons.check)),
                     const SizedBox(height: 10),
                     FloatingActionButton(
                       onPressed: () {

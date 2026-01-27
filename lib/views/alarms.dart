@@ -62,6 +62,7 @@ class AlarmsView extends StatelessWidget {
     String? message;
     switch (result) {
       case .success:
+        spotAlert.setState();
         return true;
 
       case .limitReached:

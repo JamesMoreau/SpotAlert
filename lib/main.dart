@@ -19,7 +19,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - why do we save alarms when deactivating an alarm and not when activating?
   - change default zoom level to be bigger and make initial placement radius bigger as well.
   - deal with callback being fired twice at a time from different alarms.
   - ask for permissions to notification and location at startup.
@@ -241,7 +240,9 @@ void main() async {
   spotAlert.setState();
 
   await NativeGeofenceManager.instance.initialize();
-  await loadGeofences(spotAlert);
+  var geofenceIds = await getGeofenceIds();
+  await reconcileAlarmsAndGeofences(spotAlert.alarms, geofenceIds);
+  spotAlert.setState();
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();

@@ -71,9 +71,7 @@ Future<ActivateAlarmResult> activateAlarm(SpotAlert spotAlert, Alarm alarm) asyn
 
   try {
     await NativeGeofenceManager.instance.createGeofence(geofence, geofenceTriggered);
-
     alarm.active = true;
-    spotAlert.setState();
 
     debugPrintInfo('Added geofence for alarm: ${alarm.id}');
     return .success;
@@ -120,10 +118,9 @@ Future<bool> deactivateAlarm(Alarm alarm) async {
   return true;
 }
 
-Future<void> loadGeofences(SpotAlert spotAlert) async {
-  List<String> geofenceIds;
+Future<List<String>> getGeofenceIds() async {
   try {
-    geofenceIds = await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
+    return await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
   } on NativeGeofenceException catch (e) {
     debugPrintError(
       'Unable to retrieve geofences (${e.code.name}): '
@@ -131,31 +128,31 @@ Future<void> loadGeofences(SpotAlert spotAlert) async {
       'detail=${e.details}, '
       'stackTrace=${e.stacktrace}',
     );
+    return [];
+  }
+}
 
-    return;
+Future<void> reconcileAlarmsAndGeofences(List<Alarm> alarms, List<String> geofenceIds) async {
+  // Mark alarms as active if they exist in OS
+  for (var alarm in alarms) {
+    alarm.active = geofenceIds.contains(alarm.id);
   }
 
-  for (var alarm in spotAlert.alarms) {
-    var hasMatchingGeofence = geofenceIds.contains(alarm.id);
-    alarm.active = hasMatchingGeofence;
-  }
-
-  spotAlert.setState();
-
+  // Remove orphan geofences (exist in OS but no matching alarm)
   for (var geofenceId in geofenceIds) {
-    var isOrphanGeofence = spotAlert.alarms.findById(geofenceId) == null;
-    if (isOrphanGeofence) {
-      try {
-        await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
-        debugPrintWarning('Found and removed orphan geofence $geofenceId');
-      } on NativeGeofenceException catch (e) {
-        debugPrintError(
-          'Unable to remove orphaned geofence (${e.code.name}): '
-          'message=${e.message}, '
-          'detail=${e.details}, '
-          'stackTrace=${e.stacktrace}',
-        );
-      }
+    var isOrphan = alarms.findById(geofenceId) == null;
+    if (!isOrphan) continue;
+
+    try {
+      await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
+      debugPrintWarning('Found and removed orphan geofence $geofenceId');
+    } on NativeGeofenceException catch (e) {
+      debugPrintError(
+        'Unable to remove orphaned geofence (${e.code.name}): '
+        'message=${e.message}, '
+        'detail=${e.details}, '
+        'stackTrace=${e.stacktrace}',
+      );
     }
   }
 }
