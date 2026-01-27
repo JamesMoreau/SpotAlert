@@ -342,7 +342,7 @@ class Overlay extends StatelessWidget {
     switch (result) {
       case ActivateAlarmResult.success:
         spotAlert.isPlacingAlarm = false;
-        spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;
+        spotAlert.alarmPlacementRadius = initialAlarmRadius;
         spotAlert.setState();
       case ActivateAlarmResult.limitReached:
         debugPrintWarning('Newly placed alarm could not be activated due to the limit on the number of geofences.');
@@ -391,7 +391,7 @@ class Overlay extends StatelessWidget {
                     FloatingActionButton(
                       onPressed: () {
                         spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;
+                        spotAlert.alarmPlacementRadius = initialAlarmRadius;
                         spotAlert.setState();
                       },
                       elevation: 4,
