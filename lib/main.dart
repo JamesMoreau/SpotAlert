@@ -36,7 +36,8 @@ const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png
 const mapTileStoreName = 'mapStore';
 const alarmsFilename = 'alarms.json';
 
-const initialZoom = 15.0;
+const initialZoom = 13.0;
+const initialAlarmPlacementRadius = 2000.0;
 const circleToMarkerZoomThreshold = 10.0;
 const maxZoomSupported = 18.0;
 const maxGeofenceCount = 20; // This limit comes from Apple's API, restricting the number of geofences per application.

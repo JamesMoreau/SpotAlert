@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
 
-const minimumAlarmRadius = 500.0;
-const maximumAlarmRadius = 15000.0;
+const minimumAlarmRadius = 800.0;
+const maximumAlarmRadius = 10000.0;
 
 class Alarm {
   String id;
