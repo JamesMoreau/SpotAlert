@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert.dart';
+import 'package:spot_alert/views/map.dart';
 
 class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});

@@ -9,6 +9,10 @@ import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert.dart';
 
+const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const initialZoom = 13.0;
+const circleToMarkerZoomThreshold = 10.0;
+
 class MapView extends StatelessWidget {
   const MapView({super.key});
 

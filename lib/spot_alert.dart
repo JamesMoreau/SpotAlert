@@ -13,6 +13,8 @@ import 'package:spot_alert/geofence_callback.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 
+const maxGeofenceCount = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
+
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
   LatLng? position; // The user's position.

@@ -29,17 +29,8 @@ TODO:
   - startup screen icon.
 */
 
-const author = 'James Moreau';
-const kofi = 'https://ko-fi.com/jamesmoreau';
-const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
-const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const mapTileStoreName = 'mapStore';
 const alarmsFilename = 'alarms.json';
-
-const initialZoom = 13.0;
-const circleToMarkerZoomThreshold = 10.0;
-const maxZoomSupported = 18.0;
-const maxGeofenceCount = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
 
 enum AvailableAlarmColors {
   blue(Colors.blue),

@@ -10,6 +10,10 @@ import 'package:spot_alert/main.dart';
 import 'package:spot_alert/spot_alert.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+const author = 'James Moreau';
+const kofi = 'https://ko-fi.com/jamesmoreau';
+const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
+
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
 
