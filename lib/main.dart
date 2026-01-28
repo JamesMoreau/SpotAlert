@@ -19,8 +19,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - placing an alarm does not save it for some reason...
-  - deal with callback being fired twice at a time from different alarms.
   - ask for permissions to notification and location at startup.
   - rename github repo to spot alert.
   - should be able to remove position from the app state and just listen to the stream.
