@@ -10,7 +10,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert.dart';
 import 'package:spot_alert/views/alarms.dart';
 import 'package:spot_alert/views/map.dart';
@@ -222,12 +221,6 @@ void main() async {
       spotAlert.setState();
     },
   );
-
-  var directory = await getApplicationDocumentsDirectory();
-  var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-  var file = File(alarmsPath);
-  spotAlert.alarms = await loadAlarmsFromFile(file);
-  spotAlert.setState();
 
   await NativeGeofenceManager.instance.initialize();
   var geofenceIds = await getGeofenceIds();

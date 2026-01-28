@@ -45,6 +45,8 @@ class SpotAlert extends JuneState {
 
   @override
   Future<void> onInit() async {
+    alarms = await loadAlarms();
+
     pageController = PageController(initialPage: view.index);
     packageInfo = await PackageInfo.fromPlatform();
 
@@ -70,6 +72,14 @@ class SpotAlert extends JuneState {
     geofencePort.close();
     super.onClose();
   }
+}
+
+Future<List<Alarm>> loadAlarms() async {
+  var directory = await getApplicationDocumentsDirectory();
+  var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+  var file = File(alarmsPath);
+  var alarms = await loadAlarmsFromFile(file);
+  return alarms;
 }
 
 Future<void> handleGeofencePortEvent(dynamic message, SpotAlert spotAlert) async {
