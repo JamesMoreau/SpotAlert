@@ -354,7 +354,7 @@ class Overlay extends StatelessWidget {
         debugPrintError('Could not activate newly placed alarm.');
     }
 
-    await saveAlarms(spotAlert);
+    await saveSpotAlertAlarms(spotAlert);
   }
 
   @override

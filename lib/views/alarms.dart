@@ -54,7 +54,7 @@ class AlarmsView extends StatelessWidget {
       }
 
       spotAlert.setState();
-      await saveAlarms(spotAlert);
+      await saveSpotAlertAlarms(spotAlert);
       return true;
     }
 
@@ -162,7 +162,7 @@ class EditAlarmDialog extends StatelessWidget {
 
     spotAlert.alarms.removeWhere((a) => a.id == id);
     spotAlert.setState();
-    await saveAlarms(spotAlert);
+    await saveSpotAlertAlarms(spotAlert);
   }
 
   @override

@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/spot_alert.dart';
@@ -137,7 +136,7 @@ class MainApp extends StatelessWidget {
           // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
           var appIsInitialized = spotAlert.tileProvider != null;
           if (!appIsInitialized) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(body: Center(child: CircularProgressIndicator())); //TODO
           }
 
           return Scaffold(
@@ -202,24 +201,6 @@ void main() async {
       return Future.error('Location permissions are denied');
     }
   }
-
-  var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
-  var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
-  stream.listen(
-    (location) async {
-      spotAlert.position = LatLng(location.latitude, location.longitude);
-      spotAlert.setState();
-
-      if (spotAlert.followUserLocation) moveMapToUserLocation(spotAlert);
-    },
-    onError: (error) async {
-      debugPrintError('Gelocator position stream error');
-
-      spotAlert.position = null;
-      spotAlert.followUserLocation = false;
-      spotAlert.setState();
-    },
-  );
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();

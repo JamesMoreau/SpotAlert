@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:native_geofence/native_geofence.dart';
@@ -14,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/geofence_callback.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
+import 'package:spot_alert/views/map.dart';
 import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 
 const geofenceNumberLimit = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
@@ -21,6 +23,7 @@ const geofenceNumberLimit = 20; // This limit comes from Apple's API, restrictin
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
   LatLng? position; // The user's position.
+  late ReceivePort geofencePort;
 
   SpotAlertView view = .alarms;
   late PageController pageController = PageController(initialPage: view.index);
@@ -41,8 +44,6 @@ class SpotAlert extends JuneState {
   // Settings
   late PackageInfo packageInfo;
 
-  late ReceivePort geofencePort;
-
   @override
   Future<void> onInit() async {
     alarms = await loadAlarms();
@@ -50,6 +51,10 @@ class SpotAlert extends JuneState {
 
     geofencePort = setupGeofenceEventPort();
     geofencePort.listen((message) => handleGeofenceEvent(message, alarms));
+
+    var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
+    var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
+    stream.listen((position) => handlePositionUpdate(position, this), onError: (dynamic error) => onPositionStreamError(error, this));
 
     packageInfo = await PackageInfo.fromPlatform();
 
@@ -139,6 +144,21 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
   }
 
   showAlarmDialog(navigatorKey.currentContext!, triggered);
+}
+
+Future<void> handlePositionUpdate(Position position, SpotAlert spotAlert) async {
+  spotAlert.position = LatLng(position.latitude, position.longitude);
+  spotAlert.setState();
+
+  if (spotAlert.followUserLocation) moveMapToUserLocation(spotAlert);
+}
+
+void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
+  debugPrintError('Gelocator position stream error');
+
+  spotAlert.position = null;
+  spotAlert.followUserLocation = false;
+  spotAlert.setState();
 }
 
 enum ActivateAlarmResult { success, limitReached, failed }
@@ -234,7 +254,7 @@ Future<List<String>> getGeofenceIds() async {
 // }
 
 // This should be called everytime the alarms state is changed.
-Future<void> saveAlarms(SpotAlert spotAlert) async {
+Future<void> saveSpotAlertAlarms(SpotAlert spotAlert) async {
   var directory = await getApplicationDocumentsDirectory();
   var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
   var file = File(alarmsPath);
