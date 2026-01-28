@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -23,24 +22,6 @@ TODO:
   - Update screenshots in app store and readme.
   - startup screen icon.
 */
-
-enum AvailableAlarmColors {
-  blue(Colors.blue),
-  green(Colors.green),
-  orange(Colors.orange),
-  redAccent(Colors.redAccent),
-  purple(Colors.purple),
-  pink(Colors.pink),
-  teal(Colors.teal),
-  brown(Colors.brown),
-  indigo(Colors.indigo),
-  amber(Colors.amber),
-  grey(Colors.grey),
-  black(Colors.black);
-
-  const AvailableAlarmColors(this.value);
-  final Color value;
-}
 
 ThemeData spotAlertTheme = .new(
   colorScheme: const .new(
@@ -82,12 +63,6 @@ ThemeData spotAlertTheme = .new(
 );
 
 const paleBlue = Color(0xffeaf0f5);
-
-// for switch icons.
-final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Icon?>((states) {
-  if (states.contains(WidgetState.selected)) return const Icon(Icons.check_rounded);
-  return const Icon(Icons.close_rounded);
-});
 
 GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -181,14 +156,6 @@ void main() async {
   }
 
   await SystemChrome.setPreferredOrientations([.portraitUp]);
-
-  var permission = await Geolocator.checkPermission();
-  if (permission == .denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == .denied) {
-      return Future.error('Location permissions are denied');
-    }
-  }
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();

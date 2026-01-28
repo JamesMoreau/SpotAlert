@@ -300,3 +300,9 @@ class EditAlarmDialog extends StatelessWidget {
     );
   }
 }
+
+// for switch icons.
+final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Icon?>((states) {
+  if (states.contains(WidgetState.selected)) return const Icon(Icons.check_rounded);
+  return const Icon(Icons.close_rounded);
+});

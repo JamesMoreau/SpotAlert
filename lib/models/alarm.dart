@@ -52,6 +52,24 @@ class Alarm {
   }
 }
 
+enum AvailableAlarmColors {
+  blue(Colors.blue),
+  green(Colors.green),
+  orange(Colors.orange),
+  redAccent(Colors.redAccent),
+  purple(Colors.purple),
+  pink(Colors.pink),
+  teal(Colors.teal),
+  brown(Colors.brown),
+  indigo(Colors.indigo),
+  amber(Colors.amber),
+  grey(Colors.grey),
+  black(Colors.black);
+
+  const AvailableAlarmColors(this.value);
+  final Color value;
+}
+
 extension AlarmIterable on Iterable<Alarm> {
   Alarm? findById(String id) {
     for (var alarm in this) {

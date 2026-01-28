@@ -54,6 +54,13 @@ class SpotAlert extends JuneState {
     geofencePort = setupGeofenceEventPort();
     geofencePort.listen((message) => handleGeofenceEvent(message, alarms));
 
+    var permission = await Geolocator.checkPermission();
+    if (permission == .denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == .denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
     var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
     var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
     stream.listen((position) => handlePositionUpdate(position, this), onError: (dynamic error) => onPositionStreamError(error, this));
