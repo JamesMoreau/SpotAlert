@@ -41,14 +41,15 @@ class SpotAlert extends JuneState {
   // Settings
   late PackageInfo packageInfo;
 
-  ReceivePort geofencePort = .new();
+  late ReceivePort geofencePort;
 
   @override
   Future<void> onInit() async {
     alarms = await loadAlarms();
     await loadGeofencesForAlarms(alarms);
 
-    setupGeofenceCallbackPort(this);
+    geofencePort = setupGeofenceEventPort();
+    geofencePort.listen((message) => handleGeofenceEvent(message, alarms));
 
     packageInfo = await PackageInfo.fromPlatform();
 
@@ -103,25 +104,27 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
   }
 }
 
-ReceivePort setupGeofenceCallbackPort(SpotAlert spotAlert) {
+ReceivePort setupGeofenceEventPort() {
   var port = ReceivePort();
 
   // Removing and re-registering the fixes hot-reloading issue.
   IsolateNameServer.removePortNameMapping(geofenceCallbackPortName);
-  final success = IsolateNameServer.registerPortWithName(port.sendPort, geofenceCallbackPortName);
-  if (success) {
-    port.listen((message) => handleGeofencePortEvent(message, spotAlert));
-  } else {
-    debugPrintError('Failed to register geofence port.');
+  var success = IsolateNameServer.registerPortWithName(port.sendPort, geofenceCallbackPortName);
+  if (!success) {
+    port.close();
+    throw StateError(
+      'Fatal: unable to register geofence callback port '
+      '($geofenceCallbackPortName). App cannot function.',
+    );
   }
 
   return port;
 }
 
-Future<void> handleGeofencePortEvent(dynamic message, SpotAlert spotAlert) async {
+Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
   var event = TriggeredAlarmEvent.fromMap(message as Map<String, dynamic>);
 
-  var triggered = spotAlert.alarms.findById(event.id);
+  var triggered = alarms.findById(event.id);
   if (triggered == null) {
     debugPrintError('Unable to retrieve triggered alarm given by id: ${event.id}');
     return;
