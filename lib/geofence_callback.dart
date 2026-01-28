@@ -5,7 +5,7 @@ import 'package:native_geofence/native_geofence.dart';
 import 'package:spot_alert/main.dart';
 import 'package:vibration/vibration.dart';
 
-const geofenceCallbackPortName = 'geofence_callback_port';
+const geofenceCallbackPortName = 'geofence_event_port';
 
 class TriggeredAlarmEvent {
   final String id;
