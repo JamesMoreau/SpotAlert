@@ -1,13 +1,37 @@
+import 'dart:ui';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:spot_alert/main.dart';
 import 'package:vibration/vibration.dart';
 
+const geofenceCallbackPortName = 'geofence_callback_port';
+
+class TriggeredAlarmEvent {
+  final String id;
+  final DateTime timestamp;
+
+  TriggeredAlarmEvent({required this.id, required this.timestamp});
+
+  Map<String, dynamic> toMap() => {'id': id, 'timestamp': timestamp.millisecondsSinceEpoch};
+
+  factory TriggeredAlarmEvent.fromMap(Map<String, dynamic> map) =>
+      TriggeredAlarmEvent(id: map['id'] as String, timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp'] as int));
+}
+
 @pragma('vm:entry-point')
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
-  debugPrintInfo('geofenceTriggered params: $params');
-
   var id = params.geofences.first.id;
+
+  var port = IsolateNameServer.lookupPortByName(geofenceCallbackPortName);
+  if (port == null) {
+    debugPrintError('Unable to resolve callback port.');
+    return;
+  }
+
+  var event = TriggeredAlarmEvent(id: id, timestamp: DateTime.now());
+  port.send(event.toMap());
+  // port.send(id);
 
   var success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
   var didInitialize = success ?? false;
@@ -31,10 +55,6 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 
   await Future<void>.delayed(const Duration(seconds: 1));
 }
-
-  // final SendPort? send =
-  //     IsolateNameServer.lookupPortByName('native_geofence_send_port');
-  // send?.send(params.event.name);
 
   // 
   // debugPrint('Alarm with id $id triggered.');

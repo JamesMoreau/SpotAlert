@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -12,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/geofence_callback.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
+import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 
 const geofenceNumberLimit = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
 
@@ -38,10 +41,22 @@ class SpotAlert extends JuneState {
   // Settings
   late PackageInfo packageInfo;
 
+  ReceivePort geofencePort = .new();
+
   @override
   Future<void> onInit() async {
     pageController = PageController(initialPage: view.index);
     packageInfo = await PackageInfo.fromPlatform();
+
+    // Fixes hot-reloading.
+    IsolateNameServer.removePortNameMapping(geofenceCallbackPortName);
+    final success = IsolateNameServer.registerPortWithName(geofencePort.sendPort, geofenceCallbackPortName);
+    if (success) {
+      geofencePort.listen((message) => handleGeofencePortEvent(message, this));
+    } else {
+      debugPrintError('Failed to register geofence port.');
+    }
+
     super.onInit();
   }
 
@@ -50,8 +65,31 @@ class SpotAlert extends JuneState {
     pageController.dispose();
     mapController.dispose();
     tileProvider?.dispose();
+
+    IsolateNameServer.removePortNameMapping(geofenceCallbackPortName); // Fixes hot-reloading.
+    geofencePort.close();
     super.onClose();
   }
+}
+
+Future<void> handleGeofencePortEvent(dynamic message, SpotAlert spotAlert) async {
+  var event = TriggeredAlarmEvent.fromMap(message as Map<String, dynamic>);
+
+  var triggered = spotAlert.alarms.findById(event.id);
+  if (triggered == null) {
+    debugPrintError('Unable to retrieve triggered alarm given by id: ${event.id}');
+    return;
+  }
+
+  debugPrintInfo('Alarm id ${triggered.id} triggered at ${event.timestamp}');
+
+  var success = await deactivateAlarm(triggered);
+  if (!success) {
+    debugPrintError('Unable to deactive triggered alarm: ${triggered.id}');
+    return;
+  }
+
+  showAlarmDialog(navigatorKey.currentContext!, triggered);
 }
 
 enum ActivateAlarmResult { success, limitReached, failed }
