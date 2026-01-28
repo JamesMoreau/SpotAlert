@@ -21,10 +21,6 @@ class MapView extends StatelessWidget {
     return JuneBuilder(
       () => SpotAlert(),
       builder: (spotAlert) {
-        if (spotAlert.tileProvider == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
         if (spotAlert.followUserLocation) {

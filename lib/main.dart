@@ -130,12 +130,6 @@ class MainApp extends StatelessWidget {
       home: JuneBuilder(
         () => SpotAlert(),
         builder: (spotAlert) {
-          // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
-          var appIsInitialized = spotAlert.tileProvider != null;
-          if (!appIsInitialized) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator())); //TODO
-          }
-
           return Scaffold(
             body: PageView(
               controller: spotAlert.pageController,
@@ -177,12 +171,11 @@ class MainApp extends StatelessWidget {
   }
 }
 
-// TODO(j): what in this function should instead be done in the initState fn for SpotAlert?
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (!(Platform.isIOS || Platform.isAndroid)) {
-    debugPrintError('This app is not supported on this platform. Supported platforms are iOS and Android.');
+  if (!Platform.isIOS) {
+    debugPrintError('This app is not supported on this platform. Supported platforms: iOS');
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     return;
   }

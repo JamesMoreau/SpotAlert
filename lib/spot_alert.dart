@@ -38,7 +38,7 @@ class SpotAlert extends JuneState {
   // Map
   MapController mapController = .new();
   bool mapControllerIsAttached = false; // This let's us know if we can use the controller.
-  FMTCTileProvider? tileProvider;
+  late FMTCTileProvider tileProvider;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = initialAlarmRadius;
   bool followUserLocation = false;
@@ -70,7 +70,7 @@ class SpotAlert extends JuneState {
   void onClose() {
     pageController.dispose();
     mapController.dispose();
-    tileProvider?.dispose();
+    tileProvider.dispose();
 
     IsolateNameServer.removePortNameMapping(geofenceCallbackPortName); // Fixes hot-reloading.
     geofencePort.close();
