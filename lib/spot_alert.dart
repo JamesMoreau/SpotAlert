@@ -18,6 +18,8 @@ import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/views/map.dart';
 import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 
+const mapTileStoreName = 'mapStore';
+const alarmsFilename = 'alarms.json';
 const geofenceNumberLimit = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
 
 class SpotAlert extends JuneState {
@@ -55,6 +57,9 @@ class SpotAlert extends JuneState {
     var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
     var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
     stream.listen((position) => handlePositionUpdate(position, this), onError: (dynamic error) => onPositionStreamError(error, this));
+
+    await const FMTCStore(mapTileStoreName).manage.create();
+    tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: .readUpdateCreate});
 
     packageInfo = await PackageInfo.fromPlatform();
 
@@ -248,10 +253,6 @@ Future<List<String>> getGeofenceIds() async {
     return [];
   }
 }
-
-// Future<void> reconcileAlarmsAndGeofences(List<Alarm> alarms, List<String> geofenceIds) async {
-
-// }
 
 // This should be called everytime the alarms state is changed.
 Future<void> saveSpotAlertAlarms(SpotAlert spotAlert) async {

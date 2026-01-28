@@ -24,9 +24,6 @@ TODO:
   - startup screen icon.
 */
 
-const mapTileStoreName = 'mapStore';
-const alarmsFilename = 'alarms.json';
-
 enum AvailableAlarmColors {
   blue(Colors.blue),
   green(Colors.green),
@@ -190,8 +187,6 @@ void main() async {
     return;
   }
 
-  var spotAlert = June.getState(() => SpotAlert());
-
   await SystemChrome.setPreferredOrientations([.portraitUp]);
 
   var permission = await Geolocator.checkPermission();
@@ -219,9 +214,6 @@ void main() async {
     // Retry FMTC initialization.
     await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   }
-
-  await const FMTCStore(mapTileStoreName).manage.create();
-  spotAlert.tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: .readUpdateCreate});
 
   runApp(const MainApp());
 }
