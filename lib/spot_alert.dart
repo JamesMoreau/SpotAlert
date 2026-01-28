@@ -48,16 +48,9 @@ class SpotAlert extends JuneState {
     alarms = await loadAlarms();
     await loadGeofencesForAlarms(alarms);
 
-    packageInfo = await PackageInfo.fromPlatform();
+    setupGeofenceCallbackPort(this);
 
-    // Fixes hot-reloading.
-    IsolateNameServer.removePortNameMapping(geofenceCallbackPortName);
-    final success = IsolateNameServer.registerPortWithName(geofencePort.sendPort, geofenceCallbackPortName);
-    if (success) {
-      geofencePort.listen((message) => handleGeofencePortEvent(message, this));
-    } else {
-      debugPrintError('Failed to register geofence port.');
-    }
+    packageInfo = await PackageInfo.fromPlatform();
 
     super.onInit();
   }
@@ -108,6 +101,21 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
       );
     }
   }
+}
+
+ReceivePort setupGeofenceCallbackPort(SpotAlert spotAlert) {
+  var port = ReceivePort();
+
+  // Removing and re-registering the fixes hot-reloading issue.
+  IsolateNameServer.removePortNameMapping(geofenceCallbackPortName);
+  final success = IsolateNameServer.registerPortWithName(port.sendPort, geofenceCallbackPortName);
+  if (success) {
+    port.listen((message) => handleGeofencePortEvent(message, spotAlert));
+  } else {
+    debugPrintError('Failed to register geofence port.');
+  }
+
+  return port;
 }
 
 Future<void> handleGeofencePortEvent(dynamic message, SpotAlert spotAlert) async {
@@ -219,7 +227,7 @@ Future<List<String>> getGeofenceIds() async {
 }
 
 // Future<void> reconcileAlarmsAndGeofences(List<Alarm> alarms, List<String> geofenceIds) async {
-  
+
 // }
 
 // This should be called everytime the alarms state is changed.
