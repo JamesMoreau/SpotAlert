@@ -23,7 +23,7 @@ class SpotAlert extends JuneState {
   LatLng? position; // The user's position.
 
   SpotAlertView view = .alarms;
-  late PageController pageController;
+  late PageController pageController = PageController(initialPage: view.index);
 
   // Alarms
   Alarm editAlarm = Alarm(name: '', position: const LatLng(0, 0), radius: 100);
@@ -48,8 +48,6 @@ class SpotAlert extends JuneState {
     alarms = await loadAlarms();
     await loadGeofencesForAlarms(alarms);
 
-    pageController = PageController(initialPage: view.index);
-    
     packageInfo = await PackageInfo.fromPlatform();
 
     // Fixes hot-reloading.
