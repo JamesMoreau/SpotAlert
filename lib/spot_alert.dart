@@ -46,8 +46,10 @@ class SpotAlert extends JuneState {
   @override
   Future<void> onInit() async {
     alarms = await loadAlarms();
+    await loadGeofences(alarms);
 
     pageController = PageController(initialPage: view.index);
+    
     packageInfo = await PackageInfo.fromPlatform();
 
     // Fixes hot-reloading.
@@ -80,6 +82,12 @@ Future<List<Alarm>> loadAlarms() async {
   var file = File(alarmsPath);
   var alarms = await loadAlarmsFromFile(file);
   return alarms;
+}
+
+Future<void> loadGeofences(List<Alarm> alarms) async {
+  await NativeGeofenceManager.instance.initialize();
+  var geofenceIds = await getGeofenceIds();
+  await reconcileAlarmsAndGeofences(alarms, geofenceIds);
 }
 
 Future<void> handleGeofencePortEvent(dynamic message, SpotAlert spotAlert) async {
