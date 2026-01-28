@@ -85,7 +85,29 @@ Future<List<Alarm>> loadAlarms() async {
 Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
   await NativeGeofenceManager.instance.initialize();
   var geofenceIds = await getGeofenceIds();
-  await reconcileAlarmsAndGeofences(alarms, geofenceIds);
+
+  // Mark alarms as active if they exist in OS.
+  for (var alarm in alarms) {
+    alarm.active = geofenceIds.contains(alarm.id);
+  }
+
+  // Reconcile alarms by cleaning up orphan geofences (exist in OS but no matching alarm).
+  for (var geofenceId in geofenceIds) {
+    var isOrphan = alarms.findById(geofenceId) == null;
+    if (!isOrphan) continue;
+
+    try {
+      await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
+      debugPrintWarning('Found and removed orphan geofence $geofenceId');
+    } on NativeGeofenceException catch (e) {
+      debugPrintError(
+        'Unable to remove orphaned geofence (${e.code.name}): '
+        'message=${e.message}, '
+        'detail=${e.details}, '
+        'stackTrace=${e.stacktrace}',
+      );
+    }
+  }
 }
 
 Future<void> handleGeofencePortEvent(dynamic message, SpotAlert spotAlert) async {
@@ -196,30 +218,9 @@ Future<List<String>> getGeofenceIds() async {
   }
 }
 
-Future<void> reconcileAlarmsAndGeofences(List<Alarm> alarms, List<String> geofenceIds) async {
-  // Mark alarms as active if they exist in OS
-  for (var alarm in alarms) {
-    alarm.active = geofenceIds.contains(alarm.id);
-  }
-
-  // Remove orphan geofences (exist in OS but no matching alarm)
-  for (var geofenceId in geofenceIds) {
-    var isOrphan = alarms.findById(geofenceId) == null;
-    if (!isOrphan) continue;
-
-    try {
-      await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
-      debugPrintWarning('Found and removed orphan geofence $geofenceId');
-    } on NativeGeofenceException catch (e) {
-      debugPrintError(
-        'Unable to remove orphaned geofence (${e.code.name}): '
-        'message=${e.message}, '
-        'detail=${e.details}, '
-        'stackTrace=${e.stacktrace}',
-      );
-    }
-  }
-}
+// Future<void> reconcileAlarmsAndGeofences(List<Alarm> alarms, List<String> geofenceIds) async {
+  
+// }
 
 // This should be called everytime the alarms state is changed.
 Future<void> saveAlarms(SpotAlert spotAlert) async {
