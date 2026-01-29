@@ -41,7 +41,7 @@ class MapView extends StatelessWidget {
             AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
             UserPosition(positionStream: spotAlert.positionStream),
             AlarmPlacementMarker(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
-            Compass(alarms: spotAlert.alarms, userPosition: spotAlert.position),
+            Compass(alarms: spotAlert.alarms, userPositionStream: spotAlert.positionStream),
             const Overlay(),
           ],
         );
@@ -230,10 +230,10 @@ void moveMapToUserLocation(SpotAlert spotAlert) {
 }
 
 class Compass extends StatelessWidget {
-  final LatLng? userPosition;
+  final Stream<Position> userPositionStream;
   final List<Alarm> alarms;
 
-  const Compass({required this.userPosition, required this.alarms, super.key});
+  const Compass({required this.userPositionStream, required this.alarms, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -241,63 +241,61 @@ class Compass extends StatelessWidget {
     var ellipseWidth = screenSize.width * 0.8;
     var ellipseHeight = screenSize.height * 0.65;
 
-    return IgnorePointer(
-      child: Center(
-        child: Stack(
-          alignment: .center,
-          children: [
-            Builder(
-              builder: (context) {
-                // If the user's position is not visible, show an arrow pointing towards them.
+    return StreamBuilder(
+      stream: userPositionStream,
+      builder: (context, snapshot) {
+        var position = snapshot.data;
 
-                if (userPosition == null) return const SizedBox.shrink();
+        // Nothing to show for compass if user position not available
+        if (position == null) return const SizedBox.shrink();
+        var latlng = LatLng(position.latitude, position.longitude);
 
-                var userIsVisible = MapCamera.of(context).visibleBounds.contains(userPosition!);
-                if (userIsVisible) return const SizedBox.shrink();
+        var camera = MapCamera.of(context);
 
-                var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, userPosition!);
-                var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+        // If the user's position exists but is not visible, show an arrow pointing towards them.
+        Widget? userArrow;
+        var userIsVisible = camera.visibleBounds.contains(latlng);
+        if (!userIsVisible) {
+          final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, latlng);
+          final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
-                return CompassArrow(
-                  angle: angle,
-                  arrowRotation: arrowRotation,
-                  ellipseWidth: ellipseWidth,
-                  ellipseHeight: ellipseHeight,
-                  color: Colors.blue,
-                  targetIcon: Icons.person,
-                );
-              },
-            ),
-            Builder(
-              builder: (context) {
-                // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
+          userArrow = CompassArrow(
+            angle: angle,
+            arrowRotation: arrowRotation,
+            ellipseWidth: ellipseWidth,
+            ellipseHeight: ellipseHeight,
+            color: Colors.blue,
+            targetIcon: Icons.person,
+          );
+        }
 
-                if (userPosition == null) return const SizedBox.shrink();
+        // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
+        Widget? alarmArrow;
+        var closestAlarm = getClosest(latlng, alarms, (alarm) => alarm.position);
+        if (closestAlarm != null) {
+          var closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
+          if (closestAlarmIsVisible) {
+            var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
+            var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
-                var closestAlarm = getClosest(userPosition!, alarms, (alarm) => alarm.position);
-                if (closestAlarm == null) return const SizedBox.shrink();
+            alarmArrow = CompassArrow(
+              angle: angle,
+              arrowRotation: arrowRotation,
+              ellipseWidth: ellipseWidth,
+              ellipseHeight: ellipseHeight,
+              color: closestAlarm.color,
+              targetIcon: Icons.pin_drop_rounded,
+              label: closestAlarm.name,
+            );
+          }
+        }
 
-                var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
-
-                if (closestAlarmIsVisible) return const SizedBox.shrink();
-
-                var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-                var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
-
-                return CompassArrow(
-                  angle: angle,
-                  arrowRotation: arrowRotation,
-                  ellipseWidth: ellipseWidth,
-                  ellipseHeight: ellipseHeight,
-                  color: closestAlarm.color,
-                  targetIcon: Icons.pin_drop_rounded,
-                  label: closestAlarm.name,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+        return IgnorePointer(
+          child: Center(
+            child: Stack(alignment: .center, children: [if (userArrow != null) userArrow, if (alarmArrow != null) alarmArrow]),
+          ),
+        );
+      },
     );
   }
 }
