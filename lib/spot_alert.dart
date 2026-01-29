@@ -42,7 +42,7 @@ class SpotAlert extends JuneState {
   late FMTCTileProvider tileProvider;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = initialAlarmRadius;
-  bool followUserLocation = false;
+  bool followUserPosition = false;
 
   // Settings
   late PackageInfo packageInfo;
@@ -164,14 +164,14 @@ Future<void> handlePositionUpdate(Position position, SpotAlert spotAlert) async 
   spotAlert.position = LatLng(position.latitude, position.longitude);
   spotAlert.setState();
 
-  if (spotAlert.followUserLocation) moveMapToUserLocation(spotAlert);
+  if (spotAlert.followUserPosition) moveMapToUserLocation(spotAlert);
 }
 
 void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
   debugPrintError('Gelocator position stream error');
 
   spotAlert.position = null;
-  spotAlert.followUserLocation = false;
+  spotAlert.followUserPosition = false;
   spotAlert.setState();
 }
 
