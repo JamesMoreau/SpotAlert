@@ -25,6 +25,7 @@ const geofenceNumberLimit = 20; // This limit comes from Apple's API, restrictin
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
   LatLng? position; // The user's position.
+  late Stream<Position> positionStream;
   late ReceivePort geofencePort;
 
   SpotAlertView view = .alarms;
@@ -64,6 +65,7 @@ class SpotAlert extends JuneState {
     var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
     var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
     stream.listen((position) => handlePositionUpdate(position, this), onError: (dynamic error) => onPositionStreamError(error, this));
+    positionStream = stream;
 
     await const FMTCStore(mapTileStoreName).manage.create();
     tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: .readUpdateCreate});

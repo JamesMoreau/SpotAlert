@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
@@ -38,7 +39,7 @@ class MapView extends StatelessWidget {
           children: [
             TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: spotAlert.tileProvider),
             AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
-            UserPosition(position: spotAlert.position),
+            UserPosition(positionStream: spotAlert.positionStream),
             AlarmPlacementMarker(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
             Compass(alarms: spotAlert.alarms, userPosition: spotAlert.position),
             const Overlay(),
@@ -50,25 +51,36 @@ class MapView extends StatelessWidget {
 }
 
 class UserPosition extends StatelessWidget {
-  final LatLng? position;
+  final Stream<Position> positionStream;
 
-  const UserPosition({required this.position, super.key});
+  const UserPosition({required this.positionStream, super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (position == null) return const SizedBox.shrink();
+    return StreamBuilder(
+      stream: positionStream,
+      builder: (context, snapshot) {
+        var position = snapshot.data;
 
-    return MarkerLayer(
-      markers: [
-        .new(
-          point: position!,
-          child: const Icon(Icons.circle, color: Colors.blue),
-        ),
-        .new(
-          point: position!,
-          child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
-        ),
-      ],
+        if (position == null) {
+          return const SizedBox.shrink();
+        }
+
+        var latlng = LatLng(position.latitude, position.longitude);
+
+        return MarkerLayer(
+          markers: [
+            .new(
+              point: latlng,
+              child: const Icon(Icons.circle, color: Colors.blue),
+            ),
+            .new(
+              point: latlng,
+              child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
+            ),
+          ],
+        );
+      },
     );
   }
 }
