@@ -15,6 +15,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - try repaint boundary.
   - ask for permissions to notification and location at startup.
   - should be able to remove position from the app state and just listen to the stream.
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.

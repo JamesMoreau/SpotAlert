@@ -72,11 +72,12 @@ class UserPosition extends StatelessWidget {
           markers: [
             .new(
               point: latlng,
-              child: const Icon(Icons.circle, color: Colors.blue),
-            ),
-            .new(
-              point: latlng,
-              child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
+              child: Icon(
+                Icons.person_rounded,
+                color: Colors.blue,
+                size: 30,
+                shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+              ),
             ),
           ],
         );
@@ -115,7 +116,12 @@ class AlarmMarkers extends StatelessWidget {
       child: Stack(
         alignment: .center,
         children: [
-          Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
+          Icon(
+            Icons.pin_drop_rounded,
+            color: alarm.color,
+            size: 30,
+            shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+          ),
           Positioned(
             bottom: 0,
             child: Container(
@@ -134,7 +140,7 @@ class AlarmMarkers extends StatelessWidget {
     return CircleMarker(
       point: alarm.position,
       color: alarm.color.withValues(alpha: 0.5),
-      borderColor: const Color(0xff2b2b2b),
+      borderColor: Colors.white,
       borderStrokeWidth: 2,
       radius: alarm.radius,
       useRadiusInMeter: true,
@@ -252,31 +258,13 @@ class Compass extends StatelessWidget {
                 var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, userPosition!);
                 var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
-                return IgnorePointer(
-                  child: Stack(
-                    alignment: .center,
-                    children: [
-                      Transform.translate(
-                        offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                        child: Transform.rotate(
-                          angle: arrowRotation,
-                          child: Transform.rotate(
-                            angle: -pi / 2,
-                            child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28),
-                          ),
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                        child: const Stack(
-                          children: [
-                            Center(child: Icon(Icons.circle, color: Colors.blue)),
-                            Center(child: Icon(Icons.person, color: Colors.white, size: 18)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                return CompassArrow(
+                  angle: angle,
+                  arrowRotation: arrowRotation,
+                  ellipseWidth: ellipseWidth,
+                  ellipseHeight: ellipseHeight,
+                  color: Colors.blue,
+                  targetIcon: Icons.person,
                 );
               },
             ),
@@ -295,48 +283,89 @@ class Compass extends StatelessWidget {
 
                 var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
                 var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
-                var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi);
 
-                return IgnorePointer(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Transform.translate(
-                        offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                        child: Transform.rotate(
-                          angle: arrowRotation,
-                          child: Transform.rotate(
-                            angle: -pi / 2,
-                            child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28),
-                          ),
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                        child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
-                      ),
-                      if (closestAlarm.name.isNotEmpty) ...[
-                        Transform.translate(
-                          offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
-                          child: Transform.translate(
-                            // Move the text up or down depending on the angle to now overlap with the arrow.
-                            offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
-                            child: Container(
-                              constraints: const .new(maxWidth: 100),
-                              padding: const .symmetric(horizontal: 2),
-                              decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
-                              child: Text(closestAlarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                return CompassArrow(
+                  angle: angle,
+                  arrowRotation: arrowRotation,
+                  ellipseWidth: ellipseWidth,
+                  ellipseHeight: ellipseHeight,
+                  color: closestAlarm.color,
+                  targetIcon: Icons.pin_drop_rounded,
+                  label: closestAlarm.name,
                 );
               },
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class CompassArrow extends StatelessWidget {
+  final double angle;
+  final double arrowRotation;
+  final double ellipseWidth;
+  final double ellipseHeight;
+
+  final Color color;
+  final IconData targetIcon;
+  final String? label;
+
+  const CompassArrow({
+    required this.angle,
+    required this.arrowRotation,
+    required this.ellipseWidth,
+    required this.ellipseHeight,
+    required this.color,
+    required this.targetIcon,
+    this.label,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final angleIs9to3 = angle > 0 && angle < pi;
+
+    return IgnorePointer(
+      child: Stack(
+        alignment: .center,
+        children: [
+          Transform.translate(
+            offset: .new((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+            child: Transform.rotate(
+              angle: arrowRotation,
+              child: Transform.rotate(
+                angle: -pi / 2,
+                child: Icon(Icons.arrow_forward_ios, color: color, size: 28),
+              ),
+            ),
+          ),
+          Transform.translate(
+            offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+            child: Icon(
+              targetIcon,
+              size: 32,
+              color: color,
+              shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+            ),
+          ),
+          if (label != null) ...[
+            Transform.translate(
+              offset: .new((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
+              child: Transform.translate(
+                // Move the text up or down depending on the angle to now overlap with the arrow.
+                offset: .new(0, angleIs9to3 ? -22 : 22),
+                child: Container(
+                  constraints: const .new(maxWidth: 100),
+                  padding: const .symmetric(horizontal: 2),
+                  decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
+                  child: Text(label!, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
@@ -508,6 +537,21 @@ void showInfoDialog(BuildContext context) {
       ),
     ),
   );
+}
+
+List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
+  final offsets = <Offset>[
+    .new(radius.toDouble(), 0),
+    .new(-radius.toDouble(), 0),
+    .new(0, radius.toDouble()),
+    .new(0, -radius.toDouble()),
+    .new(radius.toDouble(), radius.toDouble()),
+    .new(-radius.toDouble(), -radius.toDouble()),
+    .new(radius.toDouble(), -radius.toDouble()),
+    .new(-radius.toDouble(), radius.toDouble()),
+  ];
+
+  return offsets.map((o) => Shadow(color: color, offset: o)).toList();
 }
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);

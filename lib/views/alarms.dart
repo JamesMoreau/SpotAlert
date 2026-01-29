@@ -114,7 +114,12 @@ class AlarmsView extends StatelessWidget {
                   padding: const .all(8),
                   child: ListTile(
                     title: Text(alarm.name, maxLines: 1, overflow: .ellipsis),
-                    leading: Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
+                    leading: Icon(
+                      Icons.pin_drop_rounded,
+                      color: alarm.color,
+                      size: 30,
+                      shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+                    ),
                     subtitle: Text(alarm.position.toSexagesimal(), style: .new(fontSize: 9, color: Colors.grey[700])),
                     onLongPress: () => openAlarmEdit(context, spotAlert, alarm),
                     onTap: () => openAlarmEdit(context, spotAlert, alarm),
