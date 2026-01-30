@@ -23,7 +23,6 @@ const geofenceNumberLimit = 20; // This limit comes from Apple's API, restrictin
 
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
-  LatLng? position; // The user's position.
   late Stream<LatLng> positionStream;
   late ReceivePort geofencePort;
 
@@ -160,9 +159,6 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
 }
 
 Future<void> handlePositionUpdate(LatLng position, SpotAlert spotAlert) async {
-  spotAlert.position = LatLng(position.latitude, position.longitude);
-  spotAlert.setState();
-
   var shouldMoveToUserPosition = spotAlert.followUserPosition && spotAlert.mapControllerIsAttached;
   if (shouldMoveToUserPosition) {
     var latlng = LatLng(position.latitude, position.longitude);
@@ -174,7 +170,6 @@ Future<void> handlePositionUpdate(LatLng position, SpotAlert spotAlert) async {
 void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
   debugPrintError('Gelocator position stream error');
 
-  spotAlert.position = null;
   spotAlert.followUserPosition = false;
   spotAlert.setState();
 }
