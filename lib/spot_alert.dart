@@ -62,7 +62,9 @@ class SpotAlert extends JuneState {
     }
     var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
     var stream = Geolocator.getPositionStream(locationSettings: locationSettings).map((position) => LatLng(position.latitude, position.longitude)).asBroadcastStream();
-    stream.listen((position) => maybeFollowUser(position, this), onError: (dynamic error) => onPositionStreamError(error, this));
+    stream.listen((position) {
+      maybeFollowUser(position, this);
+    }, onError: (dynamic error) => onPositionStreamError(error, this));
     positionStream = stream;
 
     await const FMTCStore(mapTileStoreName).manage.create();
