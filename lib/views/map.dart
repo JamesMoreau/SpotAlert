@@ -64,9 +64,7 @@ class UserPosition extends StatelessWidget {
 
         var position = snapshot.data;
 
-        if (position == null) {
-          return const SizedBox.shrink();
-        }
+        if (position == null) return const SizedBox.shrink();
 
         return MarkerLayer(
           markers: [
