@@ -178,26 +178,37 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   // From this point on we can now use mapController outside the map widget.
   spotAlert.mapControllerIsAttached = true;
 
-  if (spotAlert.position == null) {
-    // Sometimes the location package takes a while to start the position stream even if the location permissions are granted.
-    await Future<void>.delayed(const Duration(seconds: 10));
+  var position = await Geolocator.getLastKnownPosition();
+  if (position != null) {
+    var latlng = LatLng(position.latitude, position.longitude);
+    spotAlert.mapController.move(latlng, initialZoom);
 
-    if (spotAlert.position == null) {
-      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-        .new(
-          behavior: .floating,
-          content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
-          action: .new(
-            label: 'Settings',
-            onPressed: () => AppSettings.openAppSettings(type: .location),
-          ),
-          shape: RoundedRectangleBorder(borderRadius: .circular(10)),
-        ),
-      );
-    }
+    return;
   }
 
-  moveMapToUserLocation(spotAlert);
+  // Sometimes the location package takes a while to start the position stream even if the location permissions are granted.
+  await Future<void>.delayed(const Duration(seconds: 10));
+
+  // Try again to get location
+  position = await Geolocator.getLastKnownPosition();
+  if (position != null) {
+    var latlng = LatLng(position.latitude, position.longitude);
+    spotAlert.mapController.move(latlng, initialZoom);
+
+    return;
+  }
+
+  ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+    .new(
+      behavior: .floating,
+      content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
+      action: .new(
+        label: 'Settings',
+        onPressed: () => AppSettings.openAppSettings(type: .location),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: .circular(10)),
+    ),
+  );
 }
 
 Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
@@ -225,21 +236,6 @@ Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
   final zoom = spotAlert.mapController.camera.zoom;
 
   spotAlert.mapController.move(latLng, zoom);
-}
-
-void moveMapToUserLocation(SpotAlert spotAlert) {
-  if (!spotAlert.mapControllerIsAttached) {
-    debugPrintError('The map controller is not attached. Cannot move to user location.');
-    return;
-  }
-
-  if (spotAlert.position == null) {
-    debugPrintError('No user position available. Cannot move to user location.');
-    return;
-  }
-
-  var zoom = spotAlert.mapController.camera.zoom;
-  spotAlert.mapController.move(spotAlert.position!, zoom);
 }
 
 class Compass extends StatelessWidget {
