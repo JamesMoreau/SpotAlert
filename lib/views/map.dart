@@ -51,7 +51,7 @@ class MapView extends StatelessWidget {
 }
 
 class UserPosition extends StatelessWidget {
-  final Stream<Position> positionStream;
+  final Stream<LatLng> positionStream;
 
   const UserPosition({required this.positionStream, super.key});
 
@@ -60,18 +60,18 @@ class UserPosition extends StatelessWidget {
     return StreamBuilder(
       stream: positionStream,
       builder: (context, snapshot) {
+        if (snapshot.hasError) return const SizedBox.shrink();
+
         var position = snapshot.data;
 
         if (position == null) {
           return const SizedBox.shrink();
         }
 
-        var latlng = LatLng(position.latitude, position.longitude);
-
         return MarkerLayer(
           markers: [
             .new(
-              point: latlng,
+              point: position,
               child: Icon(
                 Icons.person_rounded,
                 color: Colors.blue,
@@ -200,18 +200,31 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   moveMapToUserLocation(spotAlert);
 }
 
-void followOrUnfollowUser(SpotAlert spotAlert) {
-  if (spotAlert.position == null) {
-    debugPrintInfo('Cannot follow the user since there is no position.');
-    return;
-  }
-
+Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
   spotAlert.followUserPosition = !spotAlert.followUserPosition;
   spotAlert.setState();
 
+  if (!spotAlert.followUserPosition) {
+    return;
+  }
+
   // If we are following, then we need to move the map immediately instead
   // of waiting for the next location update.
-  if (spotAlert.followUserPosition) moveMapToUserLocation(spotAlert);
+
+  if (!spotAlert.mapControllerIsAttached) {
+    return;
+  }
+
+  var position = await Geolocator.getLastKnownPosition();
+  if (position == null) {
+    debugPrintInfo('Cannot follow the user since there is no known position.');
+    return;
+  }
+
+  final latLng = LatLng(position.latitude, position.longitude);
+  final zoom = spotAlert.mapController.camera.zoom;
+
+  spotAlert.mapController.move(latLng, zoom);
 }
 
 void moveMapToUserLocation(SpotAlert spotAlert) {
@@ -230,7 +243,7 @@ void moveMapToUserLocation(SpotAlert spotAlert) {
 }
 
 class Compass extends StatelessWidget {
-  final Stream<Position> userPositionStream;
+  final Stream<LatLng> userPositionStream;
   final List<Alarm> alarms;
 
   const Compass({required this.userPositionStream, required this.alarms, super.key});
@@ -244,19 +257,20 @@ class Compass extends StatelessWidget {
     return StreamBuilder(
       stream: userPositionStream,
       builder: (context, snapshot) {
+        if (snapshot.hasError) return const SizedBox.shrink();
+
         var position = snapshot.data;
 
         // Nothing to show for compass if user position not available
         if (position == null) return const SizedBox.shrink();
-        var latlng = LatLng(position.latitude, position.longitude);
 
         var camera = MapCamera.of(context);
 
         // If the user's position exists but is not visible, show an arrow pointing towards them.
         Widget? userArrow;
-        var userIsVisible = camera.visibleBounds.contains(latlng);
+        var userIsVisible = camera.visibleBounds.contains(position);
         if (!userIsVisible) {
-          final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, latlng);
+          final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, position);
           final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
           userArrow = CompassArrow(
@@ -271,7 +285,7 @@ class Compass extends StatelessWidget {
 
         // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
         Widget? alarmArrow;
-        var closestAlarm = getClosest(latlng, alarms, (alarm) => alarm.position);
+        var closestAlarm = getClosest(position, alarms, (alarm) => alarm.position);
         if (closestAlarm != null) {
           var closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
           if (closestAlarmIsVisible) {

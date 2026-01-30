@@ -15,7 +15,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/geofence_callback.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
-import 'package:spot_alert/views/map.dart';
 import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 
 const mapTileStoreName = 'mapStore';
@@ -25,7 +24,7 @@ const geofenceNumberLimit = 20; // This limit comes from Apple's API, restrictin
 class SpotAlert extends JuneState {
   List<Alarm> alarms = [];
   LatLng? position; // The user's position.
-  late Stream<Position> positionStream;
+  late Stream<LatLng> positionStream;
   late ReceivePort geofencePort;
 
   SpotAlertView view = .alarms;
@@ -63,7 +62,7 @@ class SpotAlert extends JuneState {
       }
     }
     var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
-    var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
+    var stream = Geolocator.getPositionStream(locationSettings: locationSettings).map((position) => LatLng(position.latitude, position.longitude)).asBroadcastStream();
     stream.listen((position) => handlePositionUpdate(position, this), onError: (dynamic error) => onPositionStreamError(error, this));
     positionStream = stream;
 
@@ -160,11 +159,16 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
   showAlarmDialog(navigatorKey.currentContext!, triggered);
 }
 
-Future<void> handlePositionUpdate(Position position, SpotAlert spotAlert) async {
+Future<void> handlePositionUpdate(LatLng position, SpotAlert spotAlert) async {
   spotAlert.position = LatLng(position.latitude, position.longitude);
   spotAlert.setState();
 
-  if (spotAlert.followUserPosition) moveMapToUserLocation(spotAlert);
+  var shouldMoveToUserPosition = spotAlert.followUserPosition && spotAlert.mapControllerIsAttached;
+  if (shouldMoveToUserPosition) {
+    var latlng = LatLng(position.latitude, position.longitude);
+    var zoom = spotAlert.mapController.camera.zoom;
+    spotAlert.mapController.move(latlng, zoom);
+  }
 }
 
 void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
