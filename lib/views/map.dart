@@ -24,7 +24,7 @@ class MapView extends StatelessWidget {
       builder: (spotAlert) {
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
-        if (spotAlert.followUserPosition) {
+        if (spotAlert.followUser) {
           myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
         }
 
@@ -210,10 +210,10 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
 }
 
 Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
-  spotAlert.followUserPosition = !spotAlert.followUserPosition;
+  spotAlert.followUser = !spotAlert.followUser;
   spotAlert.setState();
 
-  if (!spotAlert.followUserPosition) {
+  if (!spotAlert.followUser) {
     return;
   }
 
@@ -423,7 +423,7 @@ class Overlay extends StatelessWidget {
                 children: [
                   FloatingActionButton(child: const Icon(Icons.info_outline_rounded), onPressed: () => showInfoDialog(context)),
                   const SizedBox(height: 10),
-                  if (spotAlert.followUserPosition) ...[
+                  if (spotAlert.followUser) ...[
                     FloatingActionButton(
                       onPressed: () => followOrUnfollowUser(spotAlert),
                       elevation: 4,
@@ -450,7 +450,7 @@ class Overlay extends StatelessWidget {
                     FloatingActionButton(
                       onPressed: () {
                         spotAlert.isPlacingAlarm = true;
-                        spotAlert.followUserPosition = false;
+                        spotAlert.followUser = false;
                         spotAlert.setState();
                       },
                       elevation: 4,

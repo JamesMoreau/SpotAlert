@@ -30,7 +30,7 @@ class SpotAlert extends JuneState {
   late PageController pageController = PageController(initialPage: view.index);
 
   // Alarms
-  Alarm editAlarm = Alarm(name: '', position: const LatLng(0, 0), radius: 100);
+  Alarm editAlarm = Alarm(name: '', position: const .new(0, 0), radius: 100);
   TextEditingController nameInput = .new();
   Color colorInput = AvailableAlarmColors.blue.value;
 
@@ -40,7 +40,7 @@ class SpotAlert extends JuneState {
   late FMTCTileProvider tileProvider;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = initialAlarmRadius;
-  bool followUserPosition = false;
+  bool followUser = false;
 
   // Settings
   late PackageInfo packageInfo;
@@ -62,7 +62,7 @@ class SpotAlert extends JuneState {
     }
     var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
     var stream = Geolocator.getPositionStream(locationSettings: locationSettings).map((position) => LatLng(position.latitude, position.longitude)).asBroadcastStream();
-    stream.listen((position) => handlePositionUpdate(position, this), onError: (dynamic error) => onPositionStreamError(error, this));
+    stream.listen((position) => maybeFollowUser(position, this), onError: (dynamic error) => onPositionStreamError(error, this));
     positionStream = stream;
 
     await const FMTCStore(mapTileStoreName).manage.create();
@@ -158,8 +158,8 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
   showAlarmDialog(navigatorKey.currentContext!, triggered);
 }
 
-Future<void> handlePositionUpdate(LatLng position, SpotAlert spotAlert) async {
-  var shouldMoveToUserPosition = spotAlert.followUserPosition && spotAlert.mapControllerIsAttached;
+void maybeFollowUser(LatLng position, SpotAlert spotAlert) {
+  var shouldMoveToUserPosition = spotAlert.followUser && spotAlert.mapControllerIsAttached;
   if (shouldMoveToUserPosition) {
     var latlng = LatLng(position.latitude, position.longitude);
     var zoom = spotAlert.mapController.camera.zoom;
@@ -168,9 +168,7 @@ Future<void> handlePositionUpdate(LatLng position, SpotAlert spotAlert) async {
 }
 
 void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
-  debugPrintError('Gelocator position stream error');
-
-  spotAlert.followUserPosition = false;
+  spotAlert.followUser = false;
   spotAlert.setState();
 }
 
