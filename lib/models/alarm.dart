@@ -72,7 +72,7 @@ enum AvailableAlarmColors {
 
 extension AlarmIterable on Iterable<Alarm> {
   Alarm? findById(String id) {
-    for (var alarm in this) {
+    for (final alarm in this) {
       if (alarm.id == id) return alarm;
     }
     return null;
@@ -80,10 +80,10 @@ extension AlarmIterable on Iterable<Alarm> {
 }
 
 List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
-  var triggeredAlarms = <Alarm>[];
+  final triggeredAlarms = <Alarm>[];
 
-  for (var alarm in alarms) {
-    var distance = const Distance().distance(alarm.position, position);
+  for (final alarm in alarms) {
+    final distance = const Distance().distance(alarm.position, position);
     if (distance <= alarm.radius) triggeredAlarms.add(alarm);
   }
 
@@ -94,9 +94,9 @@ T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
   T? closestItem;
   var closestDistance = double.infinity;
 
-  for (var item in items) {
-    var itemPositon = getPosition(item);
-    var d = const Distance().distance(itemPositon, target);
+  for (final item in items) {
+    final itemPositon = getPosition(item);
+    final d = const Distance().distance(itemPositon, target);
     if (d < closestDistance) {
       closestDistance = d;
       closestItem = item;
@@ -112,19 +112,19 @@ Future<List<Alarm>> loadAlarmsFromFile(File file) async {
     return [];
   }
 
-  var contents = await file.readAsString();
+  final contents = await file.readAsString();
   if (contents.isEmpty) {
     debugPrintWarning('No alarms found in file: ${file.path}');
     return [];
   }
 
-  var decoded = jsonDecode(contents) as List;
-  var seenIds = <String>{};
-  var alarms = <Alarm>[];
+  final decoded = jsonDecode(contents) as List;
+  final seenIds = <String>{};
+  final alarms = <Alarm>[];
 
-  for (var alarmJson in decoded) {
-    var alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
-    var alarm = Alarm.fromMap(alarmMap);
+  for (final alarmJson in decoded) {
+    final alarmMap = jsonDecode(alarmJson as String) as Map<String, dynamic>;
+    final alarm = Alarm.fromMap(alarmMap);
 
     if (!seenIds.add(alarm.id)) {
       debugPrintError('Duplicate alarm id detected while loading: ${alarm.id}. Skipping duplicate.');
@@ -139,21 +139,21 @@ Future<List<Alarm>> loadAlarmsFromFile(File file) async {
 }
 
 Future<void> saveAlarmsToFile(File file, List<Alarm> alarms) async {
-  var seenIds = <String>{};
-  var alarmJsons = <String>[];
+  final seenIds = <String>{};
+  final alarmJsons = <String>[];
 
-  for (var alarm in alarms) {
+  for (final alarm in alarms) {
     if (!seenIds.add(alarm.id)) {
       debugPrintError('Duplicate alarm id detected while saving: ${alarm.id}. Skipping duplicate.');
       continue;
     }
 
-    var alarmMap = alarm.toMap();
-    var alarmJson = jsonEncode(alarmMap);
+    final alarmMap = alarm.toMap();
+    final alarmJson = jsonEncode(alarmMap);
     alarmJsons.add(alarmJson);
   }
 
-  var json = jsonEncode(alarmJsons);
+  final json = jsonEncode(alarmJsons);
   await file.writeAsString(json);
 
   debugPrintInfo('Saved ${alarmJsons.length} alarms to ${file.path}.');

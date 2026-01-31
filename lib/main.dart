@@ -15,7 +15,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - change var to final
   - ask for permissions to notification and location at startup.
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - add something cute to the app like a cartoon animal or something.
@@ -68,7 +67,7 @@ GlobalKey<ScaffoldMessengerState> globalScaffoldKey = .new();
 GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 
 void showMySnackBar(String message) {
-  var messenger = globalScaffoldKey.currentState;
+  final messenger = globalScaffoldKey.currentState;
   if (messenger == null) {
     debugPrintError('Could not show snackbar because scaffold messenger is null');
     return;
@@ -87,8 +86,8 @@ void showMySnackBar(String message) {
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    var maxConnections = 8;
-    var client = super.createHttpClient(context);
+    const maxConnections = 8;
+    final client = super.createHttpClient(context);
     client.maxConnectionsPerHost = maxConnections;
     return client;
   }
@@ -139,12 +138,12 @@ class MainApp extends StatelessWidget {
                 borderRadius: const .only(topLeft: .circular(50), topRight: .circular(50)),
                 child: NavigationBar(
                   onDestinationSelected: (int index) {
-                    var newView = SpotAlertView.values[index];
+                    final newView = SpotAlertView.values[index];
                     navigateToView(spotAlert, newView);
                   },
                   selectedIndex: spotAlert.view.index,
                   destinations: SpotAlertView.values.map((view) {
-                    var (icon, label) = switch (view) {
+                    final (icon, label) = switch (view) {
                       .alarms => (Icons.pin_drop_rounded, 'Alarms'),
                       .map => (Icons.map_rounded, 'Map'),
                       .settings => (Icons.settings_rounded, 'Settings'),
@@ -180,14 +179,14 @@ void main() async {
   HttpOverrides.global = MyHttpOverrides();
 
   // Initialize map tile cache.
-  var documentsDir = await getApplicationDocumentsDirectory();
+  final documentsDir = await getApplicationDocumentsDirectory();
   try {
     await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   } on Exception catch (error, stackTrace) {
     debugPrintInfo('FMTC initialization failed: $error\n$stackTrace');
 
     // Attempt to delete the corrupted FMTC directory.
-    var fmtcDir = Directory(path.join(documentsDir.path, 'fmtc'));
+    final fmtcDir = Directory(path.join(documentsDir.path, 'fmtc'));
     await fmtcDir.delete(recursive: true);
 
     // Retry FMTC initialization.

@@ -21,27 +21,27 @@ class TriggeredAlarmEvent {
 
 @pragma('vm:entry-point')
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
-  var id = params.geofences.first.id;
+  final id = params.geofences.first.id;
 
-  var port = IsolateNameServer.lookupPortByName(geofenceCallbackPortName);
+  final port = IsolateNameServer.lookupPortByName(geofenceCallbackPortName);
   if (port == null) {
     debugPrintError('Unable to resolve callback port.');
     return;
   }
 
-  var event = TriggeredAlarmEvent(id: id, timestamp: DateTime.now());
+  final event = TriggeredAlarmEvent(id: id, timestamp: DateTime.now());
   port.send(event.toMap());
   // port.send(id);
 
-  var success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
-  var didInitialize = success ?? false;
+  final success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
+  final didInitialize = success ?? false;
   if (!didInitialize) {
     debugPrintError('Notifications unavailable (permission denied or initialization failed).');
   }
 
-  var title = 'Alarm Triggered';
-  var message = 'You have entered the radius of an alarm.';
-  var notificationDetails = const NotificationDetails(iOS: .new(interruptionLevel: .active));
+  const title = 'Alarm Triggered';
+  const message = 'You have entered the radius of an alarm.';
+  const notificationDetails = NotificationDetails(iOS: .new(interruptionLevel: .active));
 
   try {
     await FlutterLocalNotificationsPlugin().show(id.hashCode, title, message, notificationDetails);

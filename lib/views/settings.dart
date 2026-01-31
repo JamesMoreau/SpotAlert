@@ -48,8 +48,8 @@ class SettingsView extends StatelessWidget {
                     title: const Text('Review App'),
                     trailing: const Icon(Icons.feedback_rounded),
                     onTap: () async {
-                      var uri = Uri.parse(appStoreUrl);
-                      var canLaunch = await canLaunchUrl(uri);
+                      final uri = Uri.parse(appStoreUrl);
+                      final canLaunch = await canLaunchUrl(uri);
                       if (!canLaunch) {
                         if (kDebugMode) print('Cannot launch url.');
                         return;
@@ -67,11 +67,11 @@ class SettingsView extends StatelessWidget {
                     subtitle: const Text('This can free up storage on your device.'),
                     trailing: const Icon(Icons.delete_rounded),
                     onTap: () async {
-                      var size = await const FMTCStore(mapTileStoreName).stats.size;
+                      final size = await const FMTCStore(mapTileStoreName).stats.size;
                       await const FMTCStore(mapTileStoreName).manage.reset();
 
-                      var sizeInMegabytes = double.parse((size / (1024 * 1024)).toStringAsFixed(2));
-                      var message = 'Map tile cache cleared. $sizeInMegabytes MB freed.';
+                      final sizeInMegabytes = double.parse((size / (1024 * 1024)).toStringAsFixed(2));
+                      final message = 'Map tile cache cleared. $sizeInMegabytes MB freed.';
 
                       debugPrintInfo(message);
 
@@ -98,8 +98,8 @@ class SettingsView extends StatelessWidget {
                     ),
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () async {
-                      var uri = Uri.parse(kofi);
-                      var canLaunch = await canLaunchUrl(uri);
+                      final uri = Uri.parse(kofi);
+                      final canLaunch = await canLaunchUrl(uri);
                       if (!canLaunch) {
                         if (kDebugMode) print('Cannot launch url.');
                         return;
@@ -117,16 +117,16 @@ class SettingsView extends StatelessWidget {
                       title: const Text('DEBUG: Print Alarms In Storage.'),
                       trailing: const Icon(Icons.alarm_rounded),
                       onTap: () async {
-                        var directory = await getApplicationDocumentsDirectory();
-                        var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-                        var alarmsFile = File(alarmsPath);
+                        final directory = await getApplicationDocumentsDirectory();
+                        final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+                        final alarmsFile = File(alarmsPath);
 
                         if (!alarmsFile.existsSync()) {
                           debugPrintWarning('No alarms file found in storage.');
                           return;
                         }
 
-                        var alarmJsons = await alarmsFile.readAsString();
+                        final alarmJsons = await alarmsFile.readAsString();
                         if (alarmJsons.isEmpty) {
                           debugPrintInfo('No alarms found in storage.');
                           return;

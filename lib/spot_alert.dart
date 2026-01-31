@@ -60,8 +60,8 @@ class SpotAlert extends JuneState {
         return Future.error('Location permissions are denied');
       }
     }
-    var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
-    var stream = Geolocator.getPositionStream(locationSettings: locationSettings).map((position) => LatLng(position.latitude, position.longitude)).asBroadcastStream();
+    const locationSettings = LocationSettings(accuracy: .bestForNavigation);
+    final stream = Geolocator.getPositionStream(locationSettings: locationSettings).map((position) => LatLng(position.latitude, position.longitude)).asBroadcastStream();
     stream.listen((position) {
       maybeFollowUser(position, this);
     }, onError: (dynamic error) => onPositionStreamError(error, this));
@@ -88,25 +88,25 @@ class SpotAlert extends JuneState {
 }
 
 Future<List<Alarm>> loadAlarms() async {
-  var directory = await getApplicationDocumentsDirectory();
-  var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-  var file = File(alarmsPath);
-  var alarms = await loadAlarmsFromFile(file);
+  final directory = await getApplicationDocumentsDirectory();
+  final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+  final file = File(alarmsPath);
+  final alarms = await loadAlarmsFromFile(file);
   return alarms;
 }
 
 Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
   await NativeGeofenceManager.instance.initialize();
-  var geofenceIds = await getGeofenceIds();
+  final geofenceIds = await getGeofenceIds();
 
   // Mark alarms as active if they exist in OS.
-  for (var alarm in alarms) {
+  for (final alarm in alarms) {
     alarm.active = geofenceIds.contains(alarm.id);
   }
 
   // Reconcile alarms by cleaning up orphan geofences (exist in OS but no matching alarm).
-  for (var geofenceId in geofenceIds) {
-    var isOrphan = alarms.findById(geofenceId) == null;
+  for (final geofenceId in geofenceIds) {
+    final isOrphan = alarms.findById(geofenceId) == null;
     if (!isOrphan) continue;
 
     try {
@@ -124,11 +124,11 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
 }
 
 ReceivePort setupGeofenceEventPort() {
-  var port = ReceivePort();
+  final port = ReceivePort();
 
   // Removing and re-registering the fixes hot-reloading issue.
   IsolateNameServer.removePortNameMapping(geofenceCallbackPortName);
-  var success = IsolateNameServer.registerPortWithName(port.sendPort, geofenceCallbackPortName);
+  final success = IsolateNameServer.registerPortWithName(port.sendPort, geofenceCallbackPortName);
   if (!success) {
     port.close();
     throw StateError(
@@ -141,9 +141,9 @@ ReceivePort setupGeofenceEventPort() {
 }
 
 Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
-  var event = TriggeredAlarmEvent.fromMap(message as Map<String, dynamic>);
+  final event = TriggeredAlarmEvent.fromMap(message as Map<String, dynamic>);
 
-  var triggered = alarms.findById(event.id);
+  final triggered = alarms.findById(event.id);
   if (triggered == null) {
     debugPrintError('Unable to retrieve triggered alarm given by id: ${event.id}');
     return;
@@ -151,13 +151,13 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
 
   debugPrintInfo('Alarm id ${triggered.id} triggered at ${event.timestamp}');
 
-  var success = await deactivateAlarm(triggered);
+  final success = await deactivateAlarm(triggered);
   if (!success) {
     debugPrintError('Unable to deactive triggered alarm: ${triggered.id}');
     return;
   }
 
-  var navigator = globalNavigatorKey.currentState;
+  final navigator = globalNavigatorKey.currentState;
   if (navigator == null) {
     debugPrintError('Unable to show alarm dialog: navigator not ready');
     return;
@@ -167,10 +167,10 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
 }
 
 void maybeFollowUser(LatLng position, SpotAlert spotAlert) {
-  var shouldMoveToUserPosition = spotAlert.followUser && spotAlert.mapControllerIsAttached;
+  final shouldMoveToUserPosition = spotAlert.followUser && spotAlert.mapControllerIsAttached;
   if (shouldMoveToUserPosition) {
-    var latlng = LatLng(position.latitude, position.longitude);
-    var zoom = spotAlert.mapController.camera.zoom;
+    final latlng = LatLng(position.latitude, position.longitude);
+    final zoom = spotAlert.mapController.camera.zoom;
     spotAlert.mapController.move(latlng, zoom);
   }
 }
@@ -183,20 +183,20 @@ void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
 enum ActivateAlarmResult { success, limitReached, failed }
 
 Future<ActivateAlarmResult> activateAlarm(Alarm alarm) async {
-  var geofenceIds = await getGeofenceIds();
+  final geofenceIds = await getGeofenceIds();
 
-  var geofenceAlreadyExistsForAlarm = geofenceIds.contains(alarm.id);
+  final geofenceAlreadyExistsForAlarm = geofenceIds.contains(alarm.id);
   if (geofenceAlreadyExistsForAlarm) {
     alarm.active = true;
     return ActivateAlarmResult.success;
   }
 
-  var maxGeofenceLimitReached = geofenceIds.length >= geofenceNumberLimit;
+  final maxGeofenceLimitReached = geofenceIds.length >= geofenceNumberLimit;
   if (maxGeofenceLimitReached) {
     return .limitReached;
   }
 
-  var geofence = Geofence(
+  final geofence = Geofence(
     id: alarm.id,
     location: .new(latitude: alarm.position.latitude, longitude: alarm.position.longitude),
     radiusMeters: alarm.radius,
@@ -270,8 +270,8 @@ Future<List<String>> getGeofenceIds() async {
 
 // This should be called everytime the alarms state is changed.
 Future<void> saveSpotAlertAlarms(SpotAlert spotAlert) async {
-  var directory = await getApplicationDocumentsDirectory();
-  var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-  var file = File(alarmsPath);
+  final directory = await getApplicationDocumentsDirectory();
+  final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+  final file = File(alarmsPath);
   await saveAlarmsToFile(file, spotAlert.alarms);
 }

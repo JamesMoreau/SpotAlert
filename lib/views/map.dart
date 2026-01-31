@@ -62,7 +62,7 @@ class UserPosition extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasError) return const SizedBox.shrink();
 
-        var position = snapshot.data;
+        final position = snapshot.data;
 
         if (position == null) return const SizedBox.shrink();
 
@@ -95,13 +95,13 @@ class AlarmMarkers extends StatelessWidget {
     // Display the alarms as circles or markers on the map. We create a set of markers or circles
     // representing the same alarms. The markers are only visible when the user is zoomed out
     // beyond (below) circleToMarkerZoomThreshold.
-    var showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
+    final showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
 
     if (showMarkersInsteadOfCircles) {
-      var alarmMarkers = alarms.map((a) => buildMarker(a)).toList();
+      final alarmMarkers = alarms.map((a) => buildMarker(a)).toList();
       return MarkerLayer(markers: alarmMarkers);
     } else {
-      var alarmCircles = alarms.map((a) => buildCircleMarker(a)).toList();
+      final alarmCircles = alarms.map((a) => buildCircleMarker(a)).toList();
       return CircleLayer(circles: alarmCircles);
     }
   }
@@ -178,7 +178,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
 
   var position = await Geolocator.getLastKnownPosition();
   if (position != null) {
-    var latlng = LatLng(position.latitude, position.longitude);
+    final latlng = LatLng(position.latitude, position.longitude);
     spotAlert.mapController.move(latlng, initialZoom);
 
     return;
@@ -190,13 +190,13 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   // Try again to get location
   position = await Geolocator.getLastKnownPosition();
   if (position != null) {
-    var latlng = LatLng(position.latitude, position.longitude);
+    final latlng = LatLng(position.latitude, position.longitude);
     spotAlert.mapController.move(latlng, initialZoom);
 
     return;
   }
 
-  var messenger = globalScaffoldKey.currentState;
+  final messenger = globalScaffoldKey.currentState;
   if (messenger == null) {
     debugPrintError('Could not show snackbar because scaffold messenge was null');
     return;
@@ -230,7 +230,7 @@ Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
     return;
   }
 
-  var position = await Geolocator.getLastKnownPosition();
+  final position = await Geolocator.getLastKnownPosition();
   if (position == null) {
     debugPrintInfo('Cannot follow the user since there is no known position.');
     return;
@@ -250,25 +250,25 @@ class Compass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var screenSize = MediaQuery.of(context).size;
-    var ellipseWidth = screenSize.width * 0.8;
-    var ellipseHeight = screenSize.height * 0.65;
+    final screenSize = MediaQuery.of(context).size;
+    final ellipseWidth = screenSize.width * 0.8;
+    final ellipseHeight = screenSize.height * 0.65;
 
     return StreamBuilder(
       stream: userPositionStream,
       builder: (context, snapshot) {
         if (snapshot.hasError) return const SizedBox.shrink();
 
-        var position = snapshot.data;
+        final position = snapshot.data;
 
         // Nothing to show for compass if user position not available
         if (position == null) return const SizedBox.shrink();
 
-        var camera = MapCamera.of(context);
+        final camera = MapCamera.of(context);
 
         // If the user's position exists but is not visible, show an arrow pointing towards them.
         Widget? userArrow;
-        var userIsVisible = camera.visibleBounds.contains(position);
+        final userIsVisible = camera.visibleBounds.contains(position);
         if (!userIsVisible) {
           final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, position);
           final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
@@ -285,12 +285,12 @@ class Compass extends StatelessWidget {
 
         // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
         Widget? alarmArrow;
-        var closestAlarm = getClosest(position, alarms, (alarm) => alarm.position);
+        final closestAlarm = getClosest(position, alarms, (alarm) => alarm.position);
         if (closestAlarm != null) {
-          var closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
+          final closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
           if (closestAlarmIsVisible) {
-            var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-            var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+            final arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
+            final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
             alarmArrow = CompassArrow(
               angle: angle,
@@ -387,11 +387,11 @@ class Overlay extends StatelessWidget {
   const Overlay({super.key});
 
   Future<void> placeAlarm(SpotAlert spotAlert, LatLng position) async {
-    var alarm = Alarm(name: 'Alarm', position: position, radius: spotAlert.alarmPlacementRadius);
+    final alarm = Alarm(name: 'Alarm', position: position, radius: spotAlert.alarmPlacementRadius);
     spotAlert.alarms.add(alarm);
 
     // We allow the user to have more alarms than amount of allowed geofences. The alarm will just remain unactive.
-    var result = await activateAlarm(alarm);
+    final result = await activateAlarm(alarm);
     switch (result) {
       case ActivateAlarmResult.success:
         spotAlert.isPlacingAlarm = false;
@@ -411,7 +411,7 @@ class Overlay extends StatelessWidget {
     return JuneBuilder(
       () => SpotAlert(),
       builder: (spotAlert) {
-        var statusBarHeight = MediaQuery.of(context).padding.top;
+        final statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Stack(
           alignment: .center,

@@ -21,7 +21,7 @@ class AlarmsView extends StatelessWidget {
   }
 
   Future<void> addSampleAlarms(SpotAlert spotAlert) async {
-    var sampleAlarms = [
+    final sampleAlarms = [
       Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value),
       Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value),
       Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AvailableAlarmColors.purple.value),
@@ -29,18 +29,18 @@ class AlarmsView extends StatelessWidget {
       Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value),
     ];
 
-    for (var a in sampleAlarms) {
+    for (final a in sampleAlarms) {
       spotAlert.alarms.add(a);
       spotAlert.setState();
 
-      var success = await setAlarmActiveState(spotAlert, a, setToActive: true);
+      final success = await setAlarmActiveState(spotAlert, a, setToActive: true);
       if (!success) break;
     }
   }
 
   Future<bool> setAlarmActiveState(SpotAlert spotAlert, Alarm alarm, {required bool setToActive}) async {
     if (!setToActive) {
-      var success = await deactivateAlarm(alarm);
+      final success = await deactivateAlarm(alarm);
       if (!success) {
         showMySnackBar('Failed to deactivate the alarm.');
         return false;
@@ -51,7 +51,7 @@ class AlarmsView extends StatelessWidget {
       return true;
     }
 
-    var result = await activateAlarm(alarm);
+    final result = await activateAlarm(alarm);
 
     String? message;
     switch (result) {
@@ -96,7 +96,7 @@ class AlarmsView extends StatelessWidget {
             child: ListView.builder(
               itemCount: spotAlert.alarms.length,
               itemBuilder: (context, index) {
-                var alarm = spotAlert.alarms[index];
+                final alarm = spotAlert.alarms[index];
                 return Padding(
                   padding: const .all(8),
                   child: ListTile(
@@ -131,13 +131,13 @@ class EditAlarmDialog extends StatelessWidget {
   const EditAlarmDialog({super.key});
 
   Future<void> handleAlarmDeletion(SpotAlert spotAlert) async {
-    var id = spotAlert.editAlarm.id;
+    final id = spotAlert.editAlarm.id;
 
-    var isActive = spotAlert.editAlarm.active;
+    final isActive = spotAlert.editAlarm.active;
     if (isActive) {
-      var success = await deactivateAlarm(spotAlert.editAlarm);
+      final success = await deactivateAlarm(spotAlert.editAlarm);
       if (!success) {
-        var message = 'Alarm $id could not be deactivated for deletion.';
+        final message = 'Alarm $id could not be deactivated for deletion.';
 
         debugPrintError(message);
 
@@ -211,7 +211,7 @@ class EditAlarmDialog extends StatelessWidget {
                                 child: const Icon(Icons.pin_drop_rounded, color: Colors.white),
                               ),
                             ),
-                            for (var color in AvailableAlarmColors.values) ...[
+                            for (final color in AvailableAlarmColors.values) ...[
                               Padding(
                                 padding: const .all(8),
                                 child: GestureDetector(
@@ -248,7 +248,7 @@ class EditAlarmDialog extends StatelessWidget {
                               return true;
                             });
 
-                            var position = spotAlert.editAlarm.position;
+                            final position = spotAlert.editAlarm.position;
                             spotAlert.mapController.move(position, initialZoom);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
