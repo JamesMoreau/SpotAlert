@@ -15,9 +15,9 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - change var to final
   - ask for permissions to notification and location at startup.
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
-  - can we get rid of navigator key?
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
   - startup screen icon.
@@ -64,7 +64,25 @@ ThemeData spotAlertTheme = .new(
 
 const paleBlue = Color(0xffeaf0f5);
 
-GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+GlobalKey<ScaffoldMessengerState> globalScaffoldKey = .new();
+GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
+
+void showMySnackBar(String message) {
+  var messenger = globalScaffoldKey.currentState;
+  if (messenger == null) {
+    debugPrintError('Could not show snackbar because scaffold messenger is null');
+    return;
+  }
+
+  messenger.showSnackBar(
+    .new(
+      behavior: .floating,
+      content: Padding(padding: const .all(8), child: Text(message)),
+      shape: RoundedRectangleBorder(borderRadius: .circular(10)),
+      duration: const .new(seconds: 3),
+    ),
+  );
+}
 
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -141,7 +159,8 @@ class MainApp extends StatelessWidget {
         },
       ),
       theme: spotAlertTheme,
-      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: globalScaffoldKey,
+      navigatorKey: globalNavigatorKey,
     );
   }
 }

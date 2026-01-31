@@ -157,7 +157,13 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
     return;
   }
 
-  showAlarmDialog(navigatorKey.currentContext!, triggered);
+  var navigator = globalNavigatorKey.currentState;
+  if (navigator == null) {
+    debugPrintError('Unable to show alarm dialog: navigator not ready');
+    return;
+  }
+
+  showAlarmDialog(navigator, triggered);
 }
 
 void maybeFollowUser(LatLng position, SpotAlert spotAlert) {

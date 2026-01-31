@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 
-void showAlarmDialog(BuildContext context, Alarm triggeredAlarm) {
+void showAlarmDialog(NavigatorState navigator, Alarm triggeredAlarm) {
   showGeneralDialog<void>(
-    context: context,
+    context: navigator.context,
     pageBuilder: (context, a1, a2) => Dialog.fullscreen(
       child: Container(
         width: MediaQuery.of(context).size.width,

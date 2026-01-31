@@ -196,7 +196,13 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
     return;
   }
 
-  ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
+  var messenger = globalScaffoldKey.currentState;
+  if (messenger == null) {
+    debugPrintError('Could not show snackbar because scaffold messenge was null');
+    return;
+  }
+
+  messenger.showSnackBar(
     .new(
       behavior: .floating,
       content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),

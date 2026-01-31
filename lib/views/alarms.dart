@@ -42,14 +42,7 @@ class AlarmsView extends StatelessWidget {
     if (!setToActive) {
       var success = await deactivateAlarm(alarm);
       if (!success) {
-        ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-          .new(
-            behavior: .floating,
-            content: const Padding(padding: .all(8), child: Text('Failed to deactivate the alarm.')),
-            shape: RoundedRectangleBorder(borderRadius: .circular(10)),
-          ),
-        );
-
+        showMySnackBar('Failed to deactivate the alarm.');
         return false;
       }
 
@@ -73,13 +66,7 @@ class AlarmsView extends StatelessWidget {
         message = 'Failed to activate the alarm.';
     }
 
-    ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-      .new(
-        behavior: .floating,
-        content: Padding(padding: const .all(8), child: Text(message)),
-        shape: RoundedRectangleBorder(borderRadius: .circular(10)),
-      ),
-    );
+    showMySnackBar(message);
     return false;
   }
 
@@ -154,13 +141,7 @@ class EditAlarmDialog extends StatelessWidget {
 
         debugPrintError(message);
 
-        ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-          .new(
-            behavior: .floating,
-            content: Padding(padding: const .all(8), child: Text(message)),
-            shape: RoundedRectangleBorder(borderRadius: .circular(10)),
-          ),
-        );
+        showMySnackBar(message);
         return;
       }
     }

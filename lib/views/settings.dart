@@ -67,8 +67,6 @@ class SettingsView extends StatelessWidget {
                     subtitle: const Text('This can free up storage on your device.'),
                     trailing: const Icon(Icons.delete_rounded),
                     onTap: () async {
-                      var scaffoldMessenger = ScaffoldMessenger.of(context); // Don't use Scaffold.of(context) across async gaps (according to flutter).
-
                       var size = await const FMTCStore(mapTileStoreName).stats.size;
                       await const FMTCStore(mapTileStoreName).manage.reset();
 
@@ -77,14 +75,7 @@ class SettingsView extends StatelessWidget {
 
                       debugPrintInfo(message);
 
-                      scaffoldMessenger.showSnackBar(
-                        .new(
-                          behavior: .floating,
-                          content: Container(padding: const .all(8), child: Text(message)),
-                          duration: const .new(seconds: 3),
-                          shape: RoundedRectangleBorder(borderRadius: .circular(10)),
-                        ),
-                      );
+                      showMySnackBar(message);
                     },
                   ),
                 ),
