@@ -15,6 +15,9 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - can we be more "functional" ie avoid accessing global state and try returning values?
+  - can we get rid of pageController?
+  - can we get rid of mapControllerIsAttached?
   - ask for permissions to notification and location at startup.
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - add something cute to the app like a cartoon animal or something.

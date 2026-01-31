@@ -22,53 +22,43 @@ const alarmsFilename = 'alarms.json';
 const geofenceNumberLimit = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
 
 class SpotAlert extends JuneState {
-  List<Alarm> alarms = [];
-  late Stream<LatLng> positionStream;
-  late ReceivePort geofencePort;
-
+  final List<Alarm> alarms = [];
+  late final Stream<LatLng> positionStream;
+  final ReceivePort geofencePort = setupGeofenceEventPort();
   SpotAlertView view = .alarms;
-  late PageController pageController = PageController(initialPage: view.index);
+  late final PageController pageController = .new(initialPage: view.index);
 
-  // Alarms
+  // Alarms View
   Alarm editAlarm = Alarm(name: '', position: const .new(0, 0), radius: 100);
-  TextEditingController nameInput = .new();
+  final TextEditingController nameInput = .new();
   Color colorInput = AvailableAlarmColors.blue.value;
 
-  // Map
-  MapController mapController = .new();
+  // Map View
+  final MapController mapController = .new();
   bool mapControllerIsAttached = false; // This let's us know if we can use the controller.
-  late FMTCTileProvider tileProvider;
+  late final FMTCTileProvider tileProvider;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = initialAlarmRadius;
   bool followUser = false;
 
-  // Settings
-  late PackageInfo packageInfo;
+  // Settings View
+  late final PackageInfo packageInfo;
 
   @override
   Future<void> onInit() async {
-    alarms = await loadAlarms();
+    alarms.addAll(await loadAlarms());
     await loadGeofencesForAlarms(alarms);
 
-    geofencePort = setupGeofenceEventPort();
     geofencePort.listen((message) => handleGeofenceEvent(message, alarms));
 
-    var permission = await Geolocator.checkPermission();
-    if (permission == .denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == .denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-    const locationSettings = LocationSettings(accuracy: .bestForNavigation);
-    final stream = Geolocator.getPositionStream(locationSettings: locationSettings).map((position) => LatLng(position.latitude, position.longitude)).asBroadcastStream();
-    stream.listen((position) {
-      maybeFollowUser(position, this);
-    }, onError: (dynamic error) => onPositionStreamError(error, this));
-    positionStream = stream;
+    await checkGeolocatorPermissions();
 
-    await const FMTCStore(mapTileStoreName).manage.create();
-    tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: .readUpdateCreate});
+    positionStream = initializePositionStream();
+    positionStream.listen((p) {
+      maybeFollowUser(p, this);
+    }, onError: (dynamic error) => onPositionStreamError(error, this));
+
+    tileProvider = await initializeTileProvider(mapTileStoreName);
 
     packageInfo = await PackageInfo.fromPlatform();
 
@@ -77,9 +67,9 @@ class SpotAlert extends JuneState {
 
   @override
   void onClose() {
-    pageController.dispose();
-    mapController.dispose();
     tileProvider.dispose();
+    mapController.dispose();
+    pageController.dispose();
 
     IsolateNameServer.removePortNameMapping(geofenceCallbackPortName); // Fixes hot-reloading.
     geofencePort.close();
@@ -93,6 +83,31 @@ Future<List<Alarm>> loadAlarms() async {
   final file = File(alarmsPath);
   final alarms = await loadAlarmsFromFile(file);
   return alarms;
+}
+
+Stream<LatLng> initializePositionStream() {
+  const locationSettings = LocationSettings(accuracy: .bestForNavigation);
+  var stream = Geolocator.getPositionStream(locationSettings: locationSettings).map((p) => LatLng(p.latitude, p.longitude)).asBroadcastStream();
+
+  return stream;
+}
+
+Future<FMTCTileProvider> initializeTileProvider(String storeName) async {
+  final store = FMTCStore(storeName);
+  await store.manage.create();
+  final provider = FMTCTileProvider(stores: const {mapTileStoreName: .readUpdateCreate});
+
+  return provider;
+}
+
+Future<void> checkGeolocatorPermissions() async {
+  var permission = await Geolocator.checkPermission();
+  if (permission == .denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == .deniedForever) {
+      return Future.error('Location permissions are denied');
+    }
+  }
 }
 
 Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
