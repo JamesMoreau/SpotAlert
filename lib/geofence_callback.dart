@@ -9,7 +9,7 @@ import 'package:vibration/vibration.dart';
 // This means it does not have access to the main memory and application state, that is, SpotAlert,
 // nor the widget tree.
 
-const geofenceCallbackPortName = 'geofence_event_port';
+const geofenceEventPortName = 'geofence_event_port';
 
 class TriggeredAlarmEvent {
   final String id;
@@ -27,7 +27,7 @@ class TriggeredAlarmEvent {
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   final id = params.geofences.first.id;
 
-  final port = IsolateNameServer.lookupPortByName(geofenceCallbackPortName);
+  final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);
   if (port == null) {
     debugPrintError('Unable to resolve callback port.');
     return;

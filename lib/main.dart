@@ -15,7 +15,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - organize symbols.
   - can we be more "functional" ie avoid accessing global state and try returning values?
   - reduce parameters where not needed.
   - ask for permissions to notification and location at startup.

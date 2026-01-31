@@ -24,7 +24,7 @@ const geofenceNumberLimit = 20; // This limit comes from Apple's API, restrictin
 class SpotAlert extends JuneState {
   final List<Alarm> alarms = [];
   late final Stream<LatLng> positionStream;
-  final ReceivePort geofencePort = setupGeofenceEventPort();
+  final ReceivePort geofencePort = setupGeofenceEventPort(geofenceEventPortName);
   SpotAlertView view = .alarms;
   late final PageController pageController = .new(initialPage: view.index);
 
@@ -49,14 +49,14 @@ class SpotAlert extends JuneState {
     alarms.addAll(await loadAlarms());
     await loadGeofencesForAlarms(alarms);
 
-    geofencePort.listen((message) => handleGeofenceEvent(message, alarms));
+    geofencePort.listen((message) => handleGeofenceEvent(message, alarms, globalNavigatorKey.currentState));
 
     await checkGeolocatorPermissions();
 
-    positionStream = initializePositionStream();
+    positionStream = initializePositionStream(const .new(accuracy: .bestForNavigation));
     positionStream.listen((p) {
       maybeMoveToUser(this, p);
-    }, onError: (dynamic error) => onPositionStreamError(error, this));
+    }, onError: (dynamic error) => onPositionStreamError(error, this)); // TODO: error handling should be in initializePositionStream().
 
     tileProvider = await initializeTileProvider(mapTileStoreName);
 
@@ -71,7 +71,7 @@ class SpotAlert extends JuneState {
     mapController.dispose();
     pageController.dispose();
 
-    IsolateNameServer.removePortNameMapping(geofenceCallbackPortName); // Fixes hot-reloading.
+    IsolateNameServer.removePortNameMapping(geofenceEventPortName); // Fixes hot-reloading.
     geofencePort.close();
     super.onClose();
   }
@@ -85,11 +85,8 @@ Future<List<Alarm>> loadAlarms() async {
   return alarms;
 }
 
-Stream<LatLng> initializePositionStream() {
-  const locationSettings = LocationSettings(accuracy: .bestForNavigation);
-  var stream = Geolocator.getPositionStream(locationSettings: locationSettings).map((p) => LatLng(p.latitude, p.longitude)).asBroadcastStream();
-
-  return stream;
+Stream<LatLng> initializePositionStream(LocationSettings settings) {
+  return Geolocator.getPositionStream(locationSettings: settings).map((p) => LatLng(p.latitude, p.longitude)).asBroadcastStream();
 }
 
 void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
@@ -100,9 +97,8 @@ void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
 Future<FMTCTileProvider> initializeTileProvider(String storeName) async {
   final store = FMTCStore(storeName);
   await store.manage.create();
-  final provider = FMTCTileProvider(stores: const {mapTileStoreName: .readUpdateCreate});
 
-  return provider;
+  return FMTCTileProvider(stores: {storeName: .readUpdateCreate});
 }
 
 Future<void> checkGeolocatorPermissions() async {
@@ -115,24 +111,24 @@ Future<void> checkGeolocatorPermissions() async {
   }
 }
 
-ReceivePort setupGeofenceEventPort() {
+ReceivePort setupGeofenceEventPort(String portNmae) {
   final port = ReceivePort();
 
   // Removing and re-registering the fixes hot-reloading issue.
-  IsolateNameServer.removePortNameMapping(geofenceCallbackPortName);
-  final success = IsolateNameServer.registerPortWithName(port.sendPort, geofenceCallbackPortName);
+  IsolateNameServer.removePortNameMapping(portNmae);
+  final success = IsolateNameServer.registerPortWithName(port.sendPort, portNmae);
   if (!success) {
     port.close();
     throw StateError(
       'Fatal: unable to register geofence callback port '
-      '($geofenceCallbackPortName). App cannot function.',
+      '($portNmae). App cannot function.',
     );
   }
 
   return port;
 }
 
-Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
+Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms, NavigatorState? navigator) async {
   final event = TriggeredAlarmEvent.fromMap(message as Map<String, dynamic>);
 
   final triggered = alarms.findById(event.id);
@@ -149,7 +145,6 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
     return;
   }
 
-  final navigator = globalNavigatorKey.currentState;
   if (navigator == null) {
     debugPrintError('Unable to show alarm dialog: navigator not ready');
     return;
