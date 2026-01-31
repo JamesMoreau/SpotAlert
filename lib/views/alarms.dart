@@ -243,13 +243,13 @@ class EditAlarmDialog extends StatelessWidget {
 
                             // This is a hack but we need to be sure that map controller is attached before moving.
                             await Future.doWhile(() async {
-                              if (spotAlert.mapControllerIsAttached) return false;
+                              if (spotAlert.mapIsReady) return false;
                               await Future<void>.delayed(const Duration(milliseconds: 10));
                               return true;
                             });
 
                             final position = spotAlert.editAlarm.position;
-                            spotAlert.mapController.move(position, initialZoom);
+                            tryMoveMap(spotAlert, position);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
                           label: const Text('Go To Alarm', style: .new(color: Colors.white)),

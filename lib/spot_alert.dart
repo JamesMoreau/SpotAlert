@@ -35,7 +35,7 @@ class SpotAlert extends JuneState {
 
   // Map View
   final MapController mapController = .new();
-  bool mapControllerIsAttached = false; // This let's us know if we can use the controller.
+  bool mapIsReady = false; // This let's us know if we can use the controller.
   late final FMTCTileProvider tileProvider;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = initialAlarmRadius;
@@ -55,7 +55,7 @@ class SpotAlert extends JuneState {
 
     positionStream = initializePositionStream();
     positionStream.listen((p) {
-      maybeFollowUser(p, this);
+      maybeMoveToUser(this, p);
     }, onError: (dynamic error) => onPositionStreamError(error, this));
 
     tileProvider = await initializeTileProvider(mapTileStoreName);
@@ -181,13 +181,36 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
   showAlarmDialog(navigator, triggered);
 }
 
-void maybeFollowUser(LatLng position, SpotAlert spotAlert) {
-  final shouldMoveToUserPosition = spotAlert.followUser && spotAlert.mapControllerIsAttached;
-  if (shouldMoveToUserPosition) {
-    final latlng = LatLng(position.latitude, position.longitude);
-    final zoom = spotAlert.mapController.camera.zoom;
-    spotAlert.mapController.move(latlng, zoom);
+void tryMoveMap(SpotAlert spotAlert, LatLng position) {
+  if (!spotAlert.mapIsReady) return;
+
+  final zoom = spotAlert.mapController.camera.zoom;
+  spotAlert.mapController.move(position, zoom);
+}
+
+void maybeMoveToUser(SpotAlert spotAlert, LatLng userPosition) {
+  if (spotAlert.followUser) tryMoveMap(spotAlert, userPosition);
+}
+
+Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
+  spotAlert.followUser = !spotAlert.followUser;
+  spotAlert.setState();
+
+  if (!spotAlert.followUser) {
+    return;
   }
+
+  // If we are following, then we need to move the map immediately instead
+  // of waiting for the next location update.
+
+  final position = await Geolocator.getLastKnownPosition();
+  if (position == null) {
+    debugPrintInfo('Cannot follow the user since there is no known position.');
+    return;
+  }
+
+  final latLng = LatLng(position.latitude, position.longitude);
+  tryMoveMap(spotAlert, latLng);
 }
 
 void onPositionStreamError(dynamic error, SpotAlert spotAlert) {

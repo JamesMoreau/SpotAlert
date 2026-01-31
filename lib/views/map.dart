@@ -174,12 +174,12 @@ class AlarmPlacementMarker extends StatelessWidget {
 // Since we are using MapOptions: keepAlive = true, this function is only fired once throughout the app lifecycle.
 Future<void> onMapReady(SpotAlert spotAlert) async {
   // From this point on we can now use mapController outside the map widget.
-  spotAlert.mapControllerIsAttached = true;
+  spotAlert.mapIsReady = true;
 
   var position = await Geolocator.getLastKnownPosition();
   if (position != null) {
     final latlng = LatLng(position.latitude, position.longitude);
-    spotAlert.mapController.move(latlng, initialZoom);
+    tryMoveMap(spotAlert, latlng);
 
     return;
   }
@@ -191,7 +191,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   position = await Geolocator.getLastKnownPosition();
   if (position != null) {
     final latlng = LatLng(position.latitude, position.longitude);
-    spotAlert.mapController.move(latlng, initialZoom);
+    tryMoveMap(spotAlert, latlng);
 
     return;
   }
@@ -213,33 +213,6 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
       shape: RoundedRectangleBorder(borderRadius: .circular(10)),
     ),
   );
-}
-
-Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
-  spotAlert.followUser = !spotAlert.followUser;
-  spotAlert.setState();
-
-  if (!spotAlert.followUser) {
-    return;
-  }
-
-  // If we are following, then we need to move the map immediately instead
-  // of waiting for the next location update.
-
-  if (!spotAlert.mapControllerIsAttached) {
-    return;
-  }
-
-  final position = await Geolocator.getLastKnownPosition();
-  if (position == null) {
-    debugPrintInfo('Cannot follow the user since there is no known position.');
-    return;
-  }
-
-  final latLng = LatLng(position.latitude, position.longitude);
-  final zoom = spotAlert.mapController.camera.zoom;
-
-  spotAlert.mapController.move(latLng, zoom);
 }
 
 class Compass extends StatelessWidget {
