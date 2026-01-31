@@ -92,6 +92,11 @@ Stream<LatLng> initializePositionStream() {
   return stream;
 }
 
+void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
+  spotAlert.followUser = false;
+  spotAlert.setState();
+}
+
 Future<FMTCTileProvider> initializeTileProvider(String storeName) async {
   final store = FMTCStore(storeName);
   await store.manage.create();
@@ -106,34 +111,6 @@ Future<void> checkGeolocatorPermissions() async {
     permission = await Geolocator.requestPermission();
     if (permission == .deniedForever) {
       return Future.error('Location permissions are denied');
-    }
-  }
-}
-
-Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
-  await NativeGeofenceManager.instance.initialize();
-  final geofenceIds = await getGeofenceIds();
-
-  // Mark alarms as active if they exist in OS.
-  for (final alarm in alarms) {
-    alarm.active = geofenceIds.contains(alarm.id);
-  }
-
-  // Reconcile alarms by cleaning up orphan geofences (exist in OS but no matching alarm).
-  for (final geofenceId in geofenceIds) {
-    final isOrphan = alarms.findById(geofenceId) == null;
-    if (!isOrphan) continue;
-
-    try {
-      await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
-      debugPrintWarning('Found and removed orphan geofence $geofenceId');
-    } on NativeGeofenceException catch (e) {
-      debugPrintError(
-        'Unable to remove orphaned geofence (${e.code.name}): '
-        'message=${e.message}, '
-        'detail=${e.details}, '
-        'stackTrace=${e.stacktrace}',
-      );
     }
   }
 }
@@ -181,6 +158,48 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms) async {
   showAlarmDialog(navigator, triggered);
 }
 
+Future<List<String>> getGeofenceIds() async {
+  try {
+    return await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
+  } on NativeGeofenceException catch (e) {
+    debugPrintError(
+      'Unable to retrieve geofences (${e.code.name}): '
+      'message=${e.message}, '
+      'detail=${e.details}, '
+      'stackTrace=${e.stacktrace}',
+    );
+    return [];
+  }
+}
+
+Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
+  await NativeGeofenceManager.instance.initialize();
+  final geofenceIds = await getGeofenceIds();
+
+  // Mark alarms as active if they exist in OS.
+  for (final alarm in alarms) {
+    alarm.active = geofenceIds.contains(alarm.id);
+  }
+
+  // Reconcile alarms by cleaning up orphan geofences (exist in OS but no matching alarm).
+  for (final geofenceId in geofenceIds) {
+    final isOrphan = alarms.findById(geofenceId) == null;
+    if (!isOrphan) continue;
+
+    try {
+      await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
+      debugPrintWarning('Found and removed orphan geofence $geofenceId');
+    } on NativeGeofenceException catch (e) {
+      debugPrintError(
+        'Unable to remove orphaned geofence (${e.code.name}): '
+        'message=${e.message}, '
+        'detail=${e.details}, '
+        'stackTrace=${e.stacktrace}',
+      );
+    }
+  }
+}
+
 void tryMoveMap(SpotAlert spotAlert, LatLng position) {
   if (!spotAlert.mapIsReady) return;
 
@@ -211,11 +230,6 @@ Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
 
   final latLng = LatLng(position.latitude, position.longitude);
   tryMoveMap(spotAlert, latLng);
-}
-
-void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
-  spotAlert.followUser = false;
-  spotAlert.setState();
 }
 
 enum ActivateAlarmResult { success, limitReached, failed }
@@ -290,20 +304,6 @@ Future<bool> deactivateAlarm(Alarm alarm) async {
   debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
 
   return true;
-}
-
-Future<List<String>> getGeofenceIds() async {
-  try {
-    return await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
-  } on NativeGeofenceException catch (e) {
-    debugPrintError(
-      'Unable to retrieve geofences (${e.code.name}): '
-      'message=${e.message}, '
-      'detail=${e.details}, '
-      'stackTrace=${e.stacktrace}',
-    );
-    return [];
-  }
 }
 
 // This should be called everytime the alarms state is changed.

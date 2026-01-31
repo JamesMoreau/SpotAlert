@@ -8,7 +8,7 @@ import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
-import 'package:spot_alert/spot_alert.dart';
+import 'package:spot_alert/spot_alert_state.dart';
 
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const initialZoom = 13.0;
@@ -48,6 +48,50 @@ class MapView extends StatelessWidget {
       },
     );
   }
+}
+
+// Since we are using MapOptions: keepAlive = true, this function is only fired once throughout the app lifecycle.
+Future<void> onMapReady(SpotAlert spotAlert) async {
+  // From this point on we can now use mapController outside the map widget.
+  spotAlert.mapIsReady = true;
+
+  var position = await Geolocator.getLastKnownPosition();
+  if (position != null) {
+    final latlng = LatLng(position.latitude, position.longitude);
+    tryMoveMap(spotAlert, latlng);
+
+    return;
+  }
+
+  // Sometimes the location package takes a while to start the position stream even if the location permissions are granted.
+  await Future<void>.delayed(const Duration(seconds: 10));
+
+  // Try again to get location
+  position = await Geolocator.getLastKnownPosition();
+  if (position != null) {
+    final latlng = LatLng(position.latitude, position.longitude);
+    tryMoveMap(spotAlert, latlng);
+
+    return;
+  }
+
+  final messenger = globalScaffoldKey.currentState;
+  if (messenger == null) {
+    debugPrintError('Could not show snackbar because scaffold messenge was null');
+    return;
+  }
+
+  messenger.showSnackBar(
+    .new(
+      behavior: .floating,
+      content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
+      action: .new(
+        label: 'Settings',
+        onPressed: () => AppSettings.openAppSettings(type: .location),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: .circular(10)),
+    ),
+  );
 }
 
 class UserPosition extends StatelessWidget {
@@ -169,50 +213,6 @@ class AlarmPlacementMarker extends StatelessWidget {
       ],
     );
   }
-}
-
-// Since we are using MapOptions: keepAlive = true, this function is only fired once throughout the app lifecycle.
-Future<void> onMapReady(SpotAlert spotAlert) async {
-  // From this point on we can now use mapController outside the map widget.
-  spotAlert.mapIsReady = true;
-
-  var position = await Geolocator.getLastKnownPosition();
-  if (position != null) {
-    final latlng = LatLng(position.latitude, position.longitude);
-    tryMoveMap(spotAlert, latlng);
-
-    return;
-  }
-
-  // Sometimes the location package takes a while to start the position stream even if the location permissions are granted.
-  await Future<void>.delayed(const Duration(seconds: 10));
-
-  // Try again to get location
-  position = await Geolocator.getLastKnownPosition();
-  if (position != null) {
-    final latlng = LatLng(position.latitude, position.longitude);
-    tryMoveMap(spotAlert, latlng);
-
-    return;
-  }
-
-  final messenger = globalScaffoldKey.currentState;
-  if (messenger == null) {
-    debugPrintError('Could not show snackbar because scaffold messenge was null');
-    return;
-  }
-
-  messenger.showSnackBar(
-    .new(
-      behavior: .floating,
-      content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
-      action: .new(
-        label: 'Settings',
-        onPressed: () => AppSettings.openAppSettings(type: .location),
-      ),
-      shape: RoundedRectangleBorder(borderRadius: .circular(10)),
-    ),
-  );
 }
 
 class Compass extends StatelessWidget {
@@ -355,6 +355,8 @@ class CompassArrow extends StatelessWidget {
     );
   }
 }
+
+double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
 
 class Overlay extends StatelessWidget {
   const Overlay({super.key});
@@ -523,20 +525,3 @@ void showInfoDialog(BuildContext context) {
     ),
   );
 }
-
-List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
-  final offsets = <Offset>[
-    .new(radius.toDouble(), 0),
-    .new(-radius.toDouble(), 0),
-    .new(0, radius.toDouble()),
-    .new(0, -radius.toDouble()),
-    .new(radius.toDouble(), radius.toDouble()),
-    .new(-radius.toDouble(), -radius.toDouble()),
-    .new(radius.toDouble(), -radius.toDouble()),
-    .new(-radius.toDouble(), radius.toDouble()),
-  ];
-
-  return offsets.map((o) => Shadow(color: color, offset: o)).toList();
-}
-
-double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);

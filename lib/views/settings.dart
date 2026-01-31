@@ -7,7 +7,7 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/main.dart';
-import 'package:spot_alert/spot_alert.dart';
+import 'package:spot_alert/spot_alert_state.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const author = 'James Moreau';

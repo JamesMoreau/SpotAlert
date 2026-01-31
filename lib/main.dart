@@ -7,7 +7,7 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:spot_alert/spot_alert.dart';
+import 'package:spot_alert/spot_alert_state.dart';
 import 'package:spot_alert/views/alarms.dart';
 import 'package:spot_alert/views/map.dart';
 import 'package:spot_alert/views/settings.dart';
@@ -63,6 +63,21 @@ ThemeData spotAlertTheme = .new(
   sliderTheme: const .new(thumbShape: RoundSliderThumbShape(enabledThumbRadius: 13)),
   iconTheme: const .new(color: .new(0xff50606e)),
 );
+
+List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
+  final offsets = <Offset>[
+    .new(radius.toDouble(), 0),
+    .new(-radius.toDouble(), 0),
+    .new(0, radius.toDouble()),
+    .new(0, -radius.toDouble()),
+    .new(radius.toDouble(), radius.toDouble()),
+    .new(-radius.toDouble(), -radius.toDouble()),
+    .new(radius.toDouble(), -radius.toDouble()),
+    .new(-radius.toDouble(), radius.toDouble()),
+  ];
+
+  return offsets.map((o) => Shadow(color: color, offset: o)).toList();
+}
 
 const paleBlue = Color(0xffeaf0f5);
 

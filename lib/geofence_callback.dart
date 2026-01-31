@@ -5,6 +5,10 @@ import 'package:native_geofence/native_geofence.dart';
 import 'package:spot_alert/main.dart';
 import 'package:vibration/vibration.dart';
 
+// The geofence callback is run in it's own isolate, seperated from the main flutter isolate.
+// This means it does not have access to the main memory and application state, that is, SpotAlert,
+// nor the widget tree.
+
 const geofenceCallbackPortName = 'geofence_event_port';
 
 class TriggeredAlarmEvent {
