@@ -98,7 +98,17 @@ class MyHttpOverrides extends HttpOverrides {
 
 const Uuid idGenerator = Uuid();
 
-enum SpotAlertView { alarms, map, settings }
+enum SpotAlertView {
+  alarms(icon: Icons.pin_drop_rounded, label: 'Alarms', page: AlarmsView()),
+  map(icon: Icons.map_rounded, label: 'Map', page: MapView()),
+  settings(icon: Icons.settings_rounded, label: 'Settings', page: SettingsView());
+
+  const SpotAlertView({required this.icon, required this.label, required this.page});
+
+  final IconData icon;
+  final String label;
+  final Widget page;
+}
 
 void navigateToView(SpotAlert spotAlert, SpotAlertView view) {
   spotAlert.view = view;
@@ -129,7 +139,7 @@ class MainApp extends StatelessWidget {
             body: PageView(
               controller: spotAlert.pageController,
               physics: const NeverScrollableScrollPhysics(), // Disable swipe gesture to change pages
-              children: [const AlarmsView(), const MapView(), const SettingsView()],
+              children: SpotAlertView.values.map((v) => v.page).toList(),
             ),
             extendBody: true,
             bottomNavigationBar: Container(
@@ -145,15 +155,7 @@ class MainApp extends StatelessWidget {
                     navigateToView(spotAlert, newView);
                   },
                   selectedIndex: spotAlert.view.index,
-                  destinations: SpotAlertView.values.map((view) {
-                    final (icon, label) = switch (view) {
-                      .alarms => (Icons.pin_drop_rounded, 'Alarms'),
-                      .map => (Icons.map_rounded, 'Map'),
-                      .settings => (Icons.settings_rounded, 'Settings'),
-                    };
-
-                    return NavigationDestination(icon: Icon(icon), label: label);
-                  }).toList(),
+                  destinations: SpotAlertView.values.map((view) => NavigationDestination(icon: Icon(view.icon), label: view.label)).toList(),
                 ),
               ),
             ),
