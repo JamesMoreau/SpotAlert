@@ -248,7 +248,7 @@ class EditAlarmDialog extends StatelessWidget {
                             });
 
                             final position = spotAlert.editAlarm.position;
-                            tryMoveMap(spotAlert, position);
+                            tryMoveMap(mapController: spotAlert.mapController, position: position, mapIsReady: spotAlert.mapIsReady);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
                           label: const Text('Go To Alarm', style: .new(color: Colors.white)),

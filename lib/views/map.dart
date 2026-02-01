@@ -57,8 +57,8 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
 
   var position = await Geolocator.getLastKnownPosition();
   if (position != null) {
-    final latlng = LatLng(position.latitude, position.longitude);
-    tryMoveMap(spotAlert, latlng);
+    final latLng = LatLng(position.latitude, position.longitude);
+    tryMoveMap(mapController: spotAlert.mapController, position: latLng, mapIsReady: spotAlert.mapIsReady);
 
     return;
   }
@@ -70,7 +70,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   position = await Geolocator.getLastKnownPosition();
   if (position != null) {
     final latlng = LatLng(position.latitude, position.longitude);
-    tryMoveMap(spotAlert, latlng);
+    tryMoveMap(mapController: spotAlert.mapController, position: latlng, mapIsReady: spotAlert.mapIsReady);
 
     return;
   }

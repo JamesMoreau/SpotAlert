@@ -195,17 +195,18 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
   }
 }
 
-void tryMoveMap(SpotAlert spotAlert, LatLng position) {
-  if (!spotAlert.mapIsReady) return;
+void tryMoveMap({required bool mapIsReady, required MapController mapController, required LatLng position}) {
+  if (!mapIsReady) return;
 
-  final zoom = spotAlert.mapController.camera.zoom;
-  spotAlert.mapController.move(position, zoom);
+  final zoom = mapController.camera.zoom;
+  mapController.move(position, zoom);
 }
 
 void maybeMoveToUser(SpotAlert spotAlert, LatLng userPosition) {
-  if (spotAlert.followUser) tryMoveMap(spotAlert, userPosition);
+  if (spotAlert.followUser) tryMoveMap(mapController: spotAlert.mapController, position: userPosition, mapIsReady: spotAlert.mapIsReady);
 }
 
+// TODO: move to map.dart
 Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
   spotAlert.followUser = !spotAlert.followUser;
   spotAlert.setState();
@@ -224,7 +225,7 @@ Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
   }
 
   final latLng = LatLng(position.latitude, position.longitude);
-  tryMoveMap(spotAlert, latLng);
+  tryMoveMap(mapController: spotAlert.mapController, position: latLng, mapIsReady: spotAlert.mapIsReady);
 }
 
 enum ActivateAlarmResult { success, limitReached, failed }
