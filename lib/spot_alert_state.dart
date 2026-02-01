@@ -207,26 +207,7 @@ void maybeMoveToUser(SpotAlert spotAlert, LatLng userPosition) {
 }
 
 // TODO: move to map.dart
-Future<void> followOrUnfollowUser(SpotAlert spotAlert) async {
-  spotAlert.followUser = !spotAlert.followUser;
-  spotAlert.setState();
 
-  if (!spotAlert.followUser) {
-    return;
-  }
-
-  // If we are following, then we need to move the map immediately instead
-  // of waiting for the next location update.
-
-  final position = await Geolocator.getLastKnownPosition();
-  if (position == null) {
-    debugPrintInfo('Cannot follow the user since there is no known position.');
-    return;
-  }
-
-  final latLng = LatLng(position.latitude, position.longitude);
-  tryMoveMap(mapController: spotAlert.mapController, position: latLng, mapIsReady: spotAlert.mapIsReady);
-}
 
 enum ActivateAlarmResult { success, limitReached, failed }
 
