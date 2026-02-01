@@ -206,9 +206,6 @@ void maybeMoveToUser(SpotAlert spotAlert, LatLng userPosition) {
   if (spotAlert.followUser) tryMoveMap(mapController: spotAlert.mapController, position: userPosition, mapIsReady: spotAlert.mapIsReady);
 }
 
-// TODO: move to map.dart
-
-
 enum ActivateAlarmResult { success, limitReached, failed }
 
 Future<ActivateAlarmResult> activateAlarm(Alarm alarm) async {
