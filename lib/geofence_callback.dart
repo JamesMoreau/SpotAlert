@@ -35,7 +35,6 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 
   final event = TriggeredAlarmEvent(id: id, timestamp: DateTime.now());
   port.send(event.toMap());
-  // port.send(id);
 
   final success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
   final didInitialize = success ?? false;
