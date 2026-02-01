@@ -54,9 +54,15 @@ class SpotAlert extends JuneState {
     await checkGeolocatorPermissions();
 
     positionStream = initializePositionStream(const .new(accuracy: .bestForNavigation));
-    positionStream.listen((p) {
-      maybeMoveToUser(this, p);
-    }, onError: (dynamic error) => onPositionStreamError(error, this));
+    positionStream.listen(
+      (p) {
+        maybeMoveToUser(this, p);
+      },
+      onError: (dynamic error) {
+        followUser = false;
+        setState();
+      },
+    );
 
     tileProvider = await initializeTileProvider(mapTileStoreName);
 
@@ -87,11 +93,6 @@ Future<List<Alarm>> loadAlarms() async {
 
 Stream<LatLng> initializePositionStream(LocationSettings settings) {
   return Geolocator.getPositionStream(locationSettings: settings).map((p) => LatLng(p.latitude, p.longitude)).asBroadcastStream();
-}
-
-void onPositionStreamError(dynamic error, SpotAlert spotAlert) {
-  spotAlert.followUser = false;
-  spotAlert.setState();
 }
 
 Future<FMTCTileProvider> initializeTileProvider(String storeName) async {
@@ -285,10 +286,9 @@ Future<void> saveAlarmsToStorage(List<Alarm> alarms) async {
   try {
     final directory = await getApplicationDocumentsDirectory();
     final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-    
+
     final file = File(alarmsPath);
     await saveAlarmsToFile(file, alarms);
-    
   } on MissingPlatformDirectoryException catch (e) {
     debugPrintError('Failed to save alarms: $e');
   }
