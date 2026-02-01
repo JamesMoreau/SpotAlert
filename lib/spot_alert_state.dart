@@ -56,7 +56,7 @@ class SpotAlert extends JuneState {
     positionStream = initializePositionStream(const .new(accuracy: .bestForNavigation));
     positionStream.listen((p) {
       maybeMoveToUser(this, p);
-    }, onError: (dynamic error) => onPositionStreamError(error, this)); // TODO: error handling should be in initializePositionStream().
+    }, onError: (dynamic error) => onPositionStreamError(error, this));
 
     tileProvider = await initializeTileProvider(mapTileStoreName);
 
@@ -281,9 +281,15 @@ Future<bool> deactivateAlarm(Alarm alarm) async {
 }
 
 // This should be called everytime the alarms state is changed.
-Future<void> saveSpotAlertAlarms(SpotAlert spotAlert) async {
-  final directory = await getApplicationDocumentsDirectory();
-  final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-  final file = File(alarmsPath);
-  await saveAlarmsToFile(file, spotAlert.alarms);
+Future<void> saveAlarmsToStorage(List<Alarm> alarms) async {
+  try {
+    final directory = await getApplicationDocumentsDirectory();
+    final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+    
+    final file = File(alarmsPath);
+    await saveAlarmsToFile(file, alarms);
+    
+  } on MissingPlatformDirectoryException catch (e) {
+    debugPrintError('Failed to save alarms: $e');
+  }
 }

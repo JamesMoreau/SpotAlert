@@ -39,14 +39,15 @@ class AlarmsView extends StatelessWidget {
 
   Future<bool> setAlarmActiveState(SpotAlert spotAlert, Alarm alarm, {required bool setToActive}) async {
     if (!setToActive) {
-      final success = await deactivateAlarm(alarm);
+      var success = await deactivateAlarm(alarm);
       if (!success) {
         showMySnackBar('Failed to deactivate the alarm.');
         return false;
       }
 
       spotAlert.setState();
-      await saveSpotAlertAlarms(spotAlert);
+      await saveAlarmsToStorage(spotAlert.alarms);
+
       return true;
     }
 
@@ -147,7 +148,8 @@ class EditAlarmDialog extends StatelessWidget {
 
     spotAlert.alarms.removeWhere((a) => a.id == id);
     spotAlert.setState();
-    await saveSpotAlertAlarms(spotAlert);
+    
+    await saveAlarmsToStorage(spotAlert.alarms);
   }
 
   @override

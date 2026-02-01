@@ -125,6 +125,8 @@ enum SpotAlertView {
 }
 
 void navigateToView(SpotAlert spotAlert, SpotAlertView view) {
+  if (spotAlert.view == view) return;
+
   spotAlert.view = view;
   spotAlert.setState();
   spotAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);

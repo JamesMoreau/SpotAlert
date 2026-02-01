@@ -378,7 +378,7 @@ class Overlay extends StatelessWidget {
         debugPrintError('Could not activate newly placed alarm.');
     }
 
-    await saveSpotAlertAlarms(spotAlert);
+    await saveAlarmsToStorage(spotAlert.alarms);
   }
 
   // Returns the new followUser state or null if there is an error.
