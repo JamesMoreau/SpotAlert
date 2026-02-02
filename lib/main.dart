@@ -1,16 +1,13 @@
 import 'dart:io';
 
-import 'package:alarm/alarm.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:spot_alert/spot_alert.dart';
+import 'package:spot_alert/spot_alert_state.dart';
 import 'package:spot_alert/views/alarms.dart';
 import 'package:spot_alert/views/map.dart';
 import 'package:spot_alert/views/settings.dart';
@@ -18,38 +15,13 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - ask for notification permissions (at startup?). we should not ask only at alarm triggered because the user might think everything is working but actually it's not.
+  - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
+  - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
+  - update description in appstore to inlude train / bus.
+  - startup screen icon.
 */
-
-const author = 'James Moreau';
-const kofi = 'https://ko-fi.com/jamesmoreau';
-const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
-const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const mapTileStoreName = 'mapStore';
-const alarmsFilename = 'alarms.json';
-
-const initialZoom = 15.0;
-const circleToMarkerZoomThreshold = 10.0;
-const maxZoomSupported = 18.0;
-const initialAlarmPlacementRadius = 800.0;
-
-enum AvailableAlarmColors {
-  blue(Colors.blue),
-  green(Colors.green),
-  orange(Colors.orange),
-  redAccent(Colors.redAccent),
-  purple(Colors.purple),
-  pink(Colors.pink),
-  teal(Colors.teal),
-  brown(Colors.brown),
-  indigo(Colors.indigo),
-  amber(Colors.amber),
-  grey(Colors.grey),
-  black(Colors.black);
-
-  const AvailableAlarmColors(this.value);
-  final Color value;
-}
 
 ThemeData spotAlertTheme = .new(
   colorScheme: const .new(
@@ -90,34 +62,73 @@ ThemeData spotAlertTheme = .new(
   iconTheme: const .new(color: .new(0xff50606e)),
 );
 
+List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
+  final offsets = <Offset>[
+    .new(radius.toDouble(), 0),
+    .new(-radius.toDouble(), 0),
+    .new(0, radius.toDouble()),
+    .new(0, -radius.toDouble()),
+    .new(radius.toDouble(), radius.toDouble()),
+    .new(-radius.toDouble(), -radius.toDouble()),
+    .new(radius.toDouble(), -radius.toDouble()),
+    .new(-radius.toDouble(), radius.toDouble()),
+  ];
+
+  return offsets.map((o) => Shadow(color: color, offset: o)).toList();
+}
+
 const paleBlue = Color(0xffeaf0f5);
 
-// for switch icons.
-final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Icon?>((states) {
-  if (states.contains(WidgetState.selected)) return const Icon(Icons.check_rounded);
-  return const Icon(Icons.close_rounded);
-});
+GlobalKey<ScaffoldMessengerState> globalScaffoldKey = .new();
+GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 
-GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+void showMySnackBar(String message) {
+  final messenger = globalScaffoldKey.currentState;
+  if (messenger == null) {
+    debugPrintError('Could not show snackbar because scaffold messenger is null');
+    return;
+  }
+
+  messenger.showSnackBar(
+    .new(
+      behavior: .floating,
+      content: Padding(padding: const .all(8), child: Text(message)),
+      shape: RoundedRectangleBorder(borderRadius: .circular(10)),
+      duration: const .new(seconds: 3),
+    ),
+  );
+}
 
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    var maxConnections = 8;
-    var client = super.createHttpClient(context);
-    client.maxConnectionsPerHost = maxConnections;
+    const maxConnections = 8;
+    final client = super.createHttpClient(context)..maxConnectionsPerHost = maxConnections;
     return client;
   }
 }
 
 const Uuid idGenerator = Uuid();
 
-enum SpotAlertView { alarms, map, settings }
+enum SpotAlertView {
+  alarms(icon: Icons.pin_drop_rounded, label: 'Alarms', page: AlarmsView()),
+  map(icon: Icons.map_rounded, label: 'Map', page: MapView()),
+  settings(icon: Icons.settings_rounded, label: 'Settings', page: SettingsView());
 
-void navigateToView(SpotAlert spotAlert, SpotAlertView view) {
-  spotAlert.view = view;
-  spotAlert.setState();
-  spotAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+  const SpotAlertView({required this.icon, required this.label, required this.page});
+
+  final IconData icon;
+  final String label;
+  final Widget page;
+}
+
+Future<void> navigateToView(SpotAlert spotAlert, SpotAlertView view) async {
+  if (spotAlert.view == view) return;
+
+  spotAlert
+    ..view = view
+    ..setState();
+  await spotAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
 
   debugPrintInfo('Navigating to $view.');
 }
@@ -137,19 +148,13 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: JuneBuilder(
-        () => SpotAlert(),
+        SpotAlert.new,
         builder: (spotAlert) {
-          // Check that everything is initialized before building the app. Right now, the only thing that needs to be initialized is the map tile cache.
-          var appIsInitialized = spotAlert.tileProvider != null;
-          if (!appIsInitialized) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
-          }
-
           return Scaffold(
             body: PageView(
               controller: spotAlert.pageController,
               physics: const NeverScrollableScrollPhysics(), // Disable swipe gesture to change pages
-              children: [const AlarmsView(), const MapView(), const SettingsView()],
+              children: SpotAlertView.values.map((v) => v.page).toList(),
             ),
             extendBody: true,
             bottomNavigationBar: Container(
@@ -161,19 +166,11 @@ class MainApp extends StatelessWidget {
                 borderRadius: const .only(topLeft: .circular(50), topRight: .circular(50)),
                 child: NavigationBar(
                   onDestinationSelected: (int index) {
-                    var newView = SpotAlertView.values[index];
+                    final newView = SpotAlertView.values[index];
                     navigateToView(spotAlert, newView);
                   },
                   selectedIndex: spotAlert.view.index,
-                  destinations: SpotAlertView.values.map((view) {
-                    var (icon, label) = switch (view) {
-                      .alarms => (Icons.pin_drop_rounded, 'Alarms'),
-                      .map => (Icons.map_rounded, 'Map'),
-                      .settings => (Icons.settings_rounded, 'Settings'),
-                    };
-
-                    return NavigationDestination(icon: Icon(icon), label: label);
-                  }).toList(),
+                  destinations: SpotAlertView.values.map((view) => NavigationDestination(icon: Icon(view.icon), label: view.label)).toList(),
                 ),
               ),
             ),
@@ -181,7 +178,8 @@ class MainApp extends StatelessWidget {
         },
       ),
       theme: spotAlertTheme,
-      navigatorKey: navigatorKey,
+      scaffoldMessengerKey: globalScaffoldKey,
+      navigatorKey: globalNavigatorKey,
     );
   }
 }
@@ -189,60 +187,31 @@ class MainApp extends StatelessWidget {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (!(Platform.isIOS || Platform.isAndroid)) {
-    debugPrintError('This app is not supported on this platform. Supported platforms are iOS and Android.');
+  if (!Platform.isIOS) {
+    debugPrintError('This app is not supported on this platform. Supported platforms: iOS');
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     return;
   }
 
-  var spotAlert = June.getState(() => SpotAlert());
-
   await SystemChrome.setPreferredOrientations([.portraitUp]);
-
-  await Alarm.init();
-
-  var locationSettings = const LocationSettings(accuracy: .bestForNavigation);
-  var stream = Geolocator.getPositionStream(locationSettings: locationSettings);
-  stream.listen(
-    (location) async {
-      spotAlert.position = LatLng(location.latitude, location.longitude);
-      spotAlert.setState();
-
-      await checkAlarms(spotAlert);
-
-      if (spotAlert.followUserLocation) await moveMapToUserLocation(spotAlert);
-    },
-    onError: (error) async {
-      debugPrintError('Gelocator position stream error.');
-
-      spotAlert.position = null;
-      spotAlert.followUserLocation = false;
-      spotAlert.setState();
-    },
-  );
-
-  await loadAlarms(spotAlert);
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();
 
   // Initialize map tile cache.
-  var documentsDirectory = (await getApplicationDocumentsDirectory()).path;
+  final documentsDir = await getApplicationDocumentsDirectory();
   try {
-    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   } on Exception catch (error, stackTrace) {
-    debugPrint('FMTC initialization failed: $error\n$stackTrace');
+    debugPrintInfo('FMTC initialization failed: $error\n$stackTrace');
 
     // Attempt to delete the corrupted FMTC directory.
-    var dir = Directory(path.join((await getApplicationDocumentsDirectory()).absolute.path, 'fmtc'));
-    await dir.delete(recursive: true);
+    final fmtcDir = Directory(path.join(documentsDir.path, 'fmtc'));
+    await fmtcDir.delete(recursive: true);
 
     // Retry FMTC initialization.
-    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDirectory);
+    await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   }
-
-  await const FMTCStore(mapTileStoreName).manage.create();
-  spotAlert.tileProvider = FMTCTileProvider(stores: const {mapTileStoreName: .readUpdateCreate});
 
   runApp(const MainApp());
 }

@@ -3,7 +3,7 @@ import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
-import 'package:spot_alert/spot_alert.dart';
+import 'package:spot_alert/spot_alert_state.dart';
 
 class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});
@@ -12,19 +12,16 @@ class AlarmsView extends StatelessWidget {
     debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
 
     // Copy the alarm to the buffer alarm. We don't do this inside the edit widget to avoid rebuilds resetting the buffer state.
-    spotAlert.editAlarm = alarm;
-    spotAlert.colorInput = alarm.color;
+    spotAlert
+      ..editAlarm = alarm
+      ..colorInput = alarm.color;
     spotAlert.nameInput.text = alarm.name;
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => const EditAlarmDialog(),
-    );
+    showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (context) => const EditAlarmDialog());
   }
 
-  void addSampleAlarms(SpotAlert spotAlert) {
-    var sampleAlarms = [
+  Future<void> addSampleAlarms(SpotAlert spotAlert) async {
+    final sampleAlarms = [
       Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value),
       Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value),
       Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AvailableAlarmColors.purple.value),
@@ -32,13 +29,52 @@ class AlarmsView extends StatelessWidget {
       Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value),
     ];
 
-    for (var a in sampleAlarms) addAlarm(spotAlert, a);
+    for (final a in sampleAlarms) {
+      spotAlert.alarms.add(a);
+      spotAlert.setState();
+
+      final success = await setAlarmActiveState(spotAlert, a, setToActive: true);
+      if (!success) break;
+    }
+  }
+
+  Future<bool> setAlarmActiveState(SpotAlert spotAlert, Alarm alarm, {required bool setToActive}) async {
+    if (!setToActive) {
+      final success = await deactivateAlarm(alarm);
+      if (!success) {
+        showMySnackBar('Failed to deactivate the alarm.');
+        return false;
+      }
+
+      spotAlert.setState();
+      await saveAlarmsToStorage(spotAlert.alarms);
+
+      return true;
+    }
+
+    final result = await activateAlarm(alarm);
+
+    String? message;
+    switch (result) {
+      case .success:
+        spotAlert.setState();
+        return true;
+
+      case .limitReached:
+        message = 'Maximum number of geofences allowed by iOS reached. Turn off one to add another.';
+
+      case .failed:
+        message = 'Failed to activate the alarm.';
+    }
+
+    showMySnackBar(message);
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
         if (spotAlert.alarms.isEmpty) {
           return Center(
@@ -47,11 +83,9 @@ class AlarmsView extends StatelessWidget {
               children: [
                 const Text('No alarms.'),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                   onPressed: () => addSampleAlarms(spotAlert),
-                  child: const Text('Add Some Alarms', style: TextStyle(color: Colors.white)),
+                  child: const Text('Add Some Alarms', style: .new(color: Colors.white)),
                 ),
               ],
             ),
@@ -63,20 +97,25 @@ class AlarmsView extends StatelessWidget {
             child: ListView.builder(
               itemCount: spotAlert.alarms.length,
               itemBuilder: (context, index) {
-                var alarm = spotAlert.alarms[index];
+                final alarm = spotAlert.alarms[index];
                 return Padding(
                   padding: const .all(8),
                   child: ListTile(
                     title: Text(alarm.name, maxLines: 1, overflow: .ellipsis),
-                    leading: Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
-                    subtitle: Text(alarm.position.toSexagesimal(), style: TextStyle(fontSize: 9, color: Colors.grey[700])),
+                    leading: Icon(
+                      Icons.pin_drop_rounded,
+                      color: alarm.color,
+                      size: 30,
+                      shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+                    ),
+                    subtitle: Text(alarm.position.toSexagesimal(), style: .new(fontSize: 9, color: Colors.grey[700])),
                     onLongPress: () => openAlarmEdit(context, spotAlert, alarm),
                     onTap: () => openAlarmEdit(context, spotAlert, alarm),
                     trailing: Switch(
                       value: alarm.active,
                       activeThumbColor: alarm.color,
                       thumbIcon: thumbIcon,
-                      onChanged: (value) => updateAndSaveAlarm(spotAlert, alarm, isActive: value),
+                      onChanged: (value) => setAlarmActiveState(spotAlert, alarm, setToActive: value),
                     ),
                   ),
                 );
@@ -92,10 +131,32 @@ class AlarmsView extends StatelessWidget {
 class EditAlarmDialog extends StatelessWidget {
   const EditAlarmDialog({super.key});
 
+  Future<void> handleAlarmDeletion(SpotAlert spotAlert) async {
+    final id = spotAlert.editAlarm.id;
+
+    final isActive = spotAlert.editAlarm.active;
+    if (isActive) {
+      final success = await deactivateAlarm(spotAlert.editAlarm);
+      if (!success) {
+        final message = 'Alarm $id could not be deactivated for deletion.';
+
+        debugPrintError(message);
+
+        showMySnackBar(message);
+        return;
+      }
+    }
+
+    spotAlert.alarms.removeWhere((a) => a.id == id);
+    spotAlert.setState();
+
+    await saveAlarmsToStorage(spotAlert.alarms);
+  }
+
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
         return SizedBox(
           height: MediaQuery.of(context).size.height * 0.9,
@@ -106,24 +167,14 @@ class EditAlarmDialog extends StatelessWidget {
                 Row(
                   mainAxisAlignment: .spaceBetween,
                   children: [
-                    TextButton(
-                      child: const Text('Cancel'),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const Text(
-                      'Edit Alarm',
-                      style: TextStyle(fontSize: 18, fontWeight: .bold),
-                    ),
+                    TextButton(child: const Text('Cancel'), onPressed: () => Navigator.pop(context)),
+                    const Text('Edit Alarm', style: .new(fontSize: 18, fontWeight: .bold)),
                     TextButton(
                       child: const Text('Save'),
                       onPressed: () {
                         // Replace the actual alarm data with the buffer data.
-                        updateAndSaveAlarm(
-                          spotAlert,
-                          spotAlert.editAlarm,
-                          newName: spotAlert.nameInput.text.trim(),
-                          newColor: spotAlert.colorInput,
-                        );
+                        spotAlert.editAlarm.update(name: spotAlert.nameInput.text.trim(), color: spotAlert.colorInput);
+                        spotAlert.setState();
                         Navigator.pop(context);
                       },
                     ),
@@ -133,7 +184,7 @@ class EditAlarmDialog extends StatelessWidget {
                 Expanded(
                   child: ListView(
                     children: [
-                      Text('Name', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
+                      Text('Name', style: .new(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
                       TextFormField(
                         textAlign: .center,
                         controller: spotAlert.nameInput,
@@ -149,7 +200,7 @@ class EditAlarmDialog extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      Text('Color', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
+                      Text('Color', style: .new(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
                       SingleChildScrollView(
                         scrollDirection: .horizontal,
                         child: Row(
@@ -162,13 +213,14 @@ class EditAlarmDialog extends StatelessWidget {
                                 child: const Icon(Icons.pin_drop_rounded, color: Colors.white),
                               ),
                             ),
-                            for (var color in AvailableAlarmColors.values) ...[
+                            for (final color in AvailableAlarmColors.values) ...[
                               Padding(
                                 padding: const .all(8),
                                 child: GestureDetector(
                                   onTap: () {
-                                    spotAlert.colorInput = color.value;
-                                    spotAlert.setState();
+                                    spotAlert
+                                      ..colorInput = color.value
+                                      ..setState();
                                   },
                                   child: CircleAvatar(
                                     backgroundColor: color.value,
@@ -182,35 +234,31 @@ class EditAlarmDialog extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      Text('Position', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
-                      Text(spotAlert.editAlarm.position.toSexagesimal(), style: const TextStyle(fontWeight: .bold)),
+                      Text('Position', style: .new(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
+                      Text(spotAlert.editAlarm.position.toSexagesimal(), style: const .new(fontWeight: .bold)),
                       const SizedBox(height: 10),
                       Align(
                         child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                          ),
+                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                           onPressed: () async {
                             Navigator.pop(context); // Close the edit alarm bottom sheet.
-                            navigateToView(spotAlert, .map);
+                            await navigateToView(spotAlert, .map);
 
                             // This is a hack but we need to be sure that map controller is attached before moving.
                             await Future.doWhile(() async {
-                              if (spotAlert.mapControllerIsAttached) return false;
-                              await Future<void>.delayed(const Duration(milliseconds: 10));
-                              return true;
+                              await Future<void>.delayed(const .new(milliseconds: 10));
+                              final position = spotAlert.editAlarm.position;
+                              final success = tryMoveMap(spotAlert, position);
+                              return success;
                             });
-
-                            var position = spotAlert.editAlarm.position;
-                            spotAlert.mapController.move(position, initialZoom);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
-                          label: const Text('Go To Alarm', style: TextStyle(color: Colors.white)),
+                          label: const Text('Go To Alarm', style: .new(color: Colors.white)),
                         ),
                       ),
                       const SizedBox(height: 30),
-                      Text('Radius / Size (in meters)', style: TextStyle(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
-                      Text(spotAlert.editAlarm.radius.toInt().toString(), style: const TextStyle(fontWeight: .bold)),
+                      Text('Radius / Size (in meters)', style: .new(color: Theme.of(context).colorScheme.secondary, fontSize: 12)),
+                      Text(spotAlert.editAlarm.radius.toInt().toString(), style: const .new(fontWeight: .bold)),
                       const SizedBox(height: 30),
                       Align(
                         child: ElevatedButton(
@@ -222,14 +270,10 @@ class EditAlarmDialog extends StatelessWidget {
                             ),
                           ),
                           onPressed: () {
-                            var id = spotAlert.editAlarm.id;
-                            var ok = deleteAlarmById(spotAlert, id);
-                            if (!ok) {
-                              debugPrintError('Alarm $id could not be deleted.');
-                            }
+                            handleAlarmDeletion(spotAlert);
                             Navigator.pop(context);
                           },
-                          child: const Text('Delete Alarm', style: TextStyle(color: Colors.redAccent)),
+                          child: const Text('Delete Alarm', style: .new(color: Colors.redAccent)),
                         ),
                       ),
                     ],
@@ -243,3 +287,9 @@ class EditAlarmDialog extends StatelessWidget {
     );
   }
 }
+
+// for switch icons.
+final WidgetStateProperty<Icon?> thumbIcon = WidgetStateProperty.resolveWith<Icon?>((states) {
+  if (states.contains(WidgetState.selected)) return const Icon(Icons.check_rounded);
+  return const Icon(Icons.close_rounded);
+});

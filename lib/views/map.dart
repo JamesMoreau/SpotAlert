@@ -3,11 +3,16 @@ import 'dart:math';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
-import 'package:spot_alert/spot_alert.dart';
+import 'package:spot_alert/spot_alert_state.dart';
+
+const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const initialZoom = 13.0;
+const circleToMarkerZoomThreshold = 10.0;
 
 class MapView extends StatelessWidget {
   const MapView({super.key});
@@ -15,15 +20,11 @@ class MapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
-        if (spotAlert.tileProvider == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
-        if (spotAlert.followUserLocation) {
+        if (spotAlert.followUser) {
           myInteractiveFlags = myInteractiveFlags & ~InteractiveFlag.pinchMove & ~InteractiveFlag.drag & ~InteractiveFlag.flingAnimation;
         }
 
@@ -38,9 +39,9 @@ class MapView extends StatelessWidget {
           children: [
             TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: spotAlert.tileProvider),
             AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
-            UserPosition(position: spotAlert.position),
+            UserPosition(positionStream: spotAlert.positionStream),
             AlarmPlacementMarker(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
-            Compass(alarms: spotAlert.alarms, userPosition: spotAlert.position),
+            Compass(alarms: spotAlert.alarms, userPositionStream: spotAlert.positionStream),
             const Overlay(),
           ],
         );
@@ -49,26 +50,104 @@ class MapView extends StatelessWidget {
   }
 }
 
-class UserPosition extends StatelessWidget {
-  final LatLng? position;
+// Since we are using MapOptions: keepAlive = true, this function is only fired once throughout the app lifecycle.
+Future<void> onMapReady(SpotAlert spotAlert) async {
+  // From this point on we can now use mapController outside the map widget.
+  spotAlert.mapIsReady = true;
 
-  const UserPosition({required this.position, super.key});
+  final messenger = globalScaffoldKey.currentState;
+
+  final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    showLocationUnavailableSnackbar(messenger);
+    return;
+  }
+
+  var permission = await Geolocator.checkPermission();
+  if (permission == .denied) {
+    permission = await Geolocator.requestPermission();
+  }
+
+  if (permission == .denied || permission == .deniedForever) {
+    debugPrintWarning('Location permissions are denied');
+    showLocationUnavailableSnackbar(messenger);
+    return;
+  }
+
+  // From this point assume location permissions are granted.
+
+  var position = await Geolocator.getLastKnownPosition();
+  if (position != null) {
+    final latlng = LatLng(position.latitude, position.longitude);
+    tryMoveMap(spotAlert, latlng);
+
+    return;
+  }
+
+  // Sometimes the location package takes a while to start the position stream even if the location permissions are granted.
+  await Future<void>.delayed(const Duration(seconds: 10));
+
+  // Try again to get location
+  position = await Geolocator.getLastKnownPosition();
+  if (position != null) {
+    final latlng = LatLng(position.latitude, position.longitude);
+    tryMoveMap(spotAlert, latlng);
+
+    return;
+  }
+
+  showLocationUnavailableSnackbar(messenger);
+}
+
+void showLocationUnavailableSnackbar(ScaffoldMessengerState? messenger) {
+  if (messenger == null) {
+    debugPrintError('Could not show snackbar because scaffold messenger was null');
+    return;
+  }
+
+  messenger.showSnackBar(
+    SnackBar(
+      behavior: .floating,
+      content: const Padding(padding: .all(8), child: Text('Are location permissions enabled?')),
+      action: .new(
+        label: 'Settings',
+        onPressed: () => AppSettings.openAppSettings(type: .location),
+      ),
+      shape: RoundedRectangleBorder(borderRadius: .circular(10)),
+    ),
+  );
+}
+
+class UserPosition extends StatelessWidget {
+  final Stream<LatLng> positionStream;
+
+  const UserPosition({required this.positionStream, super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (position == null) return const SizedBox.shrink();
+    return StreamBuilder(
+      stream: positionStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return const SizedBox.shrink();
 
-    return MarkerLayer(
-      markers: [
-        .new(
-          point: position!,
-          child: const Icon(Icons.circle, color: Colors.blue),
-        ),
-        .new(
-          point: position!,
-          child: const Icon(Icons.person_rounded, color: Colors.white, size: 18),
-        ),
-      ],
+        final position = snapshot.data;
+
+        if (position == null) return const SizedBox.shrink();
+
+        return MarkerLayer(
+          markers: [
+            .new(
+              point: position,
+              child: Icon(
+                Icons.person_rounded,
+                color: Colors.blue,
+                size: 30,
+                shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -84,13 +163,13 @@ class AlarmMarkers extends StatelessWidget {
     // Display the alarms as circles or markers on the map. We create a set of markers or circles
     // representing the same alarms. The markers are only visible when the user is zoomed out
     // beyond (below) circleToMarkerZoomThreshold.
-    var showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
+    final showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
 
     if (showMarkersInsteadOfCircles) {
-      var alarmMarkers = alarms.map((a) => buildMarker(a)).toList();
+      final alarmMarkers = alarms.map(buildMarker).toList();
       return MarkerLayer(markers: alarmMarkers);
     } else {
-      var alarmCircles = alarms.map((a) => buildCircleMarker(a)).toList();
+      final alarmCircles = alarms.map(buildCircleMarker).toList();
       return CircleLayer(circles: alarmCircles);
     }
   }
@@ -103,14 +182,19 @@ class AlarmMarkers extends StatelessWidget {
       child: Stack(
         alignment: .center,
         children: [
-          Icon(Icons.pin_drop_rounded, color: alarm.color, size: 30),
+          Icon(
+            Icons.pin_drop_rounded,
+            color: alarm.color,
+            size: 30,
+            shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+          ),
           Positioned(
             bottom: 0,
             child: Container(
               constraints: const .new(maxWidth: 100),
               padding: const .symmetric(horizontal: 2),
               decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
-              child: Text(alarm.name, style: const TextStyle(fontSize: 10), overflow: .ellipsis, maxLines: 1),
+              child: Text(alarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
             ),
           ),
         ],
@@ -122,7 +206,7 @@ class AlarmMarkers extends StatelessWidget {
     return CircleMarker(
       point: alarm.position,
       color: alarm.color.withValues(alpha: 0.5),
-      borderColor: const Color(0xff2b2b2b),
+      borderColor: Colors.white,
       borderStrokeWidth: 2,
       radius: alarm.radius,
       useRadiusInMeter: true,
@@ -155,190 +239,178 @@ class AlarmPlacementMarker extends StatelessWidget {
   }
 }
 
-// Since we are using MapOptions: keepAlive = true, this function is only fired once throughout the app lifecycle.
-Future<void> onMapReady(SpotAlert spotAlert) async {
-  // From this point on we can now use mapController outside the map widget.
-  spotAlert.mapControllerIsAttached = true;
-
-  if (spotAlert.position == null) {
-    // Sometimes the location package takes a while to start the position stream even if the location permissions are granted.
-    await Future<void>.delayed(const Duration(seconds: 10));
-
-    if (spotAlert.position == null) {
-      ScaffoldMessenger.of(navigatorKey.currentContext!).showSnackBar(
-        SnackBar(
-          behavior: .floating,
-          content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
-          action: SnackBarAction(
-            label: 'Settings',
-            onPressed: () => AppSettings.openAppSettings(type: .location),
-          ),
-          shape: RoundedRectangleBorder(borderRadius: .circular(10)),
-        ),
-      );
-    }
-  }
-
-  await moveMapToUserLocation(spotAlert);
-}
-
-void followOrUnfollowUser(SpotAlert spotAlert) {
-  if (spotAlert.position == null) {
-    debugPrint('Cannot follow the user since there is no position.');
-    return;
-  }
-
-  spotAlert.followUserLocation = !spotAlert.followUserLocation;
-  spotAlert.setState();
-
-  // If we are following, then we need to move the map immediately instead
-  // of waiting for the next location update.
-  if (spotAlert.followUserLocation) moveMapToUserLocation(spotAlert);
-}
-
-Future<void> moveMapToUserLocation(SpotAlert spotAlert) async {
-  if (!spotAlert.mapControllerIsAttached) {
-    debugPrintError('The map controller is not attached. Cannot move to user location.');
-    return;
-  }
-
-  if (spotAlert.position == null) {
-    debugPrintError('No user position available. Cannot move to user location.');
-    return;
-  }
-
-  final zoom = spotAlert.mapController.camera.zoom;
-  spotAlert.mapController.move(spotAlert.position!, zoom);
-}
-
 class Compass extends StatelessWidget {
-  final LatLng? userPosition;
+  final Stream<LatLng> userPositionStream;
   final List<Alarm> alarms;
 
-  const Compass({required this.userPosition, required this.alarms, super.key});
+  const Compass({required this.userPositionStream, required this.alarms, super.key});
 
   @override
   Widget build(BuildContext context) {
-    var screenSize = MediaQuery.of(context).size;
-    var ellipseWidth = screenSize.width * 0.8;
-    var ellipseHeight = screenSize.height * 0.65;
+    final screenSize = MediaQuery.of(context).size;
+    final ellipseWidth = screenSize.width * 0.8;
+    final ellipseHeight = screenSize.height * 0.65;
+
+    return StreamBuilder(
+      stream: userPositionStream,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) return const SizedBox.shrink();
+
+        final position = snapshot.data;
+
+        // Nothing to show for compass if user position not available
+        if (position == null) return const SizedBox.shrink();
+
+        final camera = MapCamera.of(context);
+
+        // If the user's position exists but is not visible, show an arrow pointing towards them.
+        Widget? userArrow;
+        final userIsVisible = camera.visibleBounds.contains(position);
+        if (!userIsVisible) {
+          final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, position);
+          final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+
+          userArrow = CompassArrow(
+            angle: angle,
+            arrowRotation: arrowRotation,
+            ellipseWidth: ellipseWidth,
+            ellipseHeight: ellipseHeight,
+            color: Colors.blue,
+            targetIcon: Icons.person,
+          );
+        }
+
+        // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
+        Widget? alarmArrow;
+        final closestAlarm = getClosest(position, alarms, (alarm) => alarm.position);
+        if (closestAlarm != null) {
+          final closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
+          if (closestAlarmIsVisible) {
+            final arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
+            final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+
+            alarmArrow = CompassArrow(
+              angle: angle,
+              arrowRotation: arrowRotation,
+              ellipseWidth: ellipseWidth,
+              ellipseHeight: ellipseHeight,
+              color: closestAlarm.color,
+              targetIcon: Icons.pin_drop_rounded,
+              label: closestAlarm.name,
+            );
+          }
+        }
+
+        return IgnorePointer(
+          child: Center(
+            child: Stack(alignment: .center, children: [if (userArrow != null) userArrow, if (alarmArrow != null) alarmArrow]),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class CompassArrow extends StatelessWidget {
+  final double angle;
+  final double arrowRotation;
+  final double ellipseWidth;
+  final double ellipseHeight;
+
+  final Color color;
+  final IconData targetIcon;
+  final String? label;
+
+  const CompassArrow({
+    required this.angle,
+    required this.arrowRotation,
+    required this.ellipseWidth,
+    required this.ellipseHeight,
+    required this.color,
+    required this.targetIcon,
+    this.label,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final angleIs9to3 = angle > 0 && angle < pi;
 
     return IgnorePointer(
-      child: Center(
-        child: Stack(
-          alignment: .center,
-          children: [
-            Builder(
-              builder: (context) {
-                // If the user's position is not visible, show an arrow pointing towards them.
-
-                if (userPosition == null) return const SizedBox.shrink();
-
-                var userIsVisible = MapCamera.of(context).visibleBounds.contains(userPosition!);
-                if (userIsVisible) return const SizedBox.shrink();
-
-                var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, userPosition!);
-                var angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-
-                return IgnorePointer(
-                  child: Stack(
-                    alignment: .center,
-                    children: [
-                      Transform.translate(
-                        offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                        child: Transform.rotate(
-                          angle: arrowRotation,
-                          child: Transform.rotate(
-                            angle: -pi / 2,
-                            child: const Icon(Icons.arrow_forward_ios, color: Colors.blue, size: 28),
-                          ),
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                        child: const Stack(
-                          children: [
-                            Center(child: Icon(Icons.circle, color: Colors.blue)),
-                            Center(child: Icon(Icons.person, color: Colors.white, size: 18)),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+      child: Stack(
+        alignment: .center,
+        children: [
+          Transform.translate(
+            offset: .new((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+            child: Transform.rotate(
+              angle: arrowRotation,
+              child: Transform.rotate(
+                angle: -pi / 2,
+                child: Icon(Icons.arrow_forward_ios, color: color, size: 28),
+              ),
             ),
-            Builder(
-              builder: (context) {
-                // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-
-                if (userPosition == null) return const SizedBox.shrink();
-
-                var closestAlarm = getClosest(userPosition!, alarms, (alarm) => alarm.position);
-                if (closestAlarm == null) return const SizedBox.shrink();
-
-                var closestAlarmIsVisible = MapCamera.of(context).visibleBounds.contains(closestAlarm.position);
-
-                if (closestAlarmIsVisible) return const SizedBox.shrink();
-
-                var arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-                var angle = (arrowRotation + 3 * pi / 2) % (2 * pi);
-                var angleIs9to3 = angle > (0 * pi) && angle < (1 * pi);
-
-                return IgnorePointer(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Transform.translate(
-                        offset: Offset((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-                        child: Transform.rotate(
-                          angle: arrowRotation,
-                          child: Transform.rotate(
-                            angle: -pi / 2,
-                            child: Icon(Icons.arrow_forward_ios, color: closestAlarm.color, size: 28),
-                          ),
-                        ),
-                      ),
-                      Transform.translate(
-                        offset: Offset((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-                        child: Icon(Icons.pin_drop_rounded, color: closestAlarm.color, size: 32),
-                      ),
-                      if (closestAlarm.name.isNotEmpty) ...[
-                        Transform.translate(
-                          offset: Offset((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
-                          child: Transform.translate(
-                            // Move the text up or down depending on the angle to now overlap with the arrow.
-                            offset: angleIs9to3 ? const Offset(0, -22) : const Offset(0, 22),
-                            child: Container(
-                              constraints: const .new(maxWidth: 100),
-                              padding: const .symmetric(horizontal: 2),
-                              decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
-                              child: Text(closestAlarm.name, style: const TextStyle(fontSize: 10), overflow: .ellipsis, maxLines: 1),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                );
-              },
+          ),
+          Transform.translate(
+            offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
+            child: Icon(
+              targetIcon,
+              size: 32,
+              color: color,
+              shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+            ),
+          ),
+          if (label != null) ...[
+            Transform.translate(
+              offset: .new((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
+              child: Transform.translate(
+                // Move the text up or down depending on the angle to now overlap with the arrow.
+                offset: .new(0, angleIs9to3 ? -22 : 22),
+                child: Container(
+                  constraints: const .new(maxWidth: 100),
+                  padding: const .symmetric(horizontal: 2),
+                  decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
+                  child: Text(label!, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
+                ),
+              ),
             ),
           ],
-        ),
+        ],
       ),
     );
   }
 }
 
+double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
+
 class Overlay extends StatelessWidget {
   const Overlay({super.key});
+
+  Future<void> placeAlarm(SpotAlert spotAlert, LatLng position) async {
+    final alarm = Alarm(name: 'Alarm', position: position, radius: spotAlert.alarmPlacementRadius);
+    spotAlert.alarms.add(alarm);
+
+    // We allow the user to have more alarms than amount of allowed geofences. The alarm will just remain unactive.
+    final result = await activateAlarm(alarm);
+    switch (result) {
+      case ActivateAlarmResult.success:
+        spotAlert.isPlacingAlarm = false;
+        spotAlert.alarmPlacementRadius = initialAlarmRadius;
+        spotAlert.setState();
+      case ActivateAlarmResult.limitReached:
+        debugPrintWarning('Newly placed alarm could not be activated due to the limit on the number of geofences.');
+      case ActivateAlarmResult.failed:
+        debugPrintError('Could not activate newly placed alarm.');
+    }
+
+    await saveAlarmsToStorage(spotAlert.alarms);
+  }
 
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
-        var statusBarHeight = MediaQuery.of(context).padding.top;
+        final statusBarHeight = MediaQuery.of(context).padding.top;
 
         return Stack(
           alignment: .center,
@@ -356,36 +428,25 @@ class Overlay extends StatelessWidget {
                 children: [
                   FloatingActionButton(child: const Icon(Icons.info_outline_rounded), onPressed: () => showInfoDialog(context)),
                   const SizedBox(height: 10),
-                  if (spotAlert.followUserLocation) ...[
-                    FloatingActionButton(
-                      onPressed: () => followOrUnfollowUser(spotAlert),
-                      elevation: 4,
-                      backgroundColor: const .fromARGB(255, 216, 255, 218),
-                      child: const Icon(Icons.near_me_rounded),
-                    ),
-                  ] else ...[
-                    FloatingActionButton(onPressed: () => followOrUnfollowUser(spotAlert), elevation: 4, child: const Icon(Icons.lock_rounded)),
-                  ],
+                  FloatingActionButton(
+                    onPressed: () async {
+                      final success = await followOrUnfollowUser(spotAlert);
+                      if (success) spotAlert.setState();
+                    },
+                    elevation: 4,
+                    backgroundColor: spotAlert.followUser ? const Color.fromARGB(255, 216, 255, 218) : null,
+                    child: Icon(spotAlert.followUser ? Icons.near_me_rounded : Icons.lock_rounded),
+                  ),
                   const SizedBox(height: 10),
                   if (spotAlert.isPlacingAlarm) ...[
-                    FloatingActionButton(
-                      onPressed: () {
-                        var alarm = Alarm(name: 'Alarm', position: MapCamera.of(context).center, radius: spotAlert.alarmPlacementRadius);
-                        addAlarm(spotAlert, alarm);
-
-                        spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;
-                        spotAlert.setState();
-                      },
-                      elevation: 4,
-                      child: const Icon(Icons.check),
-                    ),
+                    FloatingActionButton(onPressed: () => placeAlarm(spotAlert, MapCamera.of(context).center), elevation: 4, child: const Icon(Icons.check)),
                     const SizedBox(height: 10),
                     FloatingActionButton(
                       onPressed: () {
-                        spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = initialAlarmPlacementRadius;
-                        spotAlert.setState();
+                        spotAlert
+                          ..isPlacingAlarm = false
+                          ..alarmPlacementRadius = initialAlarmRadius
+                          ..setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.cancel_rounded),
@@ -393,9 +454,10 @@ class Overlay extends StatelessWidget {
                   ] else ...[
                     FloatingActionButton(
                       onPressed: () {
-                        spotAlert.isPlacingAlarm = true;
-                        spotAlert.followUserLocation = false;
-                        spotAlert.setState();
+                        spotAlert
+                          ..isPlacingAlarm = true
+                          ..followUser = false
+                          ..setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.pin_drop_rounded),
@@ -418,13 +480,14 @@ class Overlay extends StatelessWidget {
                     padding: const .symmetric(horizontal: 15, vertical: 5),
                     child: Row(
                       children: [
-                        const Text('Size:', style: TextStyle(fontWeight: .bold)),
+                        const Text('Size:', style: .new(fontWeight: .bold)),
                         Expanded(
                           child: Slider(
                             value: spotAlert.alarmPlacementRadius,
                             onChanged: (value) {
-                              spotAlert.alarmPlacementRadius = value;
-                              spotAlert.setState();
+                              spotAlert
+                                ..alarmPlacementRadius = value
+                                ..setState();
                             },
                             min: minimumAlarmRadius,
                             max: maximumAlarmRadius,
@@ -479,7 +542,7 @@ void showInfoDialog(BuildContext context) {
               const SizedBox(height: 15),
               const Text('Staying on the map view for long periods of time may drain your battery.', textAlign: .center),
               const SizedBox(height: 15),
-              const Text('Set location permissions to "While Using" or "Always" to use the app when running in background.', textAlign: .center),
+              const Text('Set location permissions to "While Using" or "Always" and enable notifications to use the app when running in background.', textAlign: .center),
               TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
             ],
           ),
@@ -488,5 +551,3 @@ void showInfoDialog(BuildContext context) {
     ),
   );
 }
-
-double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);

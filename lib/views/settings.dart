@@ -7,8 +7,12 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/main.dart';
-import 'package:spot_alert/spot_alert.dart';
+import 'package:spot_alert/spot_alert_state.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+const author = 'James Moreau';
+const kofi = 'https://ko-fi.com/jamesmoreau';
+const appStoreUrl = 'https://apps.apple.com/app/id6478944468';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
@@ -16,7 +20,7 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
         return SafeArea(
           child: Scrollbar(
@@ -44,8 +48,8 @@ class SettingsView extends StatelessWidget {
                     title: const Text('Review App'),
                     trailing: const Icon(Icons.feedback_rounded),
                     onTap: () async {
-                      var uri = Uri.parse(appStoreUrl);
-                      var canLaunch = await canLaunchUrl(uri);
+                      final uri = Uri.parse(appStoreUrl);
+                      final canLaunch = await canLaunchUrl(uri);
                       if (!canLaunch) {
                         if (kDebugMode) print('Cannot launch url.');
                         return;
@@ -63,24 +67,15 @@ class SettingsView extends StatelessWidget {
                     subtitle: const Text('This can free up storage on your device.'),
                     trailing: const Icon(Icons.delete_rounded),
                     onTap: () async {
-                      var scaffoldMessenger = ScaffoldMessenger.of(context); // Don't use Scaffold.of(context) across async gaps (according to flutter).
-
-                      var size = await const FMTCStore(mapTileStoreName).stats.size;
+                      final size = await const FMTCStore(mapTileStoreName).stats.size;
                       await const FMTCStore(mapTileStoreName).manage.reset();
 
-                      var sizeInMegabytes = double.parse((size / (1024 * 1024)).toStringAsFixed(2));
-                      var message = 'Map tile cache cleared. $sizeInMegabytes MB freed.';
+                      final sizeInMegabytes = double.parse((size / (1024 * 1024)).toStringAsFixed(2));
+                      final message = 'Map tile cache cleared. $sizeInMegabytes MB freed.';
 
                       debugPrintInfo(message);
 
-                      scaffoldMessenger.showSnackBar(
-                        SnackBar(
-                          behavior: .floating,
-                          content: Container(padding: const .all(8), child: Text(message)),
-                          duration: const Duration(seconds: 3),
-                          shape: RoundedRectangleBorder(borderRadius: .circular(10)),
-                        ),
-                      );
+                      showMySnackBar(message);
                     },
                   ),
                 ),
@@ -95,9 +90,7 @@ class SettingsView extends StatelessWidget {
                           TextSpan(text: 'If you like this app, consider supporting the author via '),
                           TextSpan(
                             text: 'Ko-fi',
-                            style: TextStyle(
-                              decoration: .underline,
-                            ),
+                            style: .new(decoration: .underline),
                           ),
                           TextSpan(text: '.'),
                         ],
@@ -105,8 +98,8 @@ class SettingsView extends StatelessWidget {
                     ),
                     trailing: const Icon(Icons.open_in_new),
                     onTap: () async {
-                      var uri = Uri.parse(kofi);
-                      var canLaunch = await canLaunchUrl(uri);
+                      final uri = Uri.parse(kofi);
+                      final canLaunch = await canLaunchUrl(uri);
                       if (!canLaunch) {
                         if (kDebugMode) print('Cannot launch url.');
                         return;
@@ -124,16 +117,16 @@ class SettingsView extends StatelessWidget {
                       title: const Text('DEBUG: Print Alarms In Storage.'),
                       trailing: const Icon(Icons.alarm_rounded),
                       onTap: () async {
-                        var directory = await getApplicationDocumentsDirectory();
-                        var alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-                        var alarmsFile = File(alarmsPath);
+                        final directory = await getApplicationDocumentsDirectory();
+                        final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+                        final alarmsFile = File(alarmsPath);
 
                         if (!alarmsFile.existsSync()) {
                           debugPrintWarning('No alarms file found in storage.');
                           return;
                         }
 
-                        var alarmJsons = await alarmsFile.readAsString();
+                        final alarmJsons = await alarmsFile.readAsString();
                         if (alarmJsons.isEmpty) {
                           debugPrintInfo('No alarms found in storage.');
                           return;
