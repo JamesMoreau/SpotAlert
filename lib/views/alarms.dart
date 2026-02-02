@@ -243,12 +243,12 @@ class EditAlarmDialog extends StatelessWidget {
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                           onPressed: () async {
-                            // TODO: extract to function. still broken when using navigate to alarm more that once.
                             Navigator.pop(context); // Close the edit alarm bottom sheet.
 
                             await navigateToView(spotAlert, .map);
 
-                            await spotAlert.mapIsReady?.future;
+                            // Wait until map is ready before moving it.
+                            await spotAlert.mapIsReady.future;
 
                             tryMoveMap(spotAlert, spotAlert.editAlarm.position);
                           },

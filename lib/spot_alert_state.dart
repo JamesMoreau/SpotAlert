@@ -35,7 +35,7 @@ class SpotAlert extends JuneState {
 
   // Map View
   final MapController mapController = .new();
-  Completer<void>? mapIsReady; // This let's us know if we can use the controller.
+  final Completer<void> mapIsReady = Completer<void>(); // This let's us know if we can use the controller.
   late final FMTCTileProvider tileProvider;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = initialAlarmRadius;
@@ -212,10 +212,7 @@ Future<bool> followOrUnfollowUser(SpotAlert spotAlert) async {
 }
 
 bool tryMoveMap(SpotAlert spotAlert, LatLng position) {
-  final ready = spotAlert.mapIsReady;
-  if (ready == null || !ready.isCompleted) {
-    return false;
-  }
+  if (!spotAlert.mapIsReady.isCompleted) return false;
 
   final zoom = spotAlert.mapController.camera.zoom;
   final success = spotAlert.mapController.move(position, zoom);

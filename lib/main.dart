@@ -126,10 +126,6 @@ enum SpotAlertView {
 Future<void> navigateToView(SpotAlert spotAlert, SpotAlertView view) async {
   if (spotAlert.view == view) return;
 
-  if (view == SpotAlertView.map) {
-    spotAlert.mapIsReady = .new();
-  }
-
   spotAlert
     ..view = view
     ..setState();
