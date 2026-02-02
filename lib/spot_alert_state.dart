@@ -185,20 +185,24 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
 }
 
 Future<bool> followOrUnfollowUser(SpotAlert spotAlert) async {
-  spotAlert.followUser = !spotAlert.followUser;
+  final shouldFollow = !spotAlert.followUser;
 
-  // If we are following, then we need to move the map immediately instead
-  // of waiting for the next location update.
+  if (shouldFollow) {
+    // If we are following, then we need to move the map immediately instead
+    // of waiting for the next location update.
 
-  final position = await Geolocator.getLastKnownPosition();
-  if (position == null) {
-    debugPrintInfo('Cannot follow the user since there is no known position.');
-    return false;
+    final position = await Geolocator.getLastKnownPosition();
+    if (position == null) {
+      debugPrintInfo('Cannot follow the user since there is no known position.');
+      return false;
+    }
+
+    final latlng = LatLng(position.latitude, position.longitude);
+    tryMoveMap(spotAlert, latlng);
   }
 
-  final latlng = LatLng(position.latitude, position.longitude);
-  tryMoveMap(spotAlert, latlng);
-
+  // Commit state only after success
+  spotAlert.followUser = shouldFollow;
   return true;
 }
 
