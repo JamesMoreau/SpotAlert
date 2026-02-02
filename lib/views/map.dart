@@ -78,8 +78,8 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
 
   var position = await Geolocator.getLastKnownPosition();
   if (position != null) {
-    final latLng = LatLng(position.latitude, position.longitude);
-    tryMoveMap(mapController: spotAlert.mapController, position: latLng, mapIsReady: spotAlert.mapIsReady);
+    final latlng = LatLng(position.latitude, position.longitude);
+    tryMoveMap(spotAlert, latlng);
 
     return;
   }
@@ -91,7 +91,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   position = await Geolocator.getLastKnownPosition();
   if (position != null) {
     final latlng = LatLng(position.latitude, position.longitude);
-    tryMoveMap(mapController: spotAlert.mapController, position: latlng, mapIsReady: spotAlert.mapIsReady);
+    tryMoveMap(spotAlert, latlng);
 
     return;
   }
@@ -406,10 +406,8 @@ class Overlay extends StatelessWidget {
   }
 
   // Returns the new followUser state or null if there is an error.
-  Future<bool?> followOrUnfollowUser({required bool isFollowingUser, required bool mapIsReady, required MapController mapController}) async {
-    final followUser = !isFollowingUser;
-
-    if (!followUser) return false;
+  Future<bool> followOrUnfollowUser(SpotAlert spotAlert) async {
+    spotAlert.followUser = !spotAlert.followUser;
 
     // If we are following, then we need to move the map immediately instead
     // of waiting for the next location update.
@@ -417,10 +415,11 @@ class Overlay extends StatelessWidget {
     final position = await Geolocator.getLastKnownPosition();
     if (position == null) {
       debugPrintInfo('Cannot follow the user since there is no known position.');
-      return null;
+      return false;
     }
 
-    tryMoveMap(mapIsReady: mapIsReady, mapController: mapController, position: LatLng(position.latitude, position.longitude));
+    final latlng = LatLng(position.latitude, position.longitude);
+    tryMoveMap(spotAlert, latlng);
 
     return true;
   }
@@ -448,20 +447,11 @@ class Overlay extends StatelessWidget {
                 children: [
                   FloatingActionButton(child: const Icon(Icons.info_outline_rounded), onPressed: () => showInfoDialog(context)),
                   const SizedBox(height: 10),
-                  if (spotAlert.followUser) ...[
+                  if (spotAlert.followUser) ...[ // TODO: simplify
                     FloatingActionButton(
                       onPressed: () async {
-                        final followUser = await followOrUnfollowUser(
-                          isFollowingUser: spotAlert.followUser,
-                          mapIsReady: spotAlert.mapIsReady,
-                          mapController: spotAlert.mapController,
-                        );
-
-                        if (followUser == null) return;
-
-                        spotAlert
-                          ..followUser = followUser
-                          ..setState();
+                        final success = await followOrUnfollowUser(spotAlert);
+                        if (success) spotAlert.setState();
                       },
                       elevation: 4,
                       backgroundColor: const .fromARGB(255, 216, 255, 218),
@@ -470,17 +460,8 @@ class Overlay extends StatelessWidget {
                   ] else ...[
                     FloatingActionButton(
                       onPressed: () async {
-                        final followUser = await followOrUnfollowUser(
-                          isFollowingUser: spotAlert.followUser,
-                          mapIsReady: spotAlert.mapIsReady,
-                          mapController: spotAlert.mapController,
-                        );
-
-                        if (followUser == null) return;
-
-                        spotAlert
-                          ..followUser = followUser
-                          ..setState();
+                        final success = await followOrUnfollowUser(spotAlert);
+                        if (success) spotAlert.setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.lock_rounded),
