@@ -405,25 +405,6 @@ class Overlay extends StatelessWidget {
     await saveAlarmsToStorage(spotAlert.alarms);
   }
 
-  // Returns the new followUser state or null if there is an error.
-  Future<bool> followOrUnfollowUser(SpotAlert spotAlert) async {
-    spotAlert.followUser = !spotAlert.followUser;
-
-    // If we are following, then we need to move the map immediately instead
-    // of waiting for the next location update.
-
-    final position = await Geolocator.getLastKnownPosition();
-    if (position == null) {
-      debugPrintInfo('Cannot follow the user since there is no known position.');
-      return false;
-    }
-
-    final latlng = LatLng(position.latitude, position.longitude);
-    tryMoveMap(spotAlert, latlng);
-
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
@@ -447,26 +428,15 @@ class Overlay extends StatelessWidget {
                 children: [
                   FloatingActionButton(child: const Icon(Icons.info_outline_rounded), onPressed: () => showInfoDialog(context)),
                   const SizedBox(height: 10),
-                  if (spotAlert.followUser) ...[ // TODO: simplify
-                    FloatingActionButton(
-                      onPressed: () async {
-                        final success = await followOrUnfollowUser(spotAlert);
-                        if (success) spotAlert.setState();
-                      },
-                      elevation: 4,
-                      backgroundColor: const .fromARGB(255, 216, 255, 218),
-                      child: const Icon(Icons.near_me_rounded),
-                    ),
-                  ] else ...[
-                    FloatingActionButton(
-                      onPressed: () async {
-                        final success = await followOrUnfollowUser(spotAlert);
-                        if (success) spotAlert.setState();
-                      },
-                      elevation: 4,
-                      child: const Icon(Icons.lock_rounded),
-                    ),
-                  ],
+                  FloatingActionButton(
+                    onPressed: () async {
+                      final success = await followOrUnfollowUser(spotAlert);
+                      if (success) spotAlert.setState();
+                    },
+                    elevation: 4,
+                    backgroundColor: spotAlert.followUser ? const Color.fromARGB(255, 216, 255, 218) : null,
+                    child: Icon(spotAlert.followUser ? Icons.near_me_rounded : Icons.lock_rounded),
+                  ),
                   const SizedBox(height: 10),
                   if (spotAlert.isPlacingAlarm) ...[
                     FloatingActionButton(onPressed: () => placeAlarm(spotAlert, MapCamera.of(context).center), elevation: 4, child: const Icon(Icons.check)),

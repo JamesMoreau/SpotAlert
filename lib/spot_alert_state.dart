@@ -184,6 +184,24 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
   }
 }
 
+Future<bool> followOrUnfollowUser(SpotAlert spotAlert) async {
+  spotAlert.followUser = !spotAlert.followUser;
+
+  // If we are following, then we need to move the map immediately instead
+  // of waiting for the next location update.
+
+  final position = await Geolocator.getLastKnownPosition();
+  if (position == null) {
+    debugPrintInfo('Cannot follow the user since there is no known position.');
+    return false;
+  }
+
+  final latlng = LatLng(position.latitude, position.longitude);
+  tryMoveMap(spotAlert, latlng);
+
+  return true;
+}
+
 bool tryMoveMap(SpotAlert spotAlert, LatLng position) {
   if (!spotAlert.mapIsReady) return false;
 
