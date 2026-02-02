@@ -55,6 +55,27 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   // From this point on we can now use mapController outside the map widget.
   spotAlert.mapIsReady = true;
 
+  final messenger = globalScaffoldKey.currentState;
+
+  final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    showLocationUnavailableSnackbar(messenger);
+    return;
+  }
+
+  var permission = await Geolocator.checkPermission();
+  if (permission == .denied) {
+    permission = await Geolocator.requestPermission();
+  }
+
+  if (permission == .denied || permission == .deniedForever) {
+    debugPrintWarning('Location permissions are denied');
+    showLocationUnavailableSnackbar(messenger);
+    return;
+  }
+
+  // From this point assume location permissions are granted.
+
   var position = await Geolocator.getLastKnownPosition();
   if (position != null) {
     final latLng = LatLng(position.latitude, position.longitude);
@@ -75,16 +96,19 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
     return;
   }
 
-  final messenger = globalScaffoldKey.currentState;
+  showLocationUnavailableSnackbar(messenger);
+}
+
+void showLocationUnavailableSnackbar(ScaffoldMessengerState? messenger) {
   if (messenger == null) {
-    debugPrintError('Could not show snackbar because scaffold messenge was null');
+    debugPrintError('Could not show snackbar because scaffold messenger was null');
     return;
   }
 
   messenger.showSnackBar(
-    .new(
+    SnackBar(
       behavior: .floating,
-      content: Container(padding: const .all(8), child: const Text('Are location permissions enabled?')),
+      content: const Padding(padding: .all(8), child: Text('Are location permissions enabled?')),
       action: .new(
         label: 'Settings',
         onPressed: () => AppSettings.openAppSettings(type: .location),

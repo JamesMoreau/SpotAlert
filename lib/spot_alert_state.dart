@@ -51,8 +51,6 @@ class SpotAlert extends JuneState {
 
     geofencePort.listen((message) => handleGeofenceEvent(message, alarms, globalNavigatorKey.currentState));
 
-    await checkGeolocatorPermissions();
-
     positionStream = initializePositionStream(const .new(accuracy: .bestForNavigation));
     positionStream.listen(
       (p) {
@@ -100,16 +98,6 @@ Future<FMTCTileProvider> initializeTileProvider(String storeName) async {
   await store.manage.create();
 
   return FMTCTileProvider(stores: {storeName: .readUpdateCreate});
-}
-
-Future<void> checkGeolocatorPermissions() async {
-  var permission = await Geolocator.checkPermission();
-  if (permission == .denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == .deniedForever) {
-      return Future.error('Location permissions are denied');
-    }
-  }
 }
 
 ReceivePort setupGeofenceEventPort(String portNmae) {

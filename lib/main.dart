@@ -15,7 +15,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - ask for permissions to notification and location at startup.
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
@@ -122,7 +121,7 @@ enum SpotAlertView {
   final Widget page;
 }
 
-void navigateToView(SpotAlert spotAlert, SpotAlertView view) {
+void navigateToView(SpotAlert spotAlert, SpotAlertView view) { // TODO: should this be async
   if (spotAlert.view == view) return;
 
   spotAlert.view = view;
