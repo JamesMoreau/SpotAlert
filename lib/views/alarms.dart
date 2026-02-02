@@ -36,6 +36,8 @@ class AlarmsView extends StatelessWidget {
       final success = await setAlarmActiveState(spotAlert, a, setToActive: true);
       if (!success) break;
     }
+
+    await saveAlarmsToStorage(spotAlert.alarms);
   }
 
   Future<bool> setAlarmActiveState(SpotAlert spotAlert, Alarm alarm, {required bool setToActive}) async {
@@ -241,16 +243,14 @@ class EditAlarmDialog extends StatelessWidget {
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                           onPressed: () async {
+                            // TODO: extract to function. still broken when using navigate to alarm more that once.
                             Navigator.pop(context); // Close the edit alarm bottom sheet.
+
                             await navigateToView(spotAlert, .map);
 
-                            // This is a hack but we need to be sure that map controller is attached before moving.
-                            await Future.doWhile(() async {
-                              await Future<void>.delayed(const .new(milliseconds: 10));
-                              final position = spotAlert.editAlarm.position;
-                              final success = tryMoveMap(spotAlert, position);
-                              return success;
-                            });
+                            await spotAlert.mapIsReady?.future;
+
+                            tryMoveMap(spotAlert, spotAlert.editAlarm.position);
                           },
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
                           label: const Text('Go To Alarm', style: .new(color: Colors.white)),
