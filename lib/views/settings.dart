@@ -20,7 +20,7 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
         return SafeArea(
           child: Scrollbar(

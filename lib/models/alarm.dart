@@ -18,7 +18,7 @@ class Alarm {
   bool active; // Corresponds to a geofence being registered with the OS. For this reason it is not serialized.
 
   Alarm({required this.name, required this.position, required this.radius, String? id, Color? color, this.active = false})
-    : assert(radius > 0),
+    : assert(radius > 0, 'The radius for an alarm must be greater than zero.'),
       id = id ?? idGenerator.v1(),
       color = color ?? AvailableAlarmColors.redAccent.value;
 

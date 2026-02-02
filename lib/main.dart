@@ -15,6 +15,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - ask for notification permissions (at startup?)
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
@@ -101,8 +102,7 @@ class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     const maxConnections = 8;
-    final client = super.createHttpClient(context);
-    client.maxConnectionsPerHost = maxConnections;
+    final client = super.createHttpClient(context)..maxConnectionsPerHost = maxConnections;
     return client;
   }
 }
@@ -121,11 +121,13 @@ enum SpotAlertView {
   final Widget page;
 }
 
-void navigateToView(SpotAlert spotAlert, SpotAlertView view) { // TODO: should this be async
+void navigateToView(SpotAlert spotAlert, SpotAlertView view) {
+  // TODO: should this be async
   if (spotAlert.view == view) return;
 
-  spotAlert.view = view;
-  spotAlert.setState();
+  spotAlert
+    ..view = view
+    ..setState();
   spotAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
 
   debugPrintInfo('Navigating to $view.');
@@ -146,7 +148,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: JuneBuilder(
-        () => SpotAlert(),
+        SpotAlert.new,
         builder: (spotAlert) {
           return Scaffold(
             body: PageView(

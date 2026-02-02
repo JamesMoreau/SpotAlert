@@ -20,7 +20,7 @@ class MapView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
         // If the map is locked to the user's location, disable move interaction.
         var myInteractiveFlags = InteractiveFlag.all & ~InteractiveFlag.rotate;
@@ -166,10 +166,10 @@ class AlarmMarkers extends StatelessWidget {
     final showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
 
     if (showMarkersInsteadOfCircles) {
-      final alarmMarkers = alarms.map((a) => buildMarker(a)).toList();
+      final alarmMarkers = alarms.map(buildMarker).toList();
       return MarkerLayer(markers: alarmMarkers);
     } else {
-      final alarmCircles = alarms.map((a) => buildCircleMarker(a)).toList();
+      final alarmCircles = alarms.map(buildCircleMarker).toList();
       return CircleLayer(circles: alarmCircles);
     }
   }
@@ -428,7 +428,7 @@ class Overlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
         final statusBarHeight = MediaQuery.of(context).padding.top;
 
@@ -459,8 +459,9 @@ class Overlay extends StatelessWidget {
 
                         if (followUser == null) return;
 
-                        spotAlert.followUser = followUser;
-                        spotAlert.setState();
+                        spotAlert
+                          ..followUser = followUser
+                          ..setState();
                       },
                       elevation: 4,
                       backgroundColor: const .fromARGB(255, 216, 255, 218),
@@ -477,8 +478,9 @@ class Overlay extends StatelessWidget {
 
                         if (followUser == null) return;
 
-                        spotAlert.followUser = followUser;
-                        spotAlert.setState();
+                        spotAlert
+                          ..followUser = followUser
+                          ..setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.lock_rounded),
@@ -490,9 +492,10 @@ class Overlay extends StatelessWidget {
                     const SizedBox(height: 10),
                     FloatingActionButton(
                       onPressed: () {
-                        spotAlert.isPlacingAlarm = false;
-                        spotAlert.alarmPlacementRadius = initialAlarmRadius;
-                        spotAlert.setState();
+                        spotAlert
+                          ..isPlacingAlarm = false
+                          ..alarmPlacementRadius = initialAlarmRadius
+                          ..setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.cancel_rounded),
@@ -500,9 +503,10 @@ class Overlay extends StatelessWidget {
                   ] else ...[
                     FloatingActionButton(
                       onPressed: () {
-                        spotAlert.isPlacingAlarm = true;
-                        spotAlert.followUser = false;
-                        spotAlert.setState();
+                        spotAlert
+                          ..isPlacingAlarm = true
+                          ..followUser = false
+                          ..setState();
                       },
                       elevation: 4,
                       child: const Icon(Icons.pin_drop_rounded),
@@ -530,8 +534,9 @@ class Overlay extends StatelessWidget {
                           child: Slider(
                             value: spotAlert.alarmPlacementRadius,
                             onChanged: (value) {
-                              spotAlert.alarmPlacementRadius = value;
-                              spotAlert.setState();
+                              spotAlert
+                                ..alarmPlacementRadius = value
+                                ..setState();
                             },
                             min: minimumAlarmRadius,
                             max: maximumAlarmRadius,

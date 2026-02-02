@@ -12,8 +12,9 @@ class AlarmsView extends StatelessWidget {
     debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
 
     // Copy the alarm to the buffer alarm. We don't do this inside the edit widget to avoid rebuilds resetting the buffer state.
-    spotAlert.editAlarm = alarm;
-    spotAlert.colorInput = alarm.color;
+    spotAlert
+      ..editAlarm = alarm
+      ..colorInput = alarm.color;
     spotAlert.nameInput.text = alarm.name;
 
     showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (context) => const EditAlarmDialog());
@@ -39,7 +40,7 @@ class AlarmsView extends StatelessWidget {
 
   Future<bool> setAlarmActiveState(SpotAlert spotAlert, Alarm alarm, {required bool setToActive}) async {
     if (!setToActive) {
-      var success = await deactivateAlarm(alarm);
+      final success = await deactivateAlarm(alarm);
       if (!success) {
         showMySnackBar('Failed to deactivate the alarm.');
         return false;
@@ -73,7 +74,7 @@ class AlarmsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
         if (spotAlert.alarms.isEmpty) {
           return Center(
@@ -148,14 +149,14 @@ class EditAlarmDialog extends StatelessWidget {
 
     spotAlert.alarms.removeWhere((a) => a.id == id);
     spotAlert.setState();
-    
+
     await saveAlarmsToStorage(spotAlert.alarms);
   }
 
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
-      () => SpotAlert(),
+      SpotAlert.new,
       builder: (spotAlert) {
         return SizedBox(
           height: MediaQuery.of(context).size.height * 0.9,
@@ -217,8 +218,9 @@ class EditAlarmDialog extends StatelessWidget {
                                 padding: const .all(8),
                                 child: GestureDetector(
                                   onTap: () {
-                                    spotAlert.colorInput = color.value;
-                                    spotAlert.setState();
+                                    spotAlert
+                                      ..colorInput = color.value
+                                      ..setState();
                                   },
                                   child: CircleAvatar(
                                     backgroundColor: color.value,
