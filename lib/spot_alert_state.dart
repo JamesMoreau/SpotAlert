@@ -198,7 +198,11 @@ Future<bool> followOrUnfollowUser(SpotAlert spotAlert) async {
     }
 
     final latlng = LatLng(position.latitude, position.longitude);
-    tryMoveMap(spotAlert, latlng);
+    final success = tryMoveMap(spotAlert, latlng);
+    if (!success) {
+      debugPrintWarning('Could not follow user since the map is not ready.');
+      return false;
+    }
   }
 
   // Commit state only after success
