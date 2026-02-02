@@ -15,10 +15,11 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - ask for notification permissions (at startup?)
+  - ask for notification permissions (at startup?). we should not ask only at alarm triggered because the user might think everything is working but actually it's not.
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
+  - update description in appstore to inlude train / bus.
   - startup screen icon.
 */
 
@@ -121,14 +122,13 @@ enum SpotAlertView {
   final Widget page;
 }
 
-void navigateToView(SpotAlert spotAlert, SpotAlertView view) {
-  // TODO: should this be async
+Future<void> navigateToView(SpotAlert spotAlert, SpotAlertView view) async {
   if (spotAlert.view == view) return;
 
   spotAlert
     ..view = view
     ..setState();
-  spotAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+  await spotAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
 
   debugPrintInfo('Navigating to $view.');
 }

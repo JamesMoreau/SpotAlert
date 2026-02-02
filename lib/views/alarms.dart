@@ -242,12 +242,12 @@ class EditAlarmDialog extends StatelessWidget {
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
                           onPressed: () async {
                             Navigator.pop(context); // Close the edit alarm bottom sheet.
-                            navigateToView(spotAlert, .map);
+                            await navigateToView(spotAlert, .map);
 
                             // This is a hack but we need to be sure that map controller is attached before moving.
-                            await Future.doWhile(() async {
+                            await Future.doWhile(() async { //TODO: remove
                               if (spotAlert.mapIsReady) return false;
-                              await Future<void>.delayed(const Duration(milliseconds: 10));
+                              await Future<void>.delayed(const .new(milliseconds: 10));
                               return true;
                             });
 

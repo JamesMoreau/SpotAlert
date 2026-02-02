@@ -54,7 +54,7 @@ class SpotAlert extends JuneState {
     positionStream = initializePositionStream(const .new(accuracy: .bestForNavigation));
     positionStream.listen(
       (p) {
-        maybeMoveToUser(this, p);
+        if (followUser) tryMoveMap(mapController: mapController, position: p, mapIsReady: mapIsReady);
       },
       onError: (dynamic error) {
         followUser = false;
@@ -184,15 +184,13 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
   }
 }
 
-void tryMoveMap({required bool mapIsReady, required MapController mapController, required LatLng position}) {
-  if (!mapIsReady) return;
+bool tryMoveMap({required bool mapIsReady, required MapController mapController, required LatLng position}) {
+  if (!mapIsReady) return false;
 
   final zoom = mapController.camera.zoom;
-  mapController.move(position, zoom);
-}
+  final success = mapController.move(position, zoom);
 
-void maybeMoveToUser(SpotAlert spotAlert, LatLng userPosition) {
-  if (spotAlert.followUser) tryMoveMap(mapController: spotAlert.mapController, position: userPosition, mapIsReady: spotAlert.mapIsReady);
+  return success;
 }
 
 enum ActivateAlarmResult { success, limitReached, failed }
