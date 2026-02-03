@@ -427,7 +427,10 @@ class Overlay extends StatelessWidget {
                 crossAxisAlignment: .end,
                 mainAxisAlignment: .spaceAround,
                 children: [
-                  FloatingActionButton(child: const Icon(Icons.info_outline_rounded), onPressed: () => const InfoDialog()),
+                  FloatingActionButton(
+                    child: const Icon(Icons.info_outline_rounded),
+                    onPressed: () => showDialog<void>(context: context, builder: (context) => const InfoDialog()),
+                  ),
                   const SizedBox(height: 10),
                   FloatingActionButton(
                     onPressed: () async {
