@@ -39,9 +39,9 @@ class MapView extends StatelessWidget {
           ),
           children: [
             TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: spotAlert.tileProvider),
-            AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
-            UserPosition(positionStream: spotAlert.positionStream),
-            AlarmPlacementMarker(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
+            AlarmMarkers(alarms: spotAlert.alarms, threshold: circleToMarkerZoomThreshold),
+            UserPosition(stream: spotAlert.positionStream),
+            AlarmPlacementMarker(isPlacing: spotAlert.isPlacingAlarm, radius: spotAlert.alarmPlacementRadius),
             Compass(alarms: spotAlert.alarms, userPositionStream: spotAlert.positionStream),
             const Overlay(),
           ],
@@ -120,15 +120,15 @@ void showLocationUnavailableSnackbar(ScaffoldMessengerState? messenger) {
   );
 }
 
-class UserPosition extends StatelessWidget { // TODO should this use june builder?
-  final Stream<LatLng> positionStream;
+class UserPosition extends StatelessWidget {
+  final Stream<LatLng> stream;
 
-  const UserPosition({required this.positionStream, super.key});
+  const UserPosition({required this.stream, super.key});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: positionStream,
+      stream: stream,
       builder: (context, snapshot) {
         if (snapshot.hasError) return const SizedBox.shrink();
 
@@ -156,16 +156,16 @@ class UserPosition extends StatelessWidget { // TODO should this use june builde
 
 class AlarmMarkers extends StatelessWidget {
   final List<Alarm> alarms;
-  final double circleToMarkerZoomThreshold;
+  final double threshold;
 
-  const AlarmMarkers({required this.alarms, required this.circleToMarkerZoomThreshold, super.key});
+  const AlarmMarkers({required this.alarms, required this.threshold, super.key});
 
   @override
   Widget build(BuildContext context) {
     // Display the alarms as circles or markers on the map. We create a set of markers or circles
     // representing the same alarms. The markers are only visible when the user is zoomed out
     // beyond (below) circleToMarkerZoomThreshold.
-    final showMarkersInsteadOfCircles = MapCamera.of(context).zoom < circleToMarkerZoomThreshold;
+    final showMarkersInsteadOfCircles = MapCamera.of(context).zoom < threshold;
 
     if (showMarkersInsteadOfCircles) {
       final alarmMarkers = alarms.map(buildMarker).toList();
@@ -217,20 +217,20 @@ class AlarmMarkers extends StatelessWidget {
 }
 
 class AlarmPlacementMarker extends StatelessWidget {
-  final bool isPlacingAlarm;
-  final double alarmPlacementRadius;
+  final bool isPlacing;
+  final double radius;
 
-  const AlarmPlacementMarker({required this.isPlacingAlarm, required this.alarmPlacementRadius, super.key});
+  const AlarmPlacementMarker({required this.isPlacing, required this.radius, super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (!isPlacingAlarm) return const SizedBox.shrink();
+    if (!isPlacing) return const SizedBox.shrink();
 
     return CircleLayer(
       circles: [
         .new(
           point: MapCamera.of(context).center,
-          radius: alarmPlacementRadius,
+          radius: radius,
           color: Colors.redAccent.withValues(alpha: 0.5),
           borderColor: Colors.black,
           borderStrokeWidth: 2,
@@ -400,7 +400,7 @@ class CompassArrow extends StatelessWidget {
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
 
-class Overlay extends StatelessWidget { //TODO should this take in spotAlert?
+class Overlay extends StatelessWidget {
   const Overlay({super.key});
 
   Future<void> placeAlarm(SpotAlert spotAlert, LatLng position) async {
