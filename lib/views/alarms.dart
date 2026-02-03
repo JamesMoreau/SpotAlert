@@ -155,6 +155,17 @@ class EditAlarmDialog extends StatelessWidget {
     await saveAlarmsToStorage(spotAlert.alarms);
   }
 
+  Future<void> navigateToAlarm(BuildContext context, SpotAlert spotAlert) async {
+    Navigator.pop(context); // Close the edit alarm bottom sheet.
+
+    await navigateToView(spotAlert, .map);
+
+    // Wait until map is ready before moving it.
+    await spotAlert.mapIsReady.future;
+
+    tryMoveMap(spotAlert, spotAlert.editAlarm.position);
+  }
+
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
@@ -242,16 +253,7 @@ class EditAlarmDialog extends StatelessWidget {
                       Align(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                          onPressed: () async {
-                            Navigator.pop(context); // Close the edit alarm bottom sheet.
-
-                            await navigateToView(spotAlert, .map);
-
-                            // Wait until map is ready before moving it.
-                            await spotAlert.mapIsReady.future;
-
-                            tryMoveMap(spotAlert, spotAlert.editAlarm.position);
-                          },
+                          onPressed: () => navigateToAlarm(context, spotAlert),
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
                           label: const Text('Go To Alarm', style: .new(color: Colors.white)),
                         ),
@@ -266,7 +268,7 @@ class EditAlarmDialog extends StatelessWidget {
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: .circular(8),
-                              side: const BorderSide(color: Colors.redAccent, width: 2),
+                              side: const .new(color: Colors.redAccent, width: 2),
                             ),
                           ),
                           onPressed: () {
