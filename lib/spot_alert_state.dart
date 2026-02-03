@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
@@ -28,8 +29,9 @@ class SpotAlert extends JuneState {
   late final PageController pageController = .new(initialPage: view.index);
 
   // Map View
+  late final FMTCTileProvider tileProvider;
   final MapController mapController = .new();
-  final Completer<void> mapIsReady = Completer<void>(); // This let's us know if we can use the controller.
+  final Completer<void> mapIsReady = .new(); // This let's us know if we can use the controller.
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = initialAlarmRadius;
   bool followUser = false;
@@ -46,7 +48,7 @@ class SpotAlert extends JuneState {
 
     geofencePort.listen((message) => handleGeofenceEvent(message, alarms, globalNavigatorKey.currentState));
 
-    positionStream = initializePositionStream(const .new(accuracy: .bestForNavigation));
+    positionStream = Geolocator.getPositionStream(locationSettings: const .new(accuracy: .bestForNavigation)).map(positionToLatLng).asBroadcastStream();
     positionStream.listen(
       (p) {
         if (followUser) tryMoveMap(this, p);
@@ -56,6 +58,10 @@ class SpotAlert extends JuneState {
         setState();
       },
     );
+
+    const store = FMTCStore(mapTileStoreName);
+    await store.manage.create();
+    tileProvider = FMTCTileProvider(stores: {mapTileStoreName: .readUpdateCreate});
 
     packageInfo = await PackageInfo.fromPlatform();
 
@@ -81,9 +87,7 @@ Future<List<Alarm>> loadAlarms() async {
   return alarms;
 }
 
-Stream<LatLng> initializePositionStream(LocationSettings settings) {
-  return Geolocator.getPositionStream(locationSettings: settings).map((p) => LatLng(p.latitude, p.longitude)).asBroadcastStream();
-}
+LatLng positionToLatLng(Position p) => .new(p.latitude, p.longitude);
 
 ReceivePort setupGeofenceEventPort(String portNmae) {
   final port = ReceivePort();

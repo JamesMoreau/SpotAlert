@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
@@ -15,42 +14,11 @@ const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png
 const initialZoom = 13.0;
 const circleToMarkerZoomThreshold = 10.0;
 
-class MapView extends StatefulWidget {
+class MapView extends StatelessWidget {
   const MapView({super.key});
 
   @override
-  State<MapView> createState() => _MapViewState();
-}
-
-class _MapViewState extends State<MapView> {
-  FMTCTileProvider? tileProvider;
-
-  @override
-  void initState() {
-    super.initState();
-    initializeTileProvider();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    tileProvider?.dispose();
-  }
-
-  Future<void> initializeTileProvider() async {
-    const store = FMTCStore(mapTileStoreName);
-    await store.manage.create();
-
-    tileProvider = FMTCTileProvider(stores: {mapTileStoreName: .readUpdateCreate});
-    setState(() {});
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (tileProvider == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     return JuneBuilder(
       SpotAlert.new,
       builder: (spotAlert) {
@@ -69,7 +37,7 @@ class _MapViewState extends State<MapView> {
             onMapReady: () => onMapReady(spotAlert),
           ),
           children: [
-            TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: tileProvider),
+            TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: spotAlert.tileProvider),
             AlarmMarkers(alarms: spotAlert.alarms, circleToMarkerZoomThreshold: circleToMarkerZoomThreshold),
             UserPosition(positionStream: spotAlert.positionStream),
             AlarmPlacementMarker(isPlacingAlarm: spotAlert.isPlacingAlarm, alarmPlacementRadius: spotAlert.alarmPlacementRadius),
