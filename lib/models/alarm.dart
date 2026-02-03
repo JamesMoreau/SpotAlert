@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/main.dart';
 
-const initialAlarmRadius = 2000.0;
 const minimumAlarmRadius = 1000.0;
+const initialAlarmRadius = 2000.0;
 const maximumAlarmRadius = 10000.0;
 
 class Alarm {
@@ -88,22 +88,6 @@ List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
   }
 
   return triggeredAlarms;
-}
-
-T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
-  T? closestItem;
-  var closestDistance = double.infinity;
-
-  for (final item in items) {
-    final itemPositon = getPosition(item);
-    final d = const Distance().distance(itemPositon, target);
-    if (d < closestDistance) {
-      closestDistance = d;
-      closestItem = item;
-    }
-  }
-
-  return closestItem;
 }
 
 Future<List<Alarm>> loadAlarmsFromFile(File file) async {

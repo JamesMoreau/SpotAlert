@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:path/path.dart' as path;
@@ -15,7 +16,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - ask for notification permissions (at startup?). how about when they add sample alarms AND on map ready.
+  - look into what we are doing with FMTC...
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
@@ -214,4 +215,10 @@ void main() async {
   }
 
   runApp(const MainApp());
+
+  final success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
+  final didInitialize = success ?? false;
+  if (!didInitialize) {
+    debugPrintError('Notifications unavailable (permission denied or initialization failed).');
+  }
 }

@@ -36,12 +36,6 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   final event = TriggeredAlarmEvent(id: id, timestamp: DateTime.now());
   port.send(event.toMap());
 
-  final success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
-  final didInitialize = success ?? false;
-  if (!didInitialize) {
-    debugPrintError('Notifications unavailable (permission denied or initialization failed).');
-  }
-
   const title = 'Alarm Triggered';
   const message = 'You have entered the radius of an alarm.';
   const notificationDetails = NotificationDetails(iOS: .new(interruptionLevel: .active));

@@ -58,6 +58,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
 
   final messenger = globalScaffoldKey.currentState;
 
+  // Check and request location permissions.
   final serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     showLocationUnavailableSnackbar(messenger);
@@ -119,7 +120,7 @@ void showLocationUnavailableSnackbar(ScaffoldMessengerState? messenger) {
   );
 }
 
-class UserPosition extends StatelessWidget {
+class UserPosition extends StatelessWidget { // TODO should this use june builder?
   final Stream<LatLng> positionStream;
 
   const UserPosition({required this.positionStream, super.key});
@@ -312,6 +313,22 @@ class Compass extends StatelessWidget {
   }
 }
 
+T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
+  T? closestItem;
+  var closestDistance = double.infinity;
+
+  for (final item in items) {
+    final itemPositon = getPosition(item);
+    final d = const Distance().distance(itemPositon, target);
+    if (d < closestDistance) {
+      closestDistance = d;
+      closestItem = item;
+    }
+  }
+
+  return closestItem;
+}
+
 class CompassArrow extends StatelessWidget {
   final double angle;
   final double arrowRotation;
@@ -383,7 +400,7 @@ class CompassArrow extends StatelessWidget {
 
 double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
 
-class Overlay extends StatelessWidget {
+class Overlay extends StatelessWidget { //TODO should this take in spotAlert?
   const Overlay({super.key});
 
   Future<void> placeAlarm(SpotAlert spotAlert, LatLng position) async {
