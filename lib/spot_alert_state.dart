@@ -5,7 +5,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
@@ -31,7 +30,6 @@ class SpotAlert extends JuneState {
   // Map View
   final MapController mapController = .new();
   final Completer<void> mapIsReady = Completer<void>(); // This let's us know if we can use the controller.
-  late final FMTCTileProvider tileProvider;
   bool isPlacingAlarm = false;
   double alarmPlacementRadius = initialAlarmRadius;
   bool followUser = false;
@@ -59,8 +57,6 @@ class SpotAlert extends JuneState {
       },
     );
 
-    tileProvider = await initializeTileProvider(mapTileStoreName);
-
     packageInfo = await PackageInfo.fromPlatform();
 
     setState();
@@ -68,7 +64,6 @@ class SpotAlert extends JuneState {
 
   @override
   void onClose() {
-    tileProvider.dispose();
     mapController.dispose();
     pageController.dispose();
 
@@ -88,13 +83,6 @@ Future<List<Alarm>> loadAlarms() async {
 
 Stream<LatLng> initializePositionStream(LocationSettings settings) {
   return Geolocator.getPositionStream(locationSettings: settings).map((p) => LatLng(p.latitude, p.longitude)).asBroadcastStream();
-}
-
-Future<FMTCTileProvider> initializeTileProvider(String storeName) async {
-  final store = FMTCStore(storeName);
-  await store.manage.create();
-
-  return FMTCTileProvider(stores: {storeName: .readUpdateCreate});
 }
 
 ReceivePort setupGeofenceEventPort(String portNmae) {
