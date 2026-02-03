@@ -59,8 +59,6 @@ class SpotAlert extends JuneState {
       },
     );
 
-    const store = FMTCStore(mapTileStoreName);
-    await store.manage.create();
     tileProvider = FMTCTileProvider(stores: {mapTileStoreName: .readUpdateCreate});
 
     packageInfo = await PackageInfo.fromPlatform();

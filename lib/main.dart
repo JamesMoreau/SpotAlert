@@ -214,6 +214,8 @@ void main() async {
     await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   }
 
+  await const FMTCStore(mapTileStoreName).manage.create();
+
   runApp(const MainApp());
 
   final success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
