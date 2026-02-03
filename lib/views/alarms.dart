@@ -8,9 +8,51 @@ import 'package:spot_alert/spot_alert_state.dart';
 class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});
 
-  void openAlarmEdit(BuildContext context, SpotAlert spotAlert, Alarm alarm) {
+  Future<void> openAlarmEdit(BuildContext context, SpotAlert spotAlert, Alarm alarm) async {
     debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
-    showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (context) => EditAlarmDialog(alarm));
+
+    final result = await showModalBottomSheet<EditAlarmResult>(context: context, isScrollControlled: true, builder: (_) => EditAlarmDialog(alarm));
+
+    switch (result) {
+      case Save():
+        alarm.update(name: result.newName, color: result.newColor);
+        spotAlert.setState();
+        await saveAlarmsToStorage(spotAlert.alarms);
+      case NavigateTo():
+        await navigateToView(spotAlert, .map);
+
+        // Wait until map is ready before moving it.
+        await spotAlert.mapIsReady.future;
+
+        tryMoveMap(spotAlert, alarm.position);
+      case Delete():
+        await handleAlarmDeletion(spotAlert, alarm);
+      case Cancel():
+      // Do nothing.
+      case null:
+        debugPrintError('EditAlarmDialog returned an unknown result.');
+    }
+  }
+
+  // TODO: should this call set state or return a success value?
+  Future<void> handleAlarmDeletion(SpotAlert spotAlert, Alarm alarm) async {
+    final isActive = alarm.active;
+    if (isActive) {
+      final success = await deactivateAlarm(alarm);
+      if (!success) {
+        final message = 'Alarm ${alarm.id} could not be deactivated for deletion.';
+
+        debugPrintError(message);
+
+        showMySnackBar(message);
+        return;
+      }
+    }
+
+    spotAlert.alarms.removeWhere((a) => a.id == alarm.id);
+    spotAlert.setState();
+
+    await saveAlarmsToStorage(spotAlert.alarms);
   }
 
   Future<void> addSampleAlarms(SpotAlert spotAlert) async {
@@ -123,6 +165,29 @@ class AlarmsView extends StatelessWidget {
   }
 }
 
+//TODO: move to own file.
+sealed class EditAlarmResult {
+  const EditAlarmResult();
+}
+
+class Save extends EditAlarmResult {
+  final String newName;
+  final Color newColor;
+  const Save(this.newName, this.newColor);
+}
+
+class Delete extends EditAlarmResult {
+  const Delete();
+}
+
+class Cancel extends EditAlarmResult {
+  const Cancel();
+}
+
+class NavigateTo extends EditAlarmResult {
+  const NavigateTo();
+}
+
 class EditAlarmDialog extends StatefulWidget {
   final Alarm alarm;
   const EditAlarmDialog(this.alarm, {super.key});
@@ -148,39 +213,6 @@ class _EditAlarmDialogState extends State<EditAlarmDialog> {
     super.dispose();
   }
 
-  Future<void> handleAlarmDeletion(SpotAlert spotAlert) async {
-    final id = widget.alarm.id;
-
-    final isActive = widget.alarm.active;
-    if (isActive) {
-      final success = await deactivateAlarm(widget.alarm);
-      if (!success) {
-        final message = 'Alarm $id could not be deactivated for deletion.';
-
-        debugPrintError(message);
-
-        showMySnackBar(message);
-        return;
-      }
-    }
-
-    spotAlert.alarms.removeWhere((a) => a.id == id);
-    spotAlert.setState();
-
-    await saveAlarmsToStorage(spotAlert.alarms);
-  }
-
-  Future<void> navigateToAlarm(BuildContext context, SpotAlert spotAlert) async {
-    Navigator.pop(context); // Close the edit alarm bottom sheet.
-
-    await navigateToView(spotAlert, .map);
-
-    // Wait until map is ready before moving it.
-    await spotAlert.mapIsReady.future;
-
-    tryMoveMap(spotAlert, widget.alarm.position);
-  }
-
   @override
   Widget build(BuildContext context) {
     return JuneBuilder(
@@ -196,18 +228,9 @@ class _EditAlarmDialogState extends State<EditAlarmDialog> {
                 Row(
                   mainAxisAlignment: .spaceBetween,
                   children: [
-                    TextButton(child: const Text('Cancel'), onPressed: () => Navigator.pop(context)),
+                    TextButton(child: const Text('Cancel'), onPressed: () => Navigator.pop(context, const Cancel())),
                     const Text('Edit Alarm', style: .new(fontSize: 18, fontWeight: .bold)),
-                    TextButton(
-                      child: const Text('Save'),
-                      onPressed: () {
-                        // Replace the actual alarm data with the buffer data.
-                        widget.alarm.update(name: nameInput.text.trim(), color: colorInput);
-                        setState(() {});
-                        spotAlert.setState();
-                        Navigator.pop(context);
-                      },
-                    ),
+                    TextButton(child: const Text('Save'), onPressed: () => Navigator.pop(context, Save(nameInput.text.trim(), colorInput))),
                   ],
                 ),
                 const SizedBox(height: 30),
@@ -269,7 +292,7 @@ class _EditAlarmDialogState extends State<EditAlarmDialog> {
                       Align(
                         child: ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary),
-                          onPressed: () => navigateToAlarm(context, spotAlert),
+                          onPressed: () => Navigator.pop(context, const NavigateTo()),
                           icon: const Icon(Icons.navigate_next_rounded, color: Colors.white),
                           label: const Text('Go To Alarm', style: .new(color: Colors.white)),
                         ),
@@ -287,10 +310,7 @@ class _EditAlarmDialogState extends State<EditAlarmDialog> {
                               side: const .new(color: Colors.redAccent, width: 2),
                             ),
                           ),
-                          onPressed: () {
-                            handleAlarmDeletion(spotAlert);
-                            Navigator.pop(context);
-                          },
+                          onPressed: () => Navigator.pop(context, const Delete()),
                           child: const Text('Delete Alarm', style: .new(color: Colors.redAccent)),
                         ),
                       ),
