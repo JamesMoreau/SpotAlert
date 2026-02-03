@@ -129,9 +129,12 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms, NavigatorS
   showAlarmDialog(navigator, triggered);
 }
 
-Future<List<String>> getGeofenceIds() async {
+Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
+  await NativeGeofenceManager.instance.initialize();
+
+  List<String> geofenceIds;
   try {
-    return await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
+    geofenceIds = await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
   } on NativeGeofenceException catch (e) {
     debugPrintError(
       'Unable to retrieve geofences (${e.code.name}): '
@@ -139,13 +142,8 @@ Future<List<String>> getGeofenceIds() async {
       'detail=${e.details}, '
       'stackTrace=${e.stacktrace}',
     );
-    return [];
+    geofenceIds = const [];
   }
-}
-
-Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
-  await NativeGeofenceManager.instance.initialize();
-  final geofenceIds = await getGeofenceIds();
 
   // Mark alarms as active if they exist in OS.
   for (final alarm in alarms) {
@@ -209,7 +207,18 @@ bool tryMoveMap(SpotAlert spotAlert, LatLng position) {
 enum ActivateAlarmResult { success, limitReached, failed }
 
 Future<ActivateAlarmResult> activateAlarm(Alarm alarm) async {
-  final geofenceIds = await getGeofenceIds();
+  List<String> geofenceIds;
+  try {
+    geofenceIds = await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
+  } on NativeGeofenceException catch (e) {
+    debugPrintError(
+      'Unable to retrieve geofences (${e.code.name}): '
+      'message=${e.message}, '
+      'detail=${e.details}, '
+      'stackTrace=${e.stacktrace}',
+    );
+    geofenceIds = const [];
+  }
 
   final geofenceAlreadyExistsForAlarm = geofenceIds.contains(alarm.id);
   if (geofenceAlreadyExistsForAlarm) {
