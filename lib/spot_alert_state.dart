@@ -28,11 +28,6 @@ class SpotAlert extends JuneState {
   SpotAlertView view = .alarms;
   late final PageController pageController = .new(initialPage: view.index);
 
-  // Alarms View
-  Alarm editAlarm = Alarm(name: '', position: const .new(0, 0), radius: 100);
-  final TextEditingController nameInput = .new();
-  Color colorInput = AvailableAlarmColors.blue.value;
-
   // Map View
   final MapController mapController = .new();
   final Completer<void> mapIsReady = Completer<void>(); // This let's us know if we can use the controller.
@@ -46,6 +41,8 @@ class SpotAlert extends JuneState {
 
   @override
   Future<void> onInit() async {
+    super.onInit();
+
     alarms.addAll(await loadAlarms());
     await loadGeofencesForAlarms(alarms);
 
@@ -67,7 +64,6 @@ class SpotAlert extends JuneState {
     packageInfo = await PackageInfo.fromPlatform();
 
     setState();
-    super.onInit();
   }
 
   @override
