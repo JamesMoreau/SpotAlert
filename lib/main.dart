@@ -15,8 +15,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - move unnecessary global state into stateful widget.
-  - ask for notification permissions (at startup?). we should not ask only at alarm triggered because the user might think everything is working but actually it's not.
+  - ask for notification permissions (at startup?). how about when they add sample alarms AND on map ready.
   - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
