@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:spot_alert/dialogs/info_dialog.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
@@ -426,7 +427,7 @@ class Overlay extends StatelessWidget {
                 crossAxisAlignment: .end,
                 mainAxisAlignment: .spaceAround,
                 children: [
-                  FloatingActionButton(child: const Icon(Icons.info_outline_rounded), onPressed: () => showInfoDialog(context)),
+                  FloatingActionButton(child: const Icon(Icons.info_outline_rounded), onPressed: () => const InfoDialog()),
                   const SizedBox(height: 10),
                   FloatingActionButton(
                     onPressed: () async {
@@ -520,34 +521,4 @@ class OpenStreetMapAttribution extends StatelessWidget {
       ),
     );
   }
-}
-
-void showInfoDialog(BuildContext context) {
-  showDialog<void>(
-    context: context,
-    builder: (BuildContext context) => Dialog(
-      child: Padding(
-        padding: const .all(24),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: .min,
-            mainAxisAlignment: .center,
-            children: [
-              Icon(Icons.info_outline_rounded, size: 40, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(height: 15),
-              const Text(
-                'Here you can place new alarms by tapping the marker button. You can also follow / unfollow your location by tapping the lock button.',
-                textAlign: .center,
-              ),
-              const SizedBox(height: 15),
-              const Text('Staying on the map view for long periods of time may drain your battery.', textAlign: .center),
-              const SizedBox(height: 15),
-              const Text('Set location permissions to "While Using" or "Always" and enable notifications to use the app when running in background.', textAlign: .center),
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
-            ],
-          ),
-        ),
-      ),
-    ),
-  );
 }
