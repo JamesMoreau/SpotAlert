@@ -9,7 +9,7 @@ import 'package:spot_alert/spot_alert_state.dart';
 class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});
 
-  Future<void> openAlarmEdit(BuildContext context, SpotAlert spotAlert, Alarm alarm) async {
+  Future<void> handleAlarmEdit(BuildContext context, SpotAlert spotAlert, Alarm alarm) async {
     debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
 
     final result = await showModalBottomSheet<EditAlarmResult>(context: context, isScrollControlled: true, builder: (_) => EditAlarmDialog(alarm));
@@ -18,7 +18,7 @@ class AlarmsView extends StatelessWidget {
       case Save():
         alarm.update(name: result.newName, color: result.newColor);
         spotAlert.setState();
-        await saveAlarmsToStorage(spotAlert.alarms);
+        await saveAlarmsToStorage(spotAlert);
       case NavigateTo():
         await navigateToView(spotAlert, .map);
 
@@ -27,33 +27,28 @@ class AlarmsView extends StatelessWidget {
 
         tryMoveMap(spotAlert, alarm.position);
       case Delete():
-        await handleAlarmDeletion(spotAlert, alarm);
+        final isActive = alarm.active;
+        if (isActive) {
+          final success = await deactivateAlarm(alarm);
+          if (!success) {
+            final message = 'Alarm ${alarm.id} could not be deactivated for deletion.';
+
+            debugPrintError(message);
+
+            showMySnackBar(message);
+            return;
+          }
+        }
+
+        spotAlert.alarms.removeWhere((a) => a.id == alarm.id);
+        spotAlert.setState();
+
+        await saveAlarmsToStorage(spotAlert);
       case Cancel():
       // Do nothing.
       case null:
         debugPrintError('EditAlarmDialog returned an unknown result.');
     }
-  }
-
-  // TODO: should this call set state or return a success value?
-  Future<void> handleAlarmDeletion(SpotAlert spotAlert, Alarm alarm) async {
-    final isActive = alarm.active;
-    if (isActive) {
-      final success = await deactivateAlarm(alarm);
-      if (!success) {
-        final message = 'Alarm ${alarm.id} could not be deactivated for deletion.';
-
-        debugPrintError(message);
-
-        showMySnackBar(message);
-        return;
-      }
-    }
-
-    spotAlert.alarms.removeWhere((a) => a.id == alarm.id);
-    spotAlert.setState();
-
-    await saveAlarmsToStorage(spotAlert.alarms);
   }
 
   Future<void> addSampleAlarms(SpotAlert spotAlert) async {
@@ -73,7 +68,7 @@ class AlarmsView extends StatelessWidget {
       if (!success) break;
     }
 
-    await saveAlarmsToStorage(spotAlert.alarms);
+    await saveAlarmsToStorage(spotAlert);
   }
 
   Future<bool> setAlarmActiveState(SpotAlert spotAlert, Alarm alarm, {required bool setToActive}) async {
@@ -85,7 +80,7 @@ class AlarmsView extends StatelessWidget {
       }
 
       spotAlert.setState();
-      await saveAlarmsToStorage(spotAlert.alarms);
+      await saveAlarmsToStorage(spotAlert);
 
       return true;
     }
@@ -147,8 +142,8 @@ class AlarmsView extends StatelessWidget {
                       shadows: solidOutlineShadows(color: Colors.white, radius: 2),
                     ),
                     subtitle: Text(alarm.position.toSexagesimal(), style: .new(fontSize: 9, color: Colors.grey[700])),
-                    onLongPress: () => openAlarmEdit(context, spotAlert, alarm),
-                    onTap: () => openAlarmEdit(context, spotAlert, alarm),
+                    onLongPress: () => handleAlarmEdit(context, spotAlert, alarm),
+                    onTap: () => handleAlarmEdit(context, spotAlert, alarm),
                     trailing: Switch(
                       value: alarm.active,
                       activeThumbColor: alarm.color,

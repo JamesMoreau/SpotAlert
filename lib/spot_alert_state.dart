@@ -291,13 +291,13 @@ Future<bool> deactivateAlarm(Alarm alarm) async {
 }
 
 // This should be called everytime the alarms state is changed.
-Future<void> saveAlarmsToStorage(List<Alarm> alarms) async {
+Future<void> saveAlarmsToStorage(SpotAlert spotAlert) async {
   try {
     final directory = await getApplicationDocumentsDirectory();
     final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
 
     final file = File(alarmsPath);
-    await saveAlarmsToFile(file, alarms);
+    await saveAlarmsToFile(file, spotAlert.alarms);
   } on MissingPlatformDirectoryException catch (e) {
     debugPrintError('Failed to save alarms: $e');
   }
