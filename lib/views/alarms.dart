@@ -14,6 +14,8 @@ class AlarmsView extends StatelessWidget {
 
     final result = await showModalBottomSheet<EditAlarmResult>(context: context, isScrollControlled: true, builder: (_) => EditAlarmDialog(alarm));
 
+    if (result == null) return; // user dismissed the sheet
+
     switch (result) {
       case Save():
         alarm.update(name: result.newName, color: result.newColor);
@@ -45,9 +47,8 @@ class AlarmsView extends StatelessWidget {
 
         await saveAlarmsToStorage(spotAlert);
       case Cancel():
-      // Do nothing.
-      case null:
-        debugPrintError('EditAlarmDialog returned an unknown result.');
+        // Do nothing.
+        break;
     }
   }
 
