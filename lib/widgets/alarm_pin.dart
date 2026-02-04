@@ -9,11 +9,14 @@ class AlarmPin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      alarm.active ? Icons.pin_drop_rounded : Icons.location_off_rounded,
-      color: alarm.color.value,
-      size: 30,
-      shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+    return Opacity(
+      opacity: alarm.active ? 1 : .6,
+      child: Icon(
+        alarm.active ? Icons.pin_drop_rounded : Icons.location_off_rounded,
+        color: alarm.color.value,
+        size: 30,
+        shadows: solidOutlineShadows(color: Colors.white, radius: 2),
+      ),
     );
   }
 }
