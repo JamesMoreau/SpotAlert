@@ -205,7 +205,7 @@ class AlarmMarkers extends StatelessWidget {
   CircleMarker buildCircleMarker(Alarm alarm) {
     return CircleMarker(
       point: alarm.position,
-      color: alarm.color.withValues(alpha: 0.5),
+      color: alarm.color.value.withValues(alpha: 0.5),
       borderColor: Colors.white,
       borderStrokeWidth: 2,
       radius: alarm.radius,
@@ -229,7 +229,7 @@ class AlarmPlacementMarker extends StatelessWidget {
         .new(
           point: MapCamera.of(context).center,
           radius: radius,
-          color: Colors.redAccent.withValues(alpha: 0.5),
+          color: AlarmColor.redAccent.value.withValues(alpha: 0.5),
           borderColor: Colors.black,
           borderStrokeWidth: 2,
           useRadiusInMeter: true,
@@ -295,7 +295,7 @@ class Compass extends StatelessWidget {
               arrowRotation: arrowRotation,
               ellipseWidth: ellipseWidth,
               ellipseHeight: ellipseHeight,
-              color: closestAlarm.color,
+              color: closestAlarm.color.value,
               icon: Icons.pin_drop_rounded,
               label: closestAlarm.name,
             );

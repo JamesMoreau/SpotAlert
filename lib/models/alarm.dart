@@ -12,17 +12,17 @@ const maximumAlarmRadius = 10000.0;
 class Alarm {
   String id;
   String name;
-  Color color;
+  AlarmColor color;
   LatLng position;
   double radius; // Meters
   bool active; // Corresponds to a geofence being registered with the OS. For this reason it is not serialized.
 
-  Alarm({required this.name, required this.position, required this.radius, String? id, Color? color, this.active = false})
+  Alarm({required this.name, required this.position, required this.radius, String? id, AlarmColor? color, this.active = false})
     : assert(radius > 0, 'The radius for an alarm must be greater than zero.'),
       id = id ?? idGenerator.v1(),
-      color = color ?? AvailableAlarmColors.redAccent.value;
+      color = color ?? AlarmColor.redAccent;
 
-  void update({String? name, LatLng? position, double? radius, Color? color}) {
+  void update({String? name, LatLng? position, double? radius, AlarmColor? color}) {
     if (name != null) this.name = name;
     if (position != null) this.position = position;
     if (radius != null) this.radius = radius;
@@ -34,7 +34,7 @@ class Alarm {
     return Alarm(
       id: map['id'] as String,
       name: map['name'] as String,
-      color: Color(map['color'] as int),
+      color: AlarmColor.values.byName(map['color'] as String),
       position: LatLng(pos['latitude'] as double, pos['longitude'] as double),
       radius: map['radius'] as double,
       // active defaults to false
@@ -45,15 +45,14 @@ class Alarm {
     return {
       'id': id,
       'name': name,
-      'color': color.toARGB32(),
+      'color': color.name,
       'position': {'latitude': position.latitude, 'longitude': position.longitude},
       'radius': radius,
     };
   }
 }
 
-// TODO make this the alarm color field.
-enum AvailableAlarmColors {
+enum AlarmColor {
   blue(Colors.blue),
   green(Colors.green),
   orange(Colors.orange),
@@ -65,7 +64,7 @@ enum AvailableAlarmColors {
   indigo(Colors.indigo),
   amber(Colors.amber);
 
-  const AvailableAlarmColors(this.value);
+  const AlarmColor(this.value);
   final Color value;
 }
 

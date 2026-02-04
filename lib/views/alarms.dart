@@ -56,11 +56,11 @@ class AlarmsView extends StatelessWidget {
 
   Future<void> addSampleAlarms(SpotAlert spotAlert) async {
     final sampleAlarms = [
-      Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AvailableAlarmColors.green.value),
-      Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AvailableAlarmColors.blue.value),
-      Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AvailableAlarmColors.purple.value),
-      Alarm(name: 'Saint Petersburg', position: const LatLng(59.9310, 30.3609), radius: 2000, color: AvailableAlarmColors.redAccent.value),
-      Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AvailableAlarmColors.orange.value),
+      Alarm(name: 'Dublin', position: const LatLng(53.3498, -6.2603), radius: 2000, color: AlarmColor.green),
+      Alarm(name: 'Montreal', position: const LatLng(45.5017, -73.5673), radius: 2000, color: AlarmColor.blue),
+      Alarm(name: 'Osaka', position: const LatLng(34.6937, 135.5023), radius: 2000, color: AlarmColor.purple),
+      Alarm(name: 'Saint Petersburg', position: const LatLng(59.9310, 30.3609), radius: 2000, color: AlarmColor.redAccent),
+      Alarm(name: 'San Antonio', position: const LatLng(29.4241, -98.4936), radius: 2000, color: AlarmColor.orange),
     ];
 
     for (final a in sampleAlarms) {
@@ -144,7 +144,7 @@ class AlarmsView extends StatelessWidget {
                     onTap: () => handleAlarmEdit(context, spotAlert, alarm),
                     trailing: Switch(
                       value: alarm.active,
-                      activeThumbColor: alarm.color,
+                      activeThumbColor: alarm.color.value,
                       thumbIcon: thumbIcon,
                       onChanged: (value) => setAlarmActiveState(spotAlert, alarm, setToActive: value),
                     ),

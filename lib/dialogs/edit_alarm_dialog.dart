@@ -7,7 +7,7 @@ sealed class EditAlarmResult {
 
 class Save extends EditAlarmResult {
   final String newName;
-  final Color newColor;
+  final AlarmColor newColor;
   const Save(this.newName, this.newColor);
 }
 
@@ -33,7 +33,7 @@ class EditAlarmDialog extends StatefulWidget {
 
 class _EditAlarmDialogState extends State<EditAlarmDialog> {
   late final TextEditingController nameInput;
-  late Color colorInput;
+  late AlarmColor colorInput;
 
   @override
   void initState() {
@@ -92,23 +92,23 @@ class _EditAlarmDialogState extends State<EditAlarmDialog> {
                         Padding(
                           padding: const .all(8),
                           child: CircleAvatar(
-                            backgroundColor: colorInput,
+                            backgroundColor: colorInput.value,
                             radius: 20,
                             child: const Icon(Icons.pin_drop_rounded, color: Colors.white),
                           ),
                         ),
-                        for (final color in AvailableAlarmColors.values) ...[
+                        for (final color in AlarmColor.values) ...[
                           Padding(
                             padding: const .all(8),
                             child: GestureDetector(
                               onTap: () {
-                                colorInput = color.value;
+                                colorInput = color;
                                 setState(() {});
                               },
                               child: CircleAvatar(
                                 backgroundColor: color.value,
                                 radius: 20,
-                                child: color.value == colorInput ? const Icon(Icons.check_rounded, color: Colors.white) : null,
+                                child: color == colorInput ? const Icon(Icons.check_rounded, color: Colors.white) : null,
                               ),
                             ),
                           ),

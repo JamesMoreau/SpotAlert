@@ -11,7 +11,7 @@ class AlarmPin extends StatelessWidget {
   Widget build(BuildContext context) {
     return Icon(
       alarm.active ? Icons.pin_drop_rounded : Icons.location_off_rounded,
-      color: alarm.color.withValues(alpha: alarm.active ? 1.0 : 0.5),
+      color: alarm.color.value.withValues(alpha: alarm.active ? 1.0 : 0.5),
       size: 30,
       shadows: solidOutlineShadows(color: Colors.white, radius: 2),
     );

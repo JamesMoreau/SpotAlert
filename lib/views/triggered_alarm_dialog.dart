@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/models/alarm.dart';
 
+// TODO: make this alarm vibrate
 void showAlarmDialog(NavigatorState navigator, Alarm triggeredAlarm) {
   showGeneralDialog<void>(
     context: navigator.context,
@@ -21,13 +22,7 @@ void showAlarmDialog(NavigatorState navigator, Alarm triggeredAlarm) {
                   children: [
                     const Text('Alarm Triggered', style: .new(fontSize: 30, fontWeight: .w300)),
                     const SizedBox(height: 16),
-                    const Text(
-                      'You have entered the radius of an alarm.',
-                      textAlign: .center,
-                      style: .new(fontSize: 20, fontWeight: .w300),
-                    ),
-                    const SizedBox(height: 16),
-                    Icon(Icons.alarm, size: 100, color: triggeredAlarm.color),
+                    Icon(Icons.alarm, size: 100, color: triggeredAlarm.color.value),
                   ],
                 ),
               ),
