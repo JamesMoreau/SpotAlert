@@ -5,6 +5,7 @@ import 'package:spot_alert/dialogs/edit_alarm_dialog.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
+import 'package:spot_alert/widgets/alarm_pin.dart';
 
 class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});
@@ -136,12 +137,7 @@ class AlarmsView extends StatelessWidget {
                   padding: const .all(8),
                   child: ListTile(
                     title: Text(alarm.name, maxLines: 1, overflow: .ellipsis),
-                    leading: Icon(
-                      Icons.pin_drop_rounded,
-                      color: alarm.color,
-                      size: 30,
-                      shadows: solidOutlineShadows(color: Colors.white, radius: 2),
-                    ),
+                    leading: AlarmPin(alarm),
                     subtitle: Text(alarm.position.toSexagesimal(), style: .new(fontSize: 9, color: Colors.grey[700])),
                     onLongPress: () => handleAlarmEdit(context, spotAlert, alarm),
                     onTap: () => handleAlarmEdit(context, spotAlert, alarm),

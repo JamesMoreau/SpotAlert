@@ -16,7 +16,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - maybe make closest alarm also need to be active.
   - figure out what's going on with map cache clearing.
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
@@ -62,21 +61,6 @@ ThemeData spotAlertTheme = .new(
   sliderTheme: const .new(thumbShape: RoundSliderThumbShape(enabledThumbRadius: 13)),
   iconTheme: const .new(color: .new(0xff50606e)),
 );
-
-List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
-  final offsets = <Offset>[
-    .new(radius.toDouble(), 0),
-    .new(-radius.toDouble(), 0),
-    .new(0, radius.toDouble()),
-    .new(0, -radius.toDouble()),
-    .new(radius.toDouble(), radius.toDouble()),
-    .new(-radius.toDouble(), -radius.toDouble()),
-    .new(radius.toDouble(), -radius.toDouble()),
-    .new(-radius.toDouble(), radius.toDouble()),
-  ];
-
-  return offsets.map((o) => Shadow(color: color, offset: o)).toList();
-}
 
 const paleBlue = Color(0xffeaf0f5);
 

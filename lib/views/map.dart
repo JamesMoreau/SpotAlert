@@ -10,6 +10,7 @@ import 'package:spot_alert/dialogs/info_dialog.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
+import 'package:spot_alert/widgets/alarm_pin.dart';
 
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const initialZoom = 13.0;
@@ -119,7 +120,7 @@ void showLocationUnavailableSnackbar(ScaffoldMessengerState? messenger) {
     ),
   );
 }
-
+ //TODO: make this not use shadows. how about just circle instead.
 class UserPosition extends StatelessWidget {
   final Stream<LatLng> stream;
 
@@ -184,12 +185,7 @@ class AlarmMarkers extends StatelessWidget {
       child: Stack(
         alignment: .center,
         children: [
-          Icon(
-            alarm.active ? Icons.pin_drop_rounded : Icons.location_off_rounded,
-            color: alarm.color.withValues(alpha: alarm.active ? 1.0 : 0.5),
-            size: 30,
-            shadows: solidOutlineShadows(color: Colors.white, radius: 2),
-          ),
+          AlarmPin(alarm),
           Positioned(
             bottom: 0,
             child: Container(
@@ -298,7 +294,7 @@ class Compass extends StatelessWidget {
               ellipseWidth: ellipseWidth,
               ellipseHeight: ellipseHeight,
               color: closestAlarm.color,
-              targetIcon: Icons.pin_drop_rounded,
+              targetIcon: Icons.pin_drop_rounded, // TODO: change to widget.
               label: closestAlarm.name,
             );
           }
