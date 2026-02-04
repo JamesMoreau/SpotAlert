@@ -95,7 +95,7 @@ class _WiggleWidgetState extends State<WiggleWidget> with SingleTickerProviderSt
       animation: controller,
       builder: (_, child) {
         return Transform.translate(
-          offset: Offset(offset.value, 0),
+          offset: .new(offset.value, 0),
           child: Transform.rotate(angle: rotation.value, child: child),
         );
       },

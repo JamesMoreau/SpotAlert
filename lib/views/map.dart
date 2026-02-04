@@ -331,7 +331,7 @@ class Overlay extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: const .all(.circular(15)),
-                    boxShadow: [.new(color: Colors.grey.withValues(alpha: .5), spreadRadius: 2, blurRadius: 5, offset: const Offset(0, 3))],
+                    boxShadow: [.new(color: Colors.grey.withValues(alpha: .5), spreadRadius: 2, blurRadius: 5, offset: const .new(0, 3))],
                   ),
                   child: Padding(
                     padding: const .symmetric(horizontal: 15, vertical: 5),
