@@ -5,6 +5,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/models/alarm.dart';
+import 'package:spot_alert/widgets/alarm_pin.dart';
+import 'package:spot_alert/widgets/user_icon.dart';
 
 class Compass extends StatelessWidget {
   final Stream<LatLng> userPositionStream;
@@ -37,14 +39,7 @@ class Compass extends StatelessWidget {
           final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, position);
           final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
 
-          userArrow = CompassArrow(
-            angle: angle,
-            arrowRotation: arrowRotation,
-            ellipseWidth: ellipseWidth,
-            ellipseHeight: ellipseHeight,
-            color: Colors.blue,
-            icon: Icons.person,
-          );
+          userArrow = UserArrow(angle: angle, arrowRotation: arrowRotation, ellipseWidth: ellipseWidth, ellipseHeight: ellipseHeight);
         }
 
         // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
@@ -59,13 +54,12 @@ class Compass extends StatelessWidget {
 
             final label = closestAlarm.name.trim().isEmpty ? null : closestAlarm.name;
 
-            alarmArrow = CompassArrow(
+            alarmArrow = AlarmArrow(
               angle: angle,
               arrowRotation: arrowRotation,
               ellipseWidth: ellipseWidth,
               ellipseHeight: ellipseHeight,
-              color: closestAlarm.color.value,
-              icon: Icons.pin_drop_rounded,
+              alarm: closestAlarm,
               label: label,
             );
           }
@@ -81,23 +75,52 @@ class Compass extends StatelessWidget {
   }
 }
 
-class CompassArrow extends StatelessWidget {
+class UserArrow extends StatelessWidget {
   final double angle;
   final double arrowRotation;
   final double ellipseWidth;
   final double ellipseHeight;
 
-  final Color color;
-  final IconData icon;
-  final String? label;
+  const UserArrow({required this.angle, required this.arrowRotation, required this.ellipseWidth, required this.ellipseHeight, super.key});
 
-  const CompassArrow({
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Stack(
+        alignment: .center,
+        children: [
+          Transform.translate(
+            offset: .new((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+            child: Transform.rotate(
+              angle: arrowRotation,
+              child: Transform.rotate(
+                angle: -pi / 2,
+                child: const Icon(Icons.arrow_forward_ios, color: Colors.blueAccent, size: 28),
+              ),
+            ),
+          ),
+          Transform.translate(offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)), child: const UserIcon()),
+        ],
+      ),
+    );
+  }
+}
+
+class AlarmArrow extends StatelessWidget {
+  final double angle;
+  final double arrowRotation;
+  final double ellipseWidth;
+  final double ellipseHeight;
+
+  final String? label;
+  final Alarm alarm;
+
+  const AlarmArrow({
+    required this.alarm,
     required this.angle,
     required this.arrowRotation,
     required this.ellipseWidth,
     required this.ellipseHeight,
-    required this.color,
-    required this.icon,
     this.label,
     super.key,
   });
@@ -116,19 +139,11 @@ class CompassArrow extends StatelessWidget {
               angle: arrowRotation,
               child: Transform.rotate(
                 angle: -pi / 2,
-                child: Icon(Icons.arrow_forward_ios, color: color, size: 28),
+                child: Icon(Icons.arrow_forward_ios, color: alarm.color.value, size: 28),
               ),
             ),
           ),
-          Transform.translate(
-            offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-            child: Icon(
-              icon,
-              size: 32,
-              color: color,
-              shadows: solidOutlineShadows(color: Colors.white, radius: 2),
-            ),
-          ),
+          Transform.translate(offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)), child: AlarmPin(alarm)),
           if (label != null) ...[
             Transform.translate(
               offset: .new((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),

@@ -12,6 +12,7 @@ import 'package:spot_alert/spot_alert_state.dart';
 import 'package:spot_alert/widgets/alarm_pin.dart';
 import 'package:spot_alert/widgets/compass.dart';
 import 'package:spot_alert/widgets/osm_attribution.dart';
+import 'package:spot_alert/widgets/user_icon.dart';
 
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const initialZoom = 13.0;
@@ -142,12 +143,7 @@ class UserPosition extends StatelessWidget {
           markers: [
             .new(
               point: position,
-              child: Icon(
-                Icons.person_rounded,
-                color: Colors.blue,
-                size: 30,
-                shadows: solidOutlineShadows(color: Colors.white, radius: 2),
-              ),
+              child: const UserIcon()
             ),
           ],
         );
