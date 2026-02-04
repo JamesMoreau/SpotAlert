@@ -195,7 +195,7 @@ class AlarmMarkers extends StatelessWidget {
               child: Container(
                 constraints: const .new(maxWidth: 100),
                 padding: const .symmetric(horizontal: 2),
-                decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
+                decoration: BoxDecoration(color: paleBlue.withValues(alpha: .7), borderRadius: .circular(8)),
                 child: Text(alarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
               ),
             ),
@@ -208,7 +208,7 @@ class AlarmMarkers extends StatelessWidget {
   CircleMarker buildCircleMarker(Alarm alarm) {
     return CircleMarker(
       point: alarm.position,
-      color: alarm.color.value.withValues(alpha: 0.5),
+      color: alarm.color.value.withValues(alpha: .5),
       borderColor: Colors.white,
       borderStrokeWidth: 2,
       radius: alarm.radius,
@@ -232,7 +232,7 @@ class AlarmPlacementMarker extends StatelessWidget {
         .new(
           point: MapCamera.of(context).center,
           radius: radius,
-          color: AlarmColor.redAccent.value.withValues(alpha: 0.5),
+          color: AlarmColor.redAccent.value.withValues(alpha: .5),
           borderColor: Colors.black,
           borderStrokeWidth: 2,
           useRadiusInMeter: true,
@@ -251,8 +251,8 @@ class Compass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final ellipseWidth = screenSize.width * 0.8;
-    final ellipseHeight = screenSize.height * 0.65;
+    final ellipseWidth = screenSize.width * .8;
+    final ellipseHeight = screenSize.height * .65;
 
     return StreamBuilder(
       stream: userPositionStream,
@@ -388,7 +388,7 @@ class CompassArrow extends StatelessWidget {
                 child: Container(
                   constraints: const .new(maxWidth: 100),
                   padding: const .symmetric(horizontal: 2),
-                  decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
+                  decoration: BoxDecoration(color: paleBlue.withValues(alpha: .7), borderRadius: .circular(8)),
                   child: Text(label!, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
                 ),
               ),
@@ -493,11 +493,11 @@ class Overlay extends StatelessWidget {
               Positioned(
                 bottom: 150,
                 child: Container(
-                  width: MediaQuery.of(context).size.width * 0.9,
+                  width: MediaQuery.of(context).size.width * .9,
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: const .all(.circular(15)),
-                    boxShadow: [.new(color: Colors.grey.withValues(alpha: 0.5), spreadRadius: 2, blurRadius: 5, offset: const Offset(0, 3))],
+                    boxShadow: [.new(color: Colors.grey.withValues(alpha: .5), spreadRadius: 2, blurRadius: 5, offset: const Offset(0, 3))],
                   ),
                   child: Padding(
                     padding: const .symmetric(horizontal: 15, vertical: 5),

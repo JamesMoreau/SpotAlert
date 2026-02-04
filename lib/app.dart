@@ -27,7 +27,7 @@ class App extends StatelessWidget {
             extendBody: true,
             bottomNavigationBar: Container(
               decoration: BoxDecoration(
-                boxShadow: [.new(color: Colors.black.withValues(alpha: 0.1), spreadRadius: 2, blurRadius: 5)],
+                boxShadow: [.new(color: Colors.black.withValues(alpha: .1), spreadRadius: 2, blurRadius: 5)],
                 borderRadius: const .only(topLeft: .circular(50), topRight: .circular(50)),
               ),
               child: ClipRRect(

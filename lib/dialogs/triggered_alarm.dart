@@ -24,7 +24,7 @@ class TriggeredAlarmDialog extends StatelessWidget {
                 children: [
                   Text(
                     'ALARM TRIGGERED',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500, letterSpacing: 1.2, color: Colors.black.withValues(alpha: 0.8)),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500, letterSpacing: 1.2, color: Colors.black.withValues(alpha: .8)),
                   ),
                   const SizedBox(height: 20),
                   WiggleWidget(child: Icon(Icons.alarm, size: 100, color: triggered.color.value)),
@@ -79,7 +79,7 @@ class _WiggleWidgetState extends State<WiggleWidget> with SingleTickerProviderSt
     super.initState();
 
     controller = AnimationController(vsync: this, duration: const .new(milliseconds: 800))..repeat(reverse: true);
-    rotation = Tween<double>(begin: -0.1, end: 0.1).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+    rotation = Tween<double>(begin: -.1, end: .1).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
     offset = Tween<double>(begin: -6, end: 6).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }
 

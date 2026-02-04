@@ -51,7 +51,7 @@ class _EditAlarmDialogState extends State<EditAlarmDialog> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.9,
+      height: MediaQuery.of(context).size.height * .9,
       child: Padding(
         padding: const .symmetric(horizontal: 20, vertical: 12),
         child: Column(

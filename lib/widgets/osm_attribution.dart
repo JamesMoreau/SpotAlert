@@ -8,7 +8,7 @@ class OpenStreetMapAttribution extends StatelessWidget {
     return IgnorePointer(
       child: Container(
         padding: const .all(3),
-        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), borderRadius: .circular(8)),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: .7), borderRadius: .circular(8)),
         child: const Text('© OpenStreetMap contributors'),
       ),
     );
