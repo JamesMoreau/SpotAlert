@@ -140,12 +140,7 @@ class UserPosition extends StatelessWidget {
         if (position == null) return const SizedBox.shrink();
 
         return MarkerLayer(
-          markers: [
-            .new(
-              point: position,
-              child: const UserIcon()
-            ),
-          ],
+          markers: [.new(point: position, child: const UserIcon())],
         );
       },
     );
@@ -233,8 +228,6 @@ class AlarmPlacementMarker extends StatelessWidget {
     );
   }
 }
-
-
 
 class Overlay extends StatelessWidget {
   const Overlay({super.key});
