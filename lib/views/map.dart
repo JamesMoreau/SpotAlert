@@ -185,7 +185,7 @@ class AlarmMarkers extends StatelessWidget {
       height: 65,
       point: alarm.position,
       child: Opacity(
-        opacity: .6,
+        opacity: alarm.active ? 1 : .6,
         child: Stack(
           alignment: .center,
           children: [
@@ -292,6 +292,8 @@ class Compass extends StatelessWidget {
           if (closestAlarmIsVisible) {
             final arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
             final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
+            
+            final label = closestAlarm.name.trim().isEmpty ? null : closestAlarm.name;
 
             alarmArrow = CompassArrow(
               angle: angle,
@@ -300,7 +302,7 @@ class Compass extends StatelessWidget {
               ellipseHeight: ellipseHeight,
               color: closestAlarm.color.value,
               icon: Icons.pin_drop_rounded,
-              label: closestAlarm.name,
+              label: label,
             );
           }
         }
