@@ -35,10 +35,6 @@ class SettingsView extends StatelessWidget {
                     trailing: const Icon(Icons.info_rounded),
                   ),
                 ),
-                const Padding(
-                  padding: .all(8),
-                  child: ListTile(title: Text('Open Settings'), trailing: Icon(Icons.keyboard_arrow_right), onTap: AppSettings.openAppSettings), // TODO: remove
-                ),
                 Padding(
                   padding: const .all(8),
                   child: ListTile(
