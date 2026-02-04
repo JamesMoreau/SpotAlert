@@ -52,6 +52,7 @@ class Alarm {
   }
 }
 
+// TODO make this the alarm color field.
 enum AvailableAlarmColors {
   blue(Colors.blue),
   green(Colors.green),
@@ -62,9 +63,7 @@ enum AvailableAlarmColors {
   teal(Colors.teal),
   brown(Colors.brown),
   indigo(Colors.indigo),
-  amber(Colors.amber),
-  grey(Colors.grey),
-  black(Colors.black);
+  amber(Colors.amber);
 
   const AvailableAlarmColors(this.value);
   final Color value;

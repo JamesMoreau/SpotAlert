@@ -16,7 +16,8 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - KNOWN ISSUE: iOS: After reboot, the first geofence event is triggered twice, one immediatly after the other. We recommend checking the last trigger time of a geofence in your app to discard duplicates.
+  - maybe make closest alarm also need to be active.
+  - figure out what's going on with map cache clearing.
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
   - update description in appstore to inlude train / bus.
@@ -212,7 +213,6 @@ void main() async {
     // Retry FMTC initialization.
     await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   }
-
   await const FMTCStore(mapTileStoreName).manage.create();
 
   runApp(const MainApp());

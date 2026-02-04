@@ -46,7 +46,7 @@ class SpotAlert extends JuneState {
     alarms.addAll(await loadAlarms());
     await loadGeofencesForAlarms(alarms);
 
-    geofencePort.listen((message) => handleGeofenceEvent(message, alarms, globalNavigatorKey.currentState));
+    geofencePort.listen((message) => handleGeofenceEvent(message, this, alarms, globalNavigatorKey.currentState));
 
     positionStream = Geolocator.getPositionStream(locationSettings: const .new(accuracy: .bestForNavigation)).map(positionToLatLng).asBroadcastStream();
     positionStream.listen(
@@ -104,7 +104,7 @@ ReceivePort setupGeofenceEventPort(String portNmae) {
   return port;
 }
 
-Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms, NavigatorState? navigator) async {
+Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alarm> alarms, NavigatorState? navigator) async {
   final event = TriggeredAlarmEvent.fromMap(message as Map<String, dynamic>);
 
   final triggered = alarms.findById(event.id);
@@ -120,6 +120,7 @@ Future<void> handleGeofenceEvent(dynamic message, List<Alarm> alarms, NavigatorS
     debugPrintError('Unable to deactive triggered alarm: ${triggered.id}');
     return;
   }
+  spotAlert.setState();
 
   if (navigator == null) {
     debugPrintError('Unable to show alarm dialog: navigator not ready');

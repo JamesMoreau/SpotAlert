@@ -185,8 +185,8 @@ class AlarmMarkers extends StatelessWidget {
         alignment: .center,
         children: [
           Icon(
-            Icons.pin_drop_rounded,
-            color: alarm.color,
+            alarm.active ? Icons.pin_drop_rounded : Icons.location_off_rounded,
+            color: alarm.color.withValues(alpha: alarm.active ? 1.0 : 0.5),
             size: 30,
             shadows: solidOutlineShadows(color: Colors.white, radius: 2),
           ),
@@ -284,7 +284,8 @@ class Compass extends StatelessWidget {
 
         // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
         Widget? alarmArrow;
-        final closestAlarm = getClosest(position, alarms, (alarm) => alarm.position);
+        final activeAlarms = alarms.where((a) => a.active).toList();
+        final closestAlarm = getClosest(position, activeAlarms, (alarm) => alarm.position);
         if (closestAlarm != null) {
           final closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
           if (closestAlarmIsVisible) {
