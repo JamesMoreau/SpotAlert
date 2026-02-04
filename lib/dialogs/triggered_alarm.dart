@@ -22,8 +22,11 @@ class TriggeredAlarmDialog extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: .center,
                 children: [
-                  const Text('Alarm Triggered', style: .new(fontSize: 30, fontWeight: .w300)),
-                  const SizedBox(height: 16),
+                  Text(
+                    'ALARM TRIGGERED',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500, letterSpacing: 1.2, color: Colors.black.withValues(alpha: 0.8)),
+                  ),
+                  const SizedBox(height: 20),
                   WiggleWidget(child: Icon(Icons.alarm, size: 100, color: triggered.color.value)),
                 ],
               ),
@@ -39,6 +42,7 @@ class TriggeredAlarmDialog extends StatelessWidget {
                       Navigator.pop(context); // Close the dialog
                     },
                     style: ElevatedButton.styleFrom(
+                      elevation: 4,
                       backgroundColor: Colors.blueGrey,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(225, 70),
