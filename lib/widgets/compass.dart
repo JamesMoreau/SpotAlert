@@ -20,6 +20,11 @@ class Compass extends StatelessWidget {
     final ellipseWidth = screenSize.width * .8;
     final ellipseHeight = screenSize.height * .65;
 
+    final layout = CompassLayout(
+      size: Size(ellipseWidth, ellipseHeight),
+      bounds: Rect.fromCenter(center: .zero, width: ellipseWidth, height: ellipseHeight),
+    );
+
     return StreamBuilder(
       stream: userPositionStream,
       builder: (context, snapshot) {
@@ -37,9 +42,7 @@ class Compass extends StatelessWidget {
         final userIsVisible = camera.visibleBounds.contains(position);
         if (!userIsVisible) {
           final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, position);
-          final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-
-          userArrow = UserArrow(angle: angle, arrowRotation: arrowRotation, ellipseWidth: ellipseWidth, ellipseHeight: ellipseHeight);
+          userArrow = UserArrow(layout: layout, direction: arrowRotation);
         }
 
         // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
@@ -50,18 +53,9 @@ class Compass extends StatelessWidget {
           final closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
           if (closestAlarmIsVisible) {
             final arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-            final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-
             final label = closestAlarm.name.trim().isEmpty ? null : closestAlarm.name;
-
-            alarmArrow = AlarmArrow(
-              angle: angle,
-              arrowRotation: arrowRotation,
-              ellipseWidth: ellipseWidth,
-              ellipseHeight: ellipseHeight,
-              alarm: closestAlarm,
-              label: label,
-            );
+            
+            alarmArrow = AlarmArrow(layout: layout, direction: arrowRotation, alarm: closestAlarm, label: label);
           }
         }
 
@@ -75,31 +69,43 @@ class Compass extends StatelessWidget {
   }
 }
 
-class UserArrow extends StatelessWidget {
-  final double angle;
-  final double arrowRotation;
-  final double ellipseWidth;
-  final double ellipseHeight;
+class CompassLayout {
+  final Size size;
+  final Rect bounds;
 
-  const UserArrow({required this.angle, required this.arrowRotation, required this.ellipseWidth, required this.ellipseHeight, super.key});
+  const CompassLayout({required this.size, required this.bounds});
+
+  Offset positionForAngle(double angle, {double inset = 0}) {
+    final a = size.width / 2 - inset;
+    final b = size.height / 2 - inset;
+
+    return .new(a * cos(angle), b * sin(angle));
+  }
+}
+
+class UserArrow extends StatelessWidget {
+  final CompassLayout layout;
+  final double direction; // world-space direction in radians
+
+  const UserArrow({required this.layout, required this.direction, super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Convert world direction -> screen angle
+    final angle = (direction + 3 * pi / 2) % (2 * pi);
+
     return IgnorePointer(
       child: Stack(
         alignment: .center,
         children: [
           Transform.translate(
-            offset: .new((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+            offset: layout.positionForAngle(angle),
             child: Transform.rotate(
-              angle: arrowRotation,
-              child: Transform.rotate(
-                angle: -pi / 2,
-                child: const Icon(Icons.arrow_forward_ios, color: Colors.blueAccent, size: 28),
-              ),
+              angle: direction - pi / 2,
+              child: const Icon(Icons.arrow_forward_ios, color: Colors.blueAccent, size: 28),
             ),
           ),
-          Transform.translate(offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)), child: const UserIcon()),
+          Transform.translate(offset: layout.positionForAngle(angle, inset: 24), child: const UserIcon()),
         ],
       ),
     );
@@ -107,26 +113,16 @@ class UserArrow extends StatelessWidget {
 }
 
 class AlarmArrow extends StatelessWidget {
-  final double angle;
-  final double arrowRotation;
-  final double ellipseWidth;
-  final double ellipseHeight;
-
-  final String? label;
+  final CompassLayout layout;
+  final double direction;
   final Alarm alarm;
+  final String? label;
 
-  const AlarmArrow({
-    required this.alarm,
-    required this.angle,
-    required this.arrowRotation,
-    required this.ellipseWidth,
-    required this.ellipseHeight,
-    this.label,
-    super.key,
-  });
+  const AlarmArrow({required this.layout, required this.direction, required this.alarm, this.label, super.key});
 
   @override
   Widget build(BuildContext context) {
+    final angle = (direction + 3 * pi / 2) % (2 * pi);
     final angleIs9to3 = angle > 0 && angle < pi;
 
     return IgnorePointer(
@@ -134,21 +130,17 @@ class AlarmArrow extends StatelessWidget {
         alignment: .center,
         children: [
           Transform.translate(
-            offset: .new((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
+            offset: layout.positionForAngle(angle),
             child: Transform.rotate(
-              angle: arrowRotation,
-              child: Transform.rotate(
-                angle: -pi / 2,
-                child: Icon(Icons.arrow_forward_ios, color: alarm.color.value, size: 28),
-              ),
+              angle: direction - pi / 2,
+              child: Icon(Icons.arrow_forward_ios, color: alarm.color.value, size: 28),
             ),
           ),
-          Transform.translate(offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)), child: AlarmPin(alarm)),
-          if (label != null) ...[
+          Transform.translate(offset: layout.positionForAngle(angle, inset: 24), child: AlarmPin(alarm)),
+          if (label != null)
             Transform.translate(
-              offset: .new((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
+              offset: layout.positionForAngle(angle, inset: 26),
               child: Transform.translate(
-                // Move the text up or down depending on the angle to now overlap with the arrow.
                 offset: .new(0, angleIs9to3 ? -22 : 22),
                 child: Container(
                   constraints: const .new(maxWidth: 100),
@@ -158,7 +150,6 @@ class AlarmArrow extends StatelessWidget {
                 ),
               ),
             ),
-          ],
         ],
       ),
     );
