@@ -47,7 +47,7 @@ class SpotAlert extends JuneState {
     alarms.addAll(await loadAlarms());
     await loadGeofencesForAlarms(alarms);
 
-    geofencePort.listen((message) => handleGeofenceEvent(message, this, alarms, globalNavigatorKey.currentState));
+    geofencePort.listen((message) => handleGeofenceEvent(message, this, alarms));
 
     positionStream = Geolocator.getPositionStream(locationSettings: const .new(accuracy: .bestForNavigation)).map(positionToLatLng).asBroadcastStream();
     positionStream.listen(
@@ -105,8 +105,7 @@ ReceivePort setupGeofenceEventPort(String portNmae) {
   return port;
 }
 
-// TODO: instead of using navigator, we could store a temporary variable in the app state and show the dialog.
-Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alarm> alarms, NavigatorState? navigator) async {
+Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alarm> alarms) async {
   final event = TriggeredAlarmEvent.fromMap(message as Map<String, dynamic>);
 
   final triggered = alarms.findById(event.id);
@@ -124,13 +123,8 @@ Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alar
   }
   spotAlert.setState();
 
-  if (navigator == null || !navigator.mounted) {
-    debugPrintError('Unable to show alarm dialog: navigator not ready');
-    return;
-  }
-
   await showGeneralDialog<void>(
-    context: navigator.context,
+    context: globalNavigatorKey.currentContext!,
     pageBuilder: (_, _, _) => Dialog.fullscreen(child: TriggeredAlarmDialog(triggered)),
   );
 }
