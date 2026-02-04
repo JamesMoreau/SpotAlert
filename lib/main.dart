@@ -13,9 +13,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - add AboutDialog instead of custom tile.
   - figure out what's going on with map cache clearing.
-  - do i still need background location permissions?
   - add something cute to the app like a cartoon animal or something.
   - Update screenshots in app store and readme.
   - update description in appstore to inlude train / bus.
