@@ -7,7 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/app.dart';
-import 'package:spot_alert/dialogs/info_dialog.dart';
+import 'package:spot_alert/dialogs/info.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
@@ -445,7 +445,7 @@ class Overlay extends StatelessWidget {
                 children: [
                   FloatingActionButton(
                     child: const Icon(Icons.info_outline_rounded),
-                    onPressed: () => showDialog<void>(context: context, builder: (context) => const InfoDialog()),
+                    onPressed: () => showDialog<void>(context: context, builder: (context) => const Info()),
                   ),
                   const SizedBox(height: 10),
                   FloatingActionButton(

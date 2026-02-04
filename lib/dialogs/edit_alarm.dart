@@ -23,15 +23,15 @@ class NavigateTo extends EditAlarmResult {
   const NavigateTo();
 }
 
-class EditAlarmDialog extends StatefulWidget {
+class EditAlarm extends StatefulWidget {
   final Alarm alarm;
-  const EditAlarmDialog(this.alarm, {super.key});
+  const EditAlarm(this.alarm, {super.key});
 
   @override
-  State<EditAlarmDialog> createState() => _EditAlarmDialogState();
+  State<EditAlarm> createState() => _EditAlarmState();
 }
 
-class _EditAlarmDialogState extends State<EditAlarmDialog> {
+class _EditAlarmState extends State<EditAlarm> {
   late final TextEditingController nameInput;
   late AlarmColor colorInput;
 

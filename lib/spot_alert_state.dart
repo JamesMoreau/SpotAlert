@@ -13,10 +13,10 @@ import 'package:native_geofence/native_geofence.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/app.dart';
+import 'package:spot_alert/dialogs/triggered_alarm.dart';
 import 'package:spot_alert/geofence_callback.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
-import 'package:spot_alert/views/triggered_alarm_dialog.dart';
 
 const mapTileStoreName = 'mapStore';
 const alarmsFilename = 'alarms.json';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/app.dart';
-import 'package:spot_alert/dialogs/edit_alarm_dialog.dart';
+import 'package:spot_alert/dialogs/edit_alarm.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
@@ -14,7 +14,7 @@ class AlarmsView extends StatelessWidget {
   Future<void> handleAlarmEdit(BuildContext context, SpotAlert spotAlert, Alarm alarm) async {
     debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
 
-    final result = await showModalBottomSheet<EditAlarmResult>(context: context, isScrollControlled: true, builder: (_) => EditAlarmDialog(alarm));
+    final result = await showModalBottomSheet<EditAlarmResult>(context: context, isScrollControlled: true, builder: (_) => EditAlarm(alarm));
 
     if (result == null) return; // user dismissed the sheet
 
