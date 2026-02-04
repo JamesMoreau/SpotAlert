@@ -184,20 +184,23 @@ class AlarmMarkers extends StatelessWidget {
       width: 100,
       height: 65,
       point: alarm.position,
-      child: Stack(
-        alignment: .center,
-        children: [
-          AlarmPin(alarm),
-          Positioned(
-            bottom: 0,
-            child: Container(
-              constraints: const .new(maxWidth: 100),
-              padding: const .symmetric(horizontal: 2),
-              decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
-              child: Text(alarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
+      child: Opacity(
+        opacity: .6,
+        child: Stack(
+          alignment: .center,
+          children: [
+            AlarmPin(alarm),
+            Positioned(
+              bottom: 0,
+              child: Container(
+                constraints: const .new(maxWidth: 100),
+                padding: const .symmetric(horizontal: 2),
+                decoration: BoxDecoration(color: paleBlue.withValues(alpha: 0.7), borderRadius: .circular(8)),
+                child: Text(alarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
