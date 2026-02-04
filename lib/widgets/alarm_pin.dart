@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spot_alert/main.dart';
+import 'package:spot_alert/app.dart';
 import 'package:spot_alert/models/alarm.dart';
 
 class AlarmPin extends StatelessWidget {

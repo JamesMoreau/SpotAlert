@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:spot_alert/app.dart';
 import 'package:spot_alert/dialogs/edit_alarm_dialog.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
