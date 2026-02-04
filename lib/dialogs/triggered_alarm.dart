@@ -78,7 +78,7 @@ class _WiggleWidgetState extends State<WiggleWidget> with SingleTickerProviderSt
   void initState() {
     super.initState();
 
-    controller = AnimationController(vsync: this, duration: const .new(milliseconds: 800))..repeat(reverse: true);
+    controller = AnimationController(vsync: this, duration: const .new(milliseconds: 500))..repeat(reverse: true);
     rotation = Tween<double>(begin: -.1, end: .1).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
     offset = Tween<double>(begin: -6, end: 6).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }
