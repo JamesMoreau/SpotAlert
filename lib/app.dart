@@ -94,18 +94,16 @@ ThemeData spotAlertTheme = .new(
 const paleBlue = Color(0xffeaf0f5);
 
 List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
-  final offsets = <Offset>[
-    .new(radius.toDouble(), 0),
-    .new(-radius.toDouble(), 0),
-    .new(0, radius.toDouble()),
-    .new(0, -radius.toDouble()),
-    .new(radius.toDouble(), radius.toDouble()),
-    .new(-radius.toDouble(), -radius.toDouble()),
-    .new(radius.toDouble(), -radius.toDouble()),
-    .new(-radius.toDouble(), radius.toDouble()),
+  final r = radius.toDouble();
+  const directions = [-1, 0, 1];
+
+  final shadows = [
+    for (final dx in directions)
+      for (final dy in directions)
+        if (dx != 0 || dy != 0) Shadow(color: color, offset: .new(dx * r, dy * r)),
   ];
 
-  return offsets.map((o) => Shadow(color: color, offset: o)).toList();
+  return shadows;
 }
 
 void showMySnackBar(String message) {
