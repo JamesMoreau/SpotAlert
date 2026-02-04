@@ -105,6 +105,7 @@ ReceivePort setupGeofenceEventPort(String portNmae) {
   return port;
 }
 
+// TODO: instead of using navigator, we could store a temporary variable in the app state and show the dialog.
 Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alarm> alarms, NavigatorState? navigator) async {
   final event = TriggeredAlarmEvent.fromMap(message as Map<String, dynamic>);
 
@@ -123,12 +124,15 @@ Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alar
   }
   spotAlert.setState();
 
-  if (navigator == null) {
+  if (navigator == null || !navigator.mounted) {
     debugPrintError('Unable to show alarm dialog: navigator not ready');
     return;
   }
 
-  showAlarmDialog(navigator, triggered);
+  await showGeneralDialog<void>(
+    context: navigator.context,
+    pageBuilder: (_, _, _) => Dialog.fullscreen(child: TriggeredAlarmDialog(triggered)),
+  );
 }
 
 Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {

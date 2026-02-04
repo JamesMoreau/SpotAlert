@@ -445,7 +445,7 @@ class Overlay extends StatelessWidget {
                 children: [
                   FloatingActionButton(
                     child: const Icon(Icons.info_outline_rounded),
-                    onPressed: () => showDialog<void>(context: context, builder: (context) => const Info()),
+                    onPressed: () => showDialog<void>(context: context, builder: (context) => const InfoDialog()),
                   ),
                   const SizedBox(height: 10),
                   FloatingActionButton(

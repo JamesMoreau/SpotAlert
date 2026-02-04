@@ -14,7 +14,7 @@ class AlarmsView extends StatelessWidget {
   Future<void> handleAlarmEdit(BuildContext context, SpotAlert spotAlert, Alarm alarm) async {
     debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
 
-    final result = await showModalBottomSheet<EditAlarmResult>(context: context, isScrollControlled: true, builder: (_) => EditAlarm(alarm));
+    final result = await showModalBottomSheet<EditAlarmResult>(context: context, isScrollControlled: true, builder: (_) => EditAlarmDialog(alarm));
 
     if (result == null) return; // user dismissed the sheet
 
