@@ -64,14 +64,20 @@ class SettingsView extends StatelessWidget {
                     subtitle: const Text('This can free up storage on your device.'),
                     trailing: const Icon(Icons.delete_rounded),
                     onTap: () async {
-                      final size = await const FMTCStore(mapTileStoreName).stats.size;
-                      await const FMTCStore(mapTileStoreName).manage.reset();
+                      const store = FMTCStore(mapTileStoreName);
 
-                      final sizeInMegabytes = double.parse((size / (1024 * 1024)).toStringAsFixed(2));
-                      final message = 'Map tile cache cleared. $sizeInMegabytes MB freed.';
+                      final sizeKiB = await store.stats.size;
 
+                      await store.manage.reset();
+
+                      final formattedSize = switch (true) {
+                        _ when sizeKiB < 1024 => '${sizeKiB.toStringAsFixed(0)} KB', // < 1 MB
+                        _ when sizeKiB < 10 * 1024 => '${(sizeKiB / 1024).toStringAsFixed(1)} MB', // < 10 MB
+                        _ when sizeKiB < 1024 * 1024 => '${(sizeKiB / 1024).toStringAsFixed(0)} MB', // < 1 GB
+                        _ => '${(sizeKiB / (1024 * 1024)).toStringAsFixed(1)} GB', // ≥ 1 GB
+                      };
+                      final message = 'Map tile cache cleared. $formattedSize freed.';
                       debugPrintInfo(message);
-
                       showMySnackBar(message);
                     },
                   ),
