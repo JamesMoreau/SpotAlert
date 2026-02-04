@@ -48,14 +48,14 @@ class Compass extends StatelessWidget {
         // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
         Widget? alarmArrow;
         final activeAlarms = alarms.where((a) => a.active).toList();
-        final closestAlarm = getClosest(position, activeAlarms, (alarm) => alarm.position);
-        if (closestAlarm != null) {
-          final closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
+        final closestActiveAlarm = getClosest(position, activeAlarms, (alarm) => alarm.position);
+        if (closestActiveAlarm != null) {
+          final closestAlarmIsVisible = !camera.visibleBounds.contains(closestActiveAlarm.position);
           if (closestAlarmIsVisible) {
-            final arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-            final label = closestAlarm.name.trim().isEmpty ? null : closestAlarm.name;
+            final arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestActiveAlarm.position);
+            final label = closestActiveAlarm.name.trim().isEmpty ? null : closestActiveAlarm.name;
             
-            alarmArrow = AlarmArrow(layout: layout, direction: arrowRotation, alarm: closestAlarm, label: label);
+            alarmArrow = AlarmArrow(layout: layout, direction: arrowRotation, alarm: closestActiveAlarm, label: label);
           }
         }
 
