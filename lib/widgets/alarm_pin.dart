@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 
 class AlarmPin extends StatelessWidget {
@@ -15,19 +16,4 @@ class AlarmPin extends StatelessWidget {
       shadows: solidOutlineShadows(color: Colors.white, radius: 2),
     );
   }
-}
-
-List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
-  final offsets = <Offset>[
-    .new(radius.toDouble(), 0),
-    .new(-radius.toDouble(), 0),
-    .new(0, radius.toDouble()),
-    .new(0, -radius.toDouble()),
-    .new(radius.toDouble(), radius.toDouble()),
-    .new(-radius.toDouble(), -radius.toDouble()),
-    .new(radius.toDouble(), -radius.toDouble()),
-    .new(-radius.toDouble(), radius.toDouble()),
-  ];
-
-  return offsets.map((o) => Shadow(color: color, offset: o)).toList();
 }

@@ -11,6 +11,7 @@ import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
 import 'package:spot_alert/widgets/alarm_pin.dart';
+import 'package:spot_alert/widgets/osm_attribution.dart';
 
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const initialZoom = 13.0;
@@ -120,7 +121,7 @@ void showLocationUnavailableSnackbar(ScaffoldMessengerState? messenger) {
     ),
   );
 }
- //TODO: make this not use shadows. how about just circle instead.
+
 class UserPosition extends StatelessWidget {
   final Stream<LatLng> stream;
 
@@ -274,7 +275,7 @@ class Compass extends StatelessWidget {
             ellipseWidth: ellipseWidth,
             ellipseHeight: ellipseHeight,
             color: Colors.blue,
-            targetIcon: Icons.person,
+            icon: Icons.person,
           );
         }
 
@@ -294,7 +295,7 @@ class Compass extends StatelessWidget {
               ellipseWidth: ellipseWidth,
               ellipseHeight: ellipseHeight,
               color: closestAlarm.color,
-              targetIcon: Icons.pin_drop_rounded, // TODO: change to widget.
+              icon: Icons.pin_drop_rounded,
               label: closestAlarm.name,
             );
           }
@@ -333,7 +334,7 @@ class CompassArrow extends StatelessWidget {
   final double ellipseHeight;
 
   final Color color;
-  final IconData targetIcon;
+  final IconData icon;
   final String? label;
 
   const CompassArrow({
@@ -342,7 +343,7 @@ class CompassArrow extends StatelessWidget {
     required this.ellipseWidth,
     required this.ellipseHeight,
     required this.color,
-    required this.targetIcon,
+    required this.icon,
     this.label,
     super.key,
   });
@@ -368,7 +369,7 @@ class CompassArrow extends StatelessWidget {
           Transform.translate(
             offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
             child: Icon(
-              targetIcon,
+              icon,
               size: 32,
               color: color,
               shadows: solidOutlineShadows(color: Colors.white, radius: 2),
@@ -521,21 +522,6 @@ class Overlay extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class OpenStreetMapAttribution extends StatelessWidget {
-  const OpenStreetMapAttribution({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        padding: const .all(3),
-        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.7), borderRadius: .circular(8)),
-        child: const Text('© OpenStreetMap contributors'),
-      ),
     );
   }
 }

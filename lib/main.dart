@@ -64,6 +64,21 @@ ThemeData spotAlertTheme = .new(
 
 const paleBlue = Color(0xffeaf0f5);
 
+List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
+  final offsets = <Offset>[
+    .new(radius.toDouble(), 0),
+    .new(-radius.toDouble(), 0),
+    .new(0, radius.toDouble()),
+    .new(0, -radius.toDouble()),
+    .new(radius.toDouble(), radius.toDouble()),
+    .new(-radius.toDouble(), -radius.toDouble()),
+    .new(radius.toDouble(), -radius.toDouble()),
+    .new(-radius.toDouble(), radius.toDouble()),
+  ];
+
+  return offsets.map((o) => Shadow(color: color, offset: o)).toList();
+}
+
 GlobalKey<ScaffoldMessengerState> globalScaffoldKey = .new();
 GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 
