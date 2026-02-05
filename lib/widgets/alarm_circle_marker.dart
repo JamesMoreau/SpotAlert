@@ -43,19 +43,28 @@ class _AlarmCircleState extends State<AlarmCircle> with SingleTickerProviderStat
     return SizedBox(
       width: diameter,
       height: diameter,
-      child: AnimatedBuilder(
-        animation: controller,
-        builder: (_, child) => Transform.rotate(angle: controller.value * 2 * pi, child: child),
-        child: CustomPaint(painter: AlarmCirclePainter(color: widget.alarm.color.value)),
+      child: Stack(
+        alignment: .center,
+        children: [
+          CustomPaint(size: Size(diameter, diameter), painter: GridPainter()),
+          AnimatedBuilder(
+            animation: controller,
+            builder: (_, child) => Transform.rotate(angle: controller.value * 2 * pi, child: child),
+            child: CustomPaint(
+              size: Size(diameter, diameter),
+              painter: RadarPainter(color: widget.alarm.color.value),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class AlarmCirclePainter extends CustomPainter {
+class RadarPainter extends CustomPainter {
   final Color color;
 
-  const AlarmCirclePainter({required this.color});
+  const RadarPainter({required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -85,7 +94,28 @@ class AlarmCirclePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant AlarmCirclePainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(covariant RadarPainter oldDelegate) => oldDelegate.color != color;
+}
+
+class GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(.zero);
+    final radius = size.shortestSide / 2;
+
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..color = Colors.white.withValues(alpha: 0.4)
+      ..strokeWidth = 1;
+
+    canvas
+      ..drawCircle(center, radius / 2, paint)
+      ..drawLine(center - Offset(radius, 0), center + Offset(radius, 0), paint) // NS
+      ..drawLine(center - Offset(0, radius), center + Offset(0, radius), paint); // EW
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 double metersToScreenPixels(MapCamera camera, LatLng point, double meters) {
