@@ -9,6 +9,7 @@ import 'package:spot_alert/dialogs/info.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
+import 'package:spot_alert/widgets/alarm_circle_marker.dart';
 import 'package:spot_alert/widgets/alarm_pin.dart';
 import 'package:spot_alert/widgets/compass.dart';
 import 'package:spot_alert/widgets/osm_attribution.dart';
@@ -165,14 +166,14 @@ class AlarmMarkers extends StatelessWidget {
       final alarmMarkers = alarms.map(buildMarker).toList();
       return MarkerLayer(markers: alarmMarkers);
     } else {
-      final alarmCircles = alarms.map(buildCircleMarker).toList();
-      return CircleLayer(circles: alarmCircles);
+      final alarmCircles = alarms.map((a) => buildCircleMarker(context, a)).toList();
+      return MarkerLayer(markers: alarmCircles);
     }
   }
 
   Marker buildMarker(Alarm alarm) {
     return Marker(
-      width: 100,
+      width: 100, //TODO what is the point.
       height: 65,
       point: alarm.position,
       child: Stack(
@@ -193,16 +194,27 @@ class AlarmMarkers extends StatelessWidget {
     );
   }
 
-  CircleMarker buildCircleMarker(Alarm alarm) {
-    return CircleMarker(
+  Marker buildCircleMarker(BuildContext context, Alarm alarm) {
+    final camera = MapCamera.of(context);
+    final pixelRadius = metersToScreenPixels(camera, alarm.position, alarm.radius);
+    final size = pixelRadius * 2;
+
+    return Marker(
       point: alarm.position,
-      color: alarm.color.value.withValues(alpha: .5),
-      borderColor: Colors.white,
-      borderStrokeWidth: 2,
-      radius: alarm.radius,
-      useRadiusInMeter: true,
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      child: AlarmCircle(size: size, color: alarm.color.value, active: alarm.active),
     );
   }
+}
+
+double metersToScreenPixels(MapCamera camera, LatLng point, double meters) {
+  final origin = camera.getOffsetFromOrigin(point);
+  final offsetPoint = const Distance().offset(point, meters, 180); // south
+  final offset = camera.getOffsetFromOrigin(offsetPoint);
+
+  return (origin - offset).distance;
 }
 
 class AlarmPlacementMarker extends StatelessWidget {
