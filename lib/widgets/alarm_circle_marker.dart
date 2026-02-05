@@ -77,7 +77,7 @@ class AlarmCirclePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = boundaryWidth
       ..strokeCap = StrokeCap.butt
-      ..color = color;
+      ..color = color.withValues(alpha: 0.8);
 
     final armEnd = Offset(center.dx + radius * math.cos(angle), center.dy + radius * math.sin(angle));
 
