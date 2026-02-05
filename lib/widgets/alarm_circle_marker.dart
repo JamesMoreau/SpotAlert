@@ -40,6 +40,17 @@ class _AlarmCircleState extends State<AlarmCircle> with SingleTickerProviderStat
 
     if (diameter <= 0) return const SizedBox.shrink();
 
+    if (!widget.alarm.active) {
+      return SizedBox(
+        height: diameter,
+        width: diameter,
+        child: CustomPaint(
+          size: Size(diameter, diameter),
+          painter: InactivePainter(color: widget.alarm.color.value),
+        ),
+      );
+    }
+
     return SizedBox(
       width: diameter,
       height: diameter,
@@ -72,13 +83,13 @@ class RadarPainter extends CustomPainter {
     final radius = size.shortestSide / 2;
 
     final backgroundPaint = Paint()
-      ..style = PaintingStyle.fill
+      ..style = .fill
       ..color = color.withValues(alpha: .4);
     canvas.drawCircle(center, radius, backgroundPaint);
 
     final paint = Paint()
       ..shader = SweepGradient(
-        colors: [color.withValues(alpha: .4), color.withValues(alpha: .8)],
+        colors: [color.withValues(alpha: .4), color.withValues(alpha: .7)],
         stops: const [
           1 / 3, // start of sweep (1/4 of circle)
           1, // bright edge
@@ -104,14 +115,40 @@ class GridPainter extends CustomPainter {
     final radius = size.shortestSide / 2;
 
     final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..color = Colors.white.withValues(alpha: 0.4)
-      ..strokeWidth = 1;
+      ..style = .stroke
+      ..color = Colors.white.withValues(alpha: 0.5)
+      ..strokeWidth = 2;
 
     canvas
       ..drawCircle(center, radius / 2, paint)
       ..drawLine(center - Offset(radius, 0), center + Offset(radius, 0), paint) // NS
       ..drawLine(center - Offset(0, radius), center + Offset(0, radius), paint); // EW
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class InactivePainter extends CustomPainter {
+  final Color color;
+
+  InactivePainter({required this.color, super.repaint});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(.zero);
+    final radius = size.shortestSide / 2;
+
+    final backgroundPaint = Paint()
+      ..style = .fill
+      ..color = color.withValues(alpha: .4);
+    canvas.drawCircle(center, radius, backgroundPaint);
+
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.white;
+    canvas.drawCircle(center, radius - ringPaint.strokeWidth / 2, ringPaint);
   }
 
   @override
