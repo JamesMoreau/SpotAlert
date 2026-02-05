@@ -272,6 +272,7 @@ class Overlay extends StatelessWidget {
               top: statusBarHeight + 10,
               right: 15,
               child: Column(
+                spacing: 15,
                 crossAxisAlignment: .end,
                 mainAxisAlignment: .spaceAround,
                 children: [
@@ -279,7 +280,6 @@ class Overlay extends StatelessWidget {
                     child: const Icon(Icons.info_outline_rounded),
                     onPressed: () => showDialog<void>(context: context, builder: (context) => const InfoDialog()),
                   ),
-                  const SizedBox(height: 10),
                   FloatingActionButton(
                     onPressed: () async {
                       final success = await followOrUnfollowUser(spotAlert);
@@ -289,10 +289,8 @@ class Overlay extends StatelessWidget {
                     backgroundColor: spotAlert.followUser ? const Color.fromARGB(255, 216, 255, 218) : null,
                     child: Icon(spotAlert.followUser ? Icons.near_me_rounded : Icons.lock_rounded),
                   ),
-                  const SizedBox(height: 10),
                   if (spotAlert.isPlacingAlarm) ...[
                     FloatingActionButton(onPressed: () => placeAlarm(spotAlert, MapCamera.of(context).center), elevation: 4, child: const Icon(Icons.check)),
-                    const SizedBox(height: 10),
                     FloatingActionButton(
                       onPressed: () {
                         spotAlert
