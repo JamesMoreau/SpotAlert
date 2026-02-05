@@ -60,7 +60,7 @@ class AlarmCirclePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = size.center(Offset.zero);
+    final center = size.center(.zero);
     final radius = size.shortestSide / 2;
 
     final paint = Paint()
@@ -68,8 +68,8 @@ class AlarmCirclePainter extends CustomPainter {
       ..shader = SweepGradient(
         colors: [color.withValues(alpha: 0), color.withValues(alpha: .35)],
         stops: const [
-          0.92, // most of circle is transparent
-          1.0, // bright sweep edge
+          0.75, // start of sweep (1/4 of circle)
+          1.0,  // bright edge
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
 
