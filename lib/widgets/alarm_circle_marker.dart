@@ -5,7 +5,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/models/alarm.dart';
 
-//TODO: this should have an inactive return path for inactive alarms.
 class AlarmCircle extends StatefulWidget {
   final Alarm alarm;
   final Duration sweepDuration;
@@ -156,9 +155,9 @@ class InactivePainter extends CustomPainter {
 }
 
 double metersToScreenPixels(MapCamera camera, LatLng point, double meters) {
-  //TODO: is this robust? ie, works for any size, zoom.
   final origin = camera.getOffsetFromOrigin(point);
-  final offsetPoint = const Distance().offset(point, meters, 180); // south
+  const bearingSouth = 180.0;
+  final offsetPoint = const Distance().offset(point, meters, bearingSouth);
   final offset = camera.getOffsetFromOrigin(offsetPoint);
 
   return (origin - offset).distance;
