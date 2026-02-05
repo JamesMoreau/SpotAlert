@@ -73,22 +73,22 @@ class AlarmCirclePainter extends CustomPainter {
 
     canvas.drawCircle(center, radius, fillPaint);
 
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..color = Colors.white;
-
-    canvas.drawCircle(center, radius - 1, ringPaint);
-
     final armPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = boundaryWidth
       ..strokeCap = StrokeCap.butt
       ..color = color;
 
-    final armAngle = angle;
-    final armEnd = Offset(center.dx + radius * math.cos(armAngle), center.dy + radius * math.sin(armAngle));
+    final armEnd = Offset(center.dx + radius * math.cos(angle), center.dy + radius * math.sin(angle));
+
     canvas.drawLine(center, armEnd, armPaint);
+
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = boundaryWidth
+      ..color = Colors.white;
+
+    canvas.drawCircle(center, radius - boundaryWidth / 2, ringPaint);
   }
 
   @override
