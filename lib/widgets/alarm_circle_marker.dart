@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -63,17 +62,26 @@ class AlarmCirclePainter extends CustomPainter {
     final center = size.center(.zero);
     final radius = size.shortestSide / 2;
 
+    final backgroundPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = color.withValues(alpha: .4);
+    canvas.drawCircle(center, radius, backgroundPaint);
+
     final paint = Paint()
-      ..blendMode = BlendMode.plus
       ..shader = SweepGradient(
-        colors: [color.withValues(alpha: 0), color.withValues(alpha: .35)],
+        colors: [color.withValues(alpha: .4), color.withValues(alpha: .8)],
         stops: const [
-          0.75, // start of sweep (1/4 of circle)
-          1.0,  // bright edge
+          1 / 3, // start of sweep (1/4 of circle)
+          1, // bright edge
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
-
     canvas.drawCircle(center, radius, paint);
+
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..color = Colors.white;
+    canvas.drawCircle(center, radius - ringPaint.strokeWidth / 2, ringPaint);
   }
 
   @override

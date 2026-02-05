@@ -206,6 +206,8 @@ class AlarmMarkers extends StatelessWidget {
   }
 }
 
+// TODO: should this take isPlacing or conditionaly be included in the widget tree.
+// This SHOULD use the new alarm circle widget.
 class AlarmPlacementMarker extends StatelessWidget {
   final bool isPlacing;
   final double radius;
@@ -285,12 +287,11 @@ class Overlay extends StatelessWidget {
                       final success = await followOrUnfollowUser(spotAlert);
                       if (success) spotAlert.setState();
                     },
-                    elevation: 4,
                     backgroundColor: spotAlert.followUser ? const Color.fromARGB(255, 216, 255, 218) : null,
                     child: Icon(spotAlert.followUser ? Icons.near_me_rounded : Icons.lock_rounded),
                   ),
                   if (spotAlert.isPlacingAlarm) ...[
-                    FloatingActionButton(onPressed: () => placeAlarm(spotAlert, MapCamera.of(context).center), elevation: 4, child: const Icon(Icons.check)),
+                    FloatingActionButton(onPressed: () => placeAlarm(spotAlert, MapCamera.of(context).center), child: const Icon(Icons.check)),
                     FloatingActionButton(
                       onPressed: () {
                         spotAlert
@@ -298,7 +299,6 @@ class Overlay extends StatelessWidget {
                           ..alarmPlacementRadius = initialAlarmRadius
                           ..setState();
                       },
-                      elevation: 4,
                       child: const Icon(Icons.cancel_rounded),
                     ),
                   ] else ...[
@@ -309,7 +309,6 @@ class Overlay extends StatelessWidget {
                           ..followUser = false
                           ..setState();
                       },
-                      elevation: 4,
                       child: const Icon(Icons.pin_drop_rounded),
                     ),
                   ],
@@ -324,7 +323,7 @@ class Overlay extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: const .all(.circular(15)),
-                    boxShadow: [.new(color: Colors.grey.withValues(alpha: .5), spreadRadius: 2, blurRadius: 5, offset: const .new(0, 3))],
+                    boxShadow: [.new(color: Colors.black.withValues(alpha: .1), spreadRadius: 2, blurRadius: 5)],
                   ),
                   child: Padding(
                     padding: const .symmetric(horizontal: 15, vertical: 5),
