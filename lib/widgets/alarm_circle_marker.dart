@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -45,57 +46,38 @@ class _AlarmCircleState extends State<AlarmCircle> with SingleTickerProviderStat
       height: diameter,
       child: AnimatedBuilder(
         animation: controller,
-        builder: (_, _) => CustomPaint(
-          painter: AlarmCirclePainter(progress: controller.value, color: widget.alarm.color.value, sweepAngle: widget.sweepAngle),
-        ),
+        builder: (_, child) => Transform.rotate(angle: controller.value * 2 * pi, child: child),
+        child: CustomPaint(painter: AlarmCirclePainter(color: widget.alarm.color.value)),
       ),
     );
   }
 }
 
 class AlarmCirclePainter extends CustomPainter {
-  final double progress;
   final Color color;
-  final double sweepAngle;
 
-  const AlarmCirclePainter({required this.progress, required this.color, required this.sweepAngle});
+  const AlarmCirclePainter({required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = size.center(.zero);
-    final radius = size.width / 2;
-    const boundaryWidth = 2.0;
+    final center = size.center(Offset.zero);
+    final radius = size.shortestSide / 2;
 
-    final angle = progress * math.pi * 2;
+    final paint = Paint()
+      ..blendMode = BlendMode.plus
+      ..shader = SweepGradient(
+        colors: [color.withValues(alpha: 0), color.withValues(alpha: .35)],
+        stops: const [
+          0.92, // most of circle is transparent
+          1.0, // bright sweep edge
+        ],
+      ).createShader(Rect.fromCircle(center: center, radius: radius));
 
-    final fillPaint = Paint()
-      ..style = PaintingStyle.fill
-      ..color = color.withValues(alpha: 0.3);
-
-    canvas.drawCircle(center, radius, fillPaint);
-
-    final armPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = boundaryWidth
-      ..strokeCap = StrokeCap.butt
-      ..color = color.withValues(alpha: 0.8);
-
-    final armEnd = Offset(center.dx + radius * math.cos(angle), center.dy + radius * math.sin(angle));
-
-    canvas.drawLine(center, armEnd, armPaint);
-
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = boundaryWidth
-      ..color = Colors.white;
-
-    canvas.drawCircle(center, radius - boundaryWidth / 2, ringPaint);
+    canvas.drawCircle(center, radius, paint);
   }
 
   @override
-  bool shouldRepaint(covariant AlarmCirclePainter oldDelegate) {
-    return oldDelegate.progress != progress || oldDelegate.color != color || oldDelegate.sweepAngle != sweepAngle;
-  }
+  bool shouldRepaint(covariant AlarmCirclePainter oldDelegate) => oldDelegate.color != color;
 }
 
 double metersToScreenPixels(MapCamera camera, LatLng point, double meters) {
