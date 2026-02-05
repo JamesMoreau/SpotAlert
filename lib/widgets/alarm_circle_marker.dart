@@ -90,7 +90,7 @@ class RadarPainter extends CustomPainter {
       ..shader = SweepGradient(
         colors: [color.withValues(alpha: .4), color.withValues(alpha: .7)],
         stops: const [
-          1 / 3, // start of sweep (1/4 of circle)
+          1 / 3, // start of sweep
           1, // bright edge
         ],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
