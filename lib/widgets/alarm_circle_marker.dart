@@ -10,7 +10,7 @@ class AlarmCircle extends StatefulWidget {
   final Duration sweepDuration;
   final double sweepAngle; // radians
 
-  const AlarmCircle({required this.alarm, super.key, this.sweepDuration = const Duration(seconds: 2), this.sweepAngle = math.pi / 4});
+  const AlarmCircle({required this.alarm, super.key, this.sweepDuration = const Duration(seconds: 4), this.sweepAngle = math.pi / 4});
 
   @override
   State<AlarmCircle> createState() => _AlarmCircleState();
@@ -37,7 +37,6 @@ class _AlarmCircleState extends State<AlarmCircle> with SingleTickerProviderStat
     final pixelRadius = metersToScreenPixels(camera, widget.alarm.position, widget.alarm.radius);
     final diameter = pixelRadius * 2;
 
-    // Nothing to draw if we're effectively invisible
     if (diameter <= 0) return const SizedBox.shrink();
 
     return SizedBox(
@@ -64,18 +63,16 @@ class AlarmCirclePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = size.center(.zero);
     final radius = size.width / 2;
-    final rect = Rect.fromCircle(center: center, radius: radius);
+    const boundaryWidth = 2.0;
 
     final angle = progress * math.pi * 2;
 
-    // Base fill
     final fillPaint = Paint()
       ..style = PaintingStyle.fill
       ..color = color.withValues(alpha: 0.3);
 
     canvas.drawCircle(center, radius, fillPaint);
 
-    // Boundary ring
     final ringPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
@@ -83,14 +80,15 @@ class AlarmCirclePainter extends CustomPainter {
 
     canvas.drawCircle(center, radius - 1, ringPaint);
 
-    // Sweeping arm
     final armPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2
-      ..strokeCap = StrokeCap.round
+      ..strokeWidth = boundaryWidth
+      ..strokeCap = StrokeCap.butt
       ..color = color;
 
-    canvas.drawArc(rect, angle, sweepAngle, false, armPaint);
+    final armAngle = angle;
+    final armEnd = Offset(center.dx + radius * math.cos(armAngle), center.dy + radius * math.sin(armAngle));
+    canvas.drawLine(center, armEnd, armPaint);
   }
 
   @override
