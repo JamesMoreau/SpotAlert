@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -8,9 +6,8 @@ import 'package:spot_alert/models/alarm.dart';
 class AlarmCircle extends StatefulWidget {
   final Alarm alarm;
   final Duration sweepDuration;
-  final double sweepAngle; // radians
 
-  const AlarmCircle({required this.alarm, super.key, this.sweepDuration = const Duration(seconds: 4), this.sweepAngle = math.pi / 4});
+  const AlarmCircle({required this.alarm, super.key, this.sweepDuration = const Duration(seconds: 4)});
 
   @override
   State<AlarmCircle> createState() => _AlarmCircleState();
@@ -89,10 +86,7 @@ class RadarPainter extends CustomPainter {
     final paint = Paint()
       ..shader = SweepGradient(
         colors: [color.withValues(alpha: .4), color.withValues(alpha: .7)],
-        stops: const [
-          1 / 3, // start of sweep
-          1, // bright edge
-        ],
+        stops: const [1 / 3, 1],
       ).createShader(Rect.fromCircle(center: center, radius: radius));
     canvas.drawCircle(center, radius, paint);
 
