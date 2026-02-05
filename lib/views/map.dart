@@ -1,6 +1,7 @@
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_polywidget/flutter_map_polywidget.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
@@ -167,7 +168,7 @@ class AlarmMarkers extends StatelessWidget {
       return MarkerLayer(markers: alarmMarkers);
     } else {
       final alarmCircles = alarms.map((a) => buildCircleMarker(context, a)).toList();
-      return MarkerLayer(markers: alarmCircles);
+      return PolyWidgetLayer(polyWidgets: alarmCircles);
     }
   }
 
@@ -194,26 +195,15 @@ class AlarmMarkers extends StatelessWidget {
     );
   }
 
-  Marker buildCircleMarker(BuildContext context, Alarm alarm) {
-    final camera = MapCamera.of(context);
-    final pixelRadius = metersToScreenPixels(camera, alarm.position, alarm.radius);
-    final diameter = pixelRadius * 2;
-
-    return Marker(
-      point: alarm.position,
-      width: diameter,
-      height: diameter,
-      child: AlarmCircle(diameter: diameter, color: Colors.redAccent),
+  PolyWidget buildCircleMarker(BuildContext context, Alarm alarm) {
+    final diameter = alarm.radius * 2;
+    return PolyWidget(
+      center: alarm.position,
+      widthInMeters: diameter,
+      heightInMeters: diameter,
+      child: AlarmCircle(alarm: alarm),
     );
   }
-}
-
-double metersToScreenPixels(MapCamera camera, LatLng point, double meters) {
-  final origin = camera.getOffsetFromOrigin(point);
-  final offsetPoint = const Distance().offset(point, meters, 180); // south
-  final offset = camera.getOffsetFromOrigin(offsetPoint);
-
-  return (origin - offset).distance;
 }
 
 class AlarmPlacementMarker extends StatelessWidget {

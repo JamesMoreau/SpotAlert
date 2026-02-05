@@ -13,7 +13,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - 
   - Update screenshots in app store and readme.
   - update description in appstore to inlude train / bus.
   - startup screen icon.
