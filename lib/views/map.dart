@@ -197,14 +197,13 @@ class AlarmMarkers extends StatelessWidget {
   Marker buildCircleMarker(BuildContext context, Alarm alarm) {
     final camera = MapCamera.of(context);
     final pixelRadius = metersToScreenPixels(camera, alarm.position, alarm.radius);
-    final size = pixelRadius * 2;
+    final diameter = pixelRadius * 2;
 
     return Marker(
       point: alarm.position,
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      child: AlarmCircle(size: size, color: alarm.color.value, active: alarm.active),
+      width: diameter,
+      height: diameter,
+      child: AlarmCircle(diameter: diameter, color: Colors.redAccent),
     );
   }
 }
