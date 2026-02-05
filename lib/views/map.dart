@@ -174,7 +174,7 @@ class AlarmMarkers extends StatelessWidget {
 
   Marker buildMarker(Alarm alarm) {
     return Marker(
-      width: 100, //TODO what is the point.
+      width: 100,
       height: 65,
       point: alarm.position,
       child: Stack(
@@ -206,8 +206,6 @@ class AlarmMarkers extends StatelessWidget {
   }
 }
 
-// TODO: should this take isPlacing or conditionaly be included in the widget tree.
-// This SHOULD use the new alarm circle widget.
 class AlarmPlacementMarker extends StatelessWidget {
   final bool isPlacing;
   final double radius;
@@ -218,15 +216,17 @@ class AlarmPlacementMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!isPlacing) return const SizedBox.shrink();
 
-    return CircleLayer(
-      circles: [
-        .new(
-          point: MapCamera.of(context).center,
-          radius: radius,
-          color: AlarmColor.redAccent.value.withValues(alpha: .5),
-          borderColor: Colors.black,
-          borderStrokeWidth: 2,
-          useRadiusInMeter: true,
+    final diameter = radius * 2;
+
+    final tempAlarm = Alarm(id: 'temp', name: '', position: MapCamera.of(context).center, radius: radius);
+
+    return PolyWidgetLayer(
+      polyWidgets: [
+        PolyWidget(
+          center: MapCamera.of(context).center,
+          heightInMeters: diameter,
+          widthInMeters: diameter,
+          child: AlarmCircle(alarm: tempAlarm),
         ),
       ],
     );
