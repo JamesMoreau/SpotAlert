@@ -1,8 +1,7 @@
-import 'dart:math';
-
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_polywidget/flutter_map_polywidget.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,8 +10,11 @@ import 'package:spot_alert/dialogs/info.dart';
 import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
+import 'package:spot_alert/widgets/alarm_circle_marker.dart';
 import 'package:spot_alert/widgets/alarm_pin.dart';
+import 'package:spot_alert/widgets/compass.dart';
 import 'package:spot_alert/widgets/osm_attribution.dart';
+import 'package:spot_alert/widgets/user_icon.dart';
 
 const openStreetMapTemplateUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const initialZoom = 13.0;
@@ -42,6 +44,7 @@ class MapView extends StatelessWidget {
           ),
           children: [
             TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: spotAlert.tileProvider),
+            const Scalebar(alignment: .bottomLeft, padding: .only(left: 20, bottom: 150)),
             AlarmMarkers(alarms: spotAlert.alarms, threshold: circleToMarkerZoomThreshold),
             UserPosition(stream: spotAlert.positionStream),
             AlarmPlacementMarker(isPlacing: spotAlert.isPlacingAlarm, radius: spotAlert.alarmPlacementRadius),
@@ -140,17 +143,7 @@ class UserPosition extends StatelessWidget {
         if (position == null) return const SizedBox.shrink();
 
         return MarkerLayer(
-          markers: [
-            .new(
-              point: position,
-              child: Icon(
-                Icons.person_rounded,
-                color: Colors.blue,
-                size: 30,
-                shadows: solidOutlineShadows(color: Colors.white, radius: 2),
-              ),
-            ),
-          ],
+          markers: [.new(point: position, child: const UserIcon())],
         );
       },
     );
@@ -174,8 +167,8 @@ class AlarmMarkers extends StatelessWidget {
       final alarmMarkers = alarms.map(buildMarker).toList();
       return MarkerLayer(markers: alarmMarkers);
     } else {
-      final alarmCircles = alarms.map(buildCircleMarker).toList();
-      return CircleLayer(circles: alarmCircles);
+      final alarmCircles = alarms.map((a) => buildCircleMarker(context, a)).toList();
+      return PolyWidgetLayer(polyWidgets: alarmCircles);
     }
   }
 
@@ -184,35 +177,31 @@ class AlarmMarkers extends StatelessWidget {
       width: 100,
       height: 65,
       point: alarm.position,
-      child: Opacity(
-        opacity: alarm.active ? 1 : .6,
-        child: Stack(
-          alignment: .center,
-          children: [
-            AlarmPin(alarm),
-            Positioned(
-              bottom: 0,
-              child: Container(
-                constraints: const .new(maxWidth: 100),
-                padding: const .symmetric(horizontal: 2),
-                decoration: BoxDecoration(color: paleBlue.withValues(alpha: .7), borderRadius: .circular(8)),
-                child: Text(alarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
-              ),
+      child: Stack(
+        alignment: .center,
+        children: [
+          AlarmPin(alarm),
+          Positioned(
+            bottom: 0,
+            child: Container(
+              constraints: const .new(maxWidth: 100),
+              padding: const .symmetric(horizontal: 2),
+              decoration: BoxDecoration(color: paleBlue.withValues(alpha: .7), borderRadius: .circular(8)),
+              child: Text(alarm.name, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  CircleMarker buildCircleMarker(Alarm alarm) {
-    return CircleMarker(
-      point: alarm.position,
-      color: alarm.color.value.withValues(alpha: .5),
-      borderColor: Colors.white,
-      borderStrokeWidth: 2,
-      radius: alarm.radius,
-      useRadiusInMeter: true,
+  PolyWidget buildCircleMarker(BuildContext context, Alarm alarm) {
+    final diameter = alarm.radius * 2;
+    return PolyWidget(
+      center: alarm.position,
+      widthInMeters: diameter,
+      heightInMeters: diameter,
+      child: AlarmCircle(alarm: alarm),
     );
   }
 }
@@ -227,182 +216,22 @@ class AlarmPlacementMarker extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!isPlacing) return const SizedBox.shrink();
 
-    return CircleLayer(
-      circles: [
-        .new(
-          point: MapCamera.of(context).center,
-          radius: radius,
-          color: AlarmColor.redAccent.value.withValues(alpha: .5),
-          borderColor: Colors.black,
-          borderStrokeWidth: 2,
-          useRadiusInMeter: true,
+    final diameter = radius * 2;
+
+    final tempAlarm = Alarm(id: 'temp', name: '', position: MapCamera.of(context).center, radius: radius);
+
+    return PolyWidgetLayer(
+      polyWidgets: [
+        PolyWidget(
+          center: MapCamera.of(context).center,
+          heightInMeters: diameter,
+          widthInMeters: diameter,
+          child: AlarmCircle(alarm: tempAlarm),
         ),
       ],
     );
   }
 }
-
-class Compass extends StatelessWidget {
-  final Stream<LatLng> userPositionStream;
-  final List<Alarm> alarms;
-
-  const Compass({required this.userPositionStream, required this.alarms, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final ellipseWidth = screenSize.width * .8;
-    final ellipseHeight = screenSize.height * .65;
-
-    return StreamBuilder(
-      stream: userPositionStream,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) return const SizedBox.shrink();
-
-        final position = snapshot.data;
-
-        // Nothing to show for compass if user position not available
-        if (position == null) return const SizedBox.shrink();
-
-        final camera = MapCamera.of(context);
-
-        // If the user's position exists but is not visible, show an arrow pointing towards them.
-        Widget? userArrow;
-        final userIsVisible = camera.visibleBounds.contains(position);
-        if (!userIsVisible) {
-          final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, position);
-          final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-
-          userArrow = CompassArrow(
-            angle: angle,
-            arrowRotation: arrowRotation,
-            ellipseWidth: ellipseWidth,
-            ellipseHeight: ellipseHeight,
-            color: Colors.blue,
-            icon: Icons.person,
-          );
-        }
-
-        // If no alarms are currently visible on screen, show an arrow pointing towards the closest alarm (if there is one).
-        Widget? alarmArrow;
-        final activeAlarms = alarms.where((a) => a.active).toList();
-        final closestAlarm = getClosest(position, activeAlarms, (alarm) => alarm.position);
-        if (closestAlarm != null) {
-          final closestAlarmIsVisible = !camera.visibleBounds.contains(closestAlarm.position);
-          if (closestAlarmIsVisible) {
-            final arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestAlarm.position);
-            final angle = (arrowRotation + 3 * pi / 2) % (2 * pi); // Compensate the for y-axis pointing downwards on Transform.translate().
-            
-            final label = closestAlarm.name.trim().isEmpty ? null : closestAlarm.name;
-
-            alarmArrow = CompassArrow(
-              angle: angle,
-              arrowRotation: arrowRotation,
-              ellipseWidth: ellipseWidth,
-              ellipseHeight: ellipseHeight,
-              color: closestAlarm.color.value,
-              icon: Icons.pin_drop_rounded,
-              label: label,
-            );
-          }
-        }
-
-        return IgnorePointer(
-          child: Center(
-            child: Stack(alignment: .center, children: [if (userArrow != null) userArrow, if (alarmArrow != null) alarmArrow]),
-          ),
-        );
-      },
-    );
-  }
-}
-
-T? getClosest<T>(LatLng target, List<T> items, LatLng Function(T) getPosition) {
-  T? closestItem;
-  var closestDistance = double.infinity;
-
-  for (final item in items) {
-    final itemPositon = getPosition(item);
-    final d = const Distance().distance(itemPositon, target);
-    if (d < closestDistance) {
-      closestDistance = d;
-      closestItem = item;
-    }
-  }
-
-  return closestItem;
-}
-
-class CompassArrow extends StatelessWidget {
-  final double angle;
-  final double arrowRotation;
-  final double ellipseWidth;
-  final double ellipseHeight;
-
-  final Color color;
-  final IconData icon;
-  final String? label;
-
-  const CompassArrow({
-    required this.angle,
-    required this.arrowRotation,
-    required this.ellipseWidth,
-    required this.ellipseHeight,
-    required this.color,
-    required this.icon,
-    this.label,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final angleIs9to3 = angle > 0 && angle < pi;
-
-    return IgnorePointer(
-      child: Stack(
-        alignment: .center,
-        children: [
-          Transform.translate(
-            offset: .new((ellipseWidth / 2) * cos(angle), (ellipseHeight / 2) * sin(angle)),
-            child: Transform.rotate(
-              angle: arrowRotation,
-              child: Transform.rotate(
-                angle: -pi / 2,
-                child: Icon(Icons.arrow_forward_ios, color: color, size: 28),
-              ),
-            ),
-          ),
-          Transform.translate(
-            offset: .new((ellipseWidth / 2 - 24) * cos(angle), (ellipseHeight / 2 - 24) * sin(angle)),
-            child: Icon(
-              icon,
-              size: 32,
-              color: color,
-              shadows: solidOutlineShadows(color: Colors.white, radius: 2),
-            ),
-          ),
-          if (label != null) ...[
-            Transform.translate(
-              offset: .new((ellipseWidth / 2 - 26) * cos(angle), (ellipseHeight / 2 - 26) * sin(angle)),
-              child: Transform.translate(
-                // Move the text up or down depending on the angle to now overlap with the arrow.
-                offset: .new(0, angleIs9to3 ? -22 : 22),
-                child: Container(
-                  constraints: const .new(maxWidth: 100),
-                  padding: const .symmetric(horizontal: 2),
-                  decoration: BoxDecoration(color: paleBlue.withValues(alpha: .7), borderRadius: .circular(8)),
-                  child: Text(label!, style: const .new(fontSize: 10), overflow: .ellipsis, maxLines: 1),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-double calculateAngleBetweenTwoPositions(LatLng from, LatLng to) => atan2(to.longitude - from.longitude, to.latitude - from.latitude);
 
 class Overlay extends StatelessWidget {
   const Overlay({super.key});
@@ -445,6 +274,7 @@ class Overlay extends StatelessWidget {
               top: statusBarHeight + 10,
               right: 15,
               child: Column(
+                spacing: 15,
                 crossAxisAlignment: .end,
                 mainAxisAlignment: .spaceAround,
                 children: [
@@ -452,20 +282,16 @@ class Overlay extends StatelessWidget {
                     child: const Icon(Icons.info_outline_rounded),
                     onPressed: () => showDialog<void>(context: context, builder: (context) => const InfoDialog()),
                   ),
-                  const SizedBox(height: 10),
                   FloatingActionButton(
                     onPressed: () async {
                       final success = await followOrUnfollowUser(spotAlert);
                       if (success) spotAlert.setState();
                     },
-                    elevation: 4,
                     backgroundColor: spotAlert.followUser ? const Color.fromARGB(255, 216, 255, 218) : null,
                     child: Icon(spotAlert.followUser ? Icons.near_me_rounded : Icons.lock_rounded),
                   ),
-                  const SizedBox(height: 10),
                   if (spotAlert.isPlacingAlarm) ...[
-                    FloatingActionButton(onPressed: () => placeAlarm(spotAlert, MapCamera.of(context).center), elevation: 4, child: const Icon(Icons.check)),
-                    const SizedBox(height: 10),
+                    FloatingActionButton(onPressed: () => placeAlarm(spotAlert, MapCamera.of(context).center), child: const Icon(Icons.check)),
                     FloatingActionButton(
                       onPressed: () {
                         spotAlert
@@ -473,7 +299,6 @@ class Overlay extends StatelessWidget {
                           ..alarmPlacementRadius = initialAlarmRadius
                           ..setState();
                       },
-                      elevation: 4,
                       child: const Icon(Icons.cancel_rounded),
                     ),
                   ] else ...[
@@ -484,7 +309,6 @@ class Overlay extends StatelessWidget {
                           ..followUser = false
                           ..setState();
                       },
-                      elevation: 4,
                       child: const Icon(Icons.pin_drop_rounded),
                     ),
                   ],
@@ -499,7 +323,7 @@ class Overlay extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primaryContainer,
                     borderRadius: const .all(.circular(15)),
-                    boxShadow: [.new(color: Colors.grey.withValues(alpha: .5), spreadRadius: 2, blurRadius: 5, offset: const Offset(0, 3))],
+                    boxShadow: [.new(color: Colors.black.withValues(alpha: .1), spreadRadius: 2, blurRadius: 5)],
                   ),
                   child: Padding(
                     padding: const .symmetric(horizontal: 15, vertical: 5),
