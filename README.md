@@ -6,8 +6,8 @@ Built in Flutter using geofencing, mapping, and notification libraries.
 
 ![Screenshot](documentation/lXGEOkC5.png)
 
-![Screenshot](documentation/VfIW1IJy.png.png)
+![Screenshot](documentation/VfIW1IJy.png)
 
-![Screenshot](documentation/5Y6vqN3H.png.png)
+![Screenshot](documentation/5Y6vqN3H.png)
 
-![Screenshot](documentation/lAqCoZiD.png.png)
+![Screenshot](documentation/lAqCoZiD.png)
