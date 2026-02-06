@@ -12,7 +12,6 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - Update screenshots in app store and readme.
 */
 
 class MyHttpOverrides extends HttpOverrides {
