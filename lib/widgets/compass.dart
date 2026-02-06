@@ -52,7 +52,7 @@ class Compass extends StatelessWidget {
         if (closestActiveAlarm != null) {
           final closestAlarmIsVisible = !camera.visibleBounds.contains(closestActiveAlarm.position);
           if (closestAlarmIsVisible) {
-            final arrowRotation = calculateAngleBetweenTwoPositions(MapCamera.of(context).center, closestActiveAlarm.position);
+            final arrowRotation = calculateAngleBetweenTwoPositions(camera.center, closestActiveAlarm.position);
             final label = closestActiveAlarm.name.trim().isEmpty ? null : closestActiveAlarm.name;
             
             alarmArrow = AlarmArrow(layout: layout, direction: arrowRotation, alarm: closestActiveAlarm, label: label);
