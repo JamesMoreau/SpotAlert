@@ -44,10 +44,10 @@ class MapView extends StatelessWidget {
           ),
           children: [
             TileLayer(urlTemplate: openStreetMapTemplateUrl, userAgentPackageName: spotAlert.packageInfo.packageName, tileProvider: spotAlert.tileProvider),
-            const Scalebar(alignment: .bottomLeft, padding: .only(left: 20, bottom: 150)),
             AlarmMarkers(alarms: spotAlert.alarms, threshold: circleToMarkerZoomThreshold),
             UserPosition(stream: spotAlert.positionStream),
             AlarmPlacementMarker(isPlacing: spotAlert.isPlacingAlarm, radius: spotAlert.alarmPlacementRadius),
+            const Scalebar(alignment: .bottomLeft, padding: .only(left: 20, bottom: 150)),
             Compass(alarms: spotAlert.alarms, userPositionStream: spotAlert.positionStream),
             const Overlay(),
           ],
