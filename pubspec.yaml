@@ -59,10 +59,9 @@ dev_dependencies:
   pubspec_dependency_sorter: ^1.0.4
   very_good_analysis: 10.1.0
 
-flutter_launcher_icons:
-  android: "launcher_icon"
-  ios: true
-  image_path: "assets/icon.png"
+# flutter_launcher_icons:
+#   ios: true
+#   image_path: "assets/icon.png"
 
 flutter:
   # The following line ensures that the Material Icons font is

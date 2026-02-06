@@ -1,6 +1,6 @@
 # flutter pub run flutter_launcher_icons
 flutter_launcher_icons:
-  image_path: "resources/icon.png"
+  image_path: "assets/icon.png"
 
   android: "launcher_icon"
   # image_path_android: "assets/icon/icon.png"
@@ -17,7 +17,3 @@ flutter_launcher_icons:
   # image_path_ios_tinted_grayscale: "assets/icon/icon_tinted.png"
   # desaturate_tinted_to_grayscale_ios: true
   # background_color_ios: "#ffffff"
-
-  macos:
-    generate: true
-    # image_path: "path/to/image.png"
