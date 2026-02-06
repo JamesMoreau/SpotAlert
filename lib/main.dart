@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -29,7 +28,10 @@ class MyHttpOverrides extends HttpOverrides {
 const Uuid idGenerator = Uuid();
 
 void debugPrintMessage(String message) {
-  if (kDebugMode) debugPrint(message);
+  assert(() {
+    debugPrint(message);
+    return true;
+  }());
 }
 
 void debugPrintInfo(String message) => debugPrintMessage('ℹ️ $message');
