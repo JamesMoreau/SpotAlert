@@ -1,5 +1,5 @@
 name: spot_alert
-description: A proximity-based alarm app.
+description: A location-based alarm app designed for travel. Set alarms at specific places and get notified when you arrive—so you never miss a stop, destination, or moment..
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -58,10 +58,6 @@ dev_dependencies:
     sdk: flutter
   pubspec_dependency_sorter: ^1.0.4
   very_good_analysis: 10.1.0
-
-# flutter_launcher_icons:
-#   ios: true
-#   image_path: "assets/icon.png"
 
 flutter:
   # The following line ensures that the Material Icons font is

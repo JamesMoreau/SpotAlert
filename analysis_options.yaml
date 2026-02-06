@@ -31,6 +31,7 @@ linter:
     prefer_const_constructors: true
     prefer_const_literals_to_create_immutables: false
     curly_braces_in_flow_control_structures: false
+    prefer_asserts_with_message: false
     
     # very good analysis options
     public_member_api_docs: false

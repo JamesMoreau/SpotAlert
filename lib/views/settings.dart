@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/main.dart';
@@ -116,7 +117,7 @@ class SettingsView extends StatelessWidget {
                       trailing: const Icon(Icons.alarm_rounded),
                       onTap: () async {
                         final directory = await getApplicationDocumentsDirectory();
-                        final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+                        final alarmsPath = path.join(directory.path, alarmsFilename);
                         final alarmsFile = File(alarmsPath);
 
                         if (!alarmsFile.existsSync()) {

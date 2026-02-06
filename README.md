@@ -1,7 +1,8 @@
 # Spot Alert
 
-A proximity-based alarm mobile app for travel. Set alarms at desired locations to never miss a train stop or attraction.
-Built in Flutter using geolocation, mapping, notification, and storage libraries.
+A location-based alarm app designed for travel. Set alarms at specific places and get notified when you arrive—so you never miss a stop, destination, or moment.
+
+Built in Flutter using geofencing, mapping, and notification libraries.
 
 ![Screenshot](documentation/x4LaTmy1JM.png)
 

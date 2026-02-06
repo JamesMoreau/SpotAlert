@@ -11,6 +11,7 @@ import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/dialogs/triggered_alarm.dart';
@@ -80,10 +81,23 @@ class SpotAlert extends JuneState {
 
 Future<List<Alarm>> loadAlarms() async {
   final directory = await getApplicationDocumentsDirectory();
-  final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
+  final alarmsPath = path.join(directory.path, alarmsFilename);
   final file = File(alarmsPath);
   final alarms = await loadAlarmsFromFile(file);
   return alarms;
+}
+
+// This should be called everytime the alarms state is changed.
+Future<void> saveAlarmsToStorage(SpotAlert spotAlert) async {
+  try {
+    final directory = await getApplicationDocumentsDirectory();
+    final alarmsPath = path.join(directory.path, alarmsFilename);
+
+    final file = File(alarmsPath);
+    await saveAlarmsToFile(file, spotAlert.alarms);
+  } on MissingPlatformDirectoryException catch (e) {
+    debugPrintError('Failed to save alarms: $e');
+  }
 }
 
 LatLng positionToLatLng(Position p) => .new(p.latitude, p.longitude);
@@ -289,17 +303,4 @@ Future<bool> deactivateAlarm(Alarm alarm) async {
   debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
 
   return true;
-}
-
-// This should be called everytime the alarms state is changed.
-Future<void> saveAlarmsToStorage(SpotAlert spotAlert) async {
-  try {
-    final directory = await getApplicationDocumentsDirectory();
-    final alarmsPath = '${directory.path}${Platform.pathSeparator}$alarmsFilename';
-
-    final file = File(alarmsPath);
-    await saveAlarmsToFile(file, spotAlert.alarms);
-  } on MissingPlatformDirectoryException catch (e) {
-    debugPrintError('Failed to save alarms: $e');
-  }
 }
