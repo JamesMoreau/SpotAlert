@@ -12,6 +12,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
+  - vibration not lasting long enough.
 */
 
 class MyHttpOverrides extends HttpOverrides {
