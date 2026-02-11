@@ -49,10 +49,10 @@ dependencies:
   path_provider: ^2.1.2
   url_launcher: ^6.3.0
   uuid: ^4.3.3
-  vibration: ^3.1.5
+  vibration: ^3.1.6
 
 dev_dependencies:
-  dependency_validator: ^5.0.3
+  dependency_validator: ^5.0.4
   flutter_launcher_icons: ^0.14.4
   flutter_test:
     sdk: flutter

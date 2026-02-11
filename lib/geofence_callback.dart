@@ -47,7 +47,7 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   }
 
   if (await Vibration.hasVibrator()) {
-    await Vibration.vibrate(preset: .rhythmicBuzz);
+    await Vibration.vibrate(pattern: [2000, 1000, 2000, 1000, 2000, 1000, 2000, 1000, 2000, 1000, 2000, 1000]);
   }
 
   await Future<void>.delayed(const Duration(seconds: 1));

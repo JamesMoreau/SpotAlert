@@ -12,7 +12,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
-  - vibration not lasting long enough.
+ alarm is being triggered twice
 */
 
 class MyHttpOverrides extends HttpOverrides {
