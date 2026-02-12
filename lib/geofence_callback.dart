@@ -45,7 +45,7 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   final now = DateTime.now();
 
   // Sometimes the same geofence can trigger twice for the same event type.
-  // Therefore, we must de-duplicate by checking the last trigger time. Since 
+  // Therefore, we must de-duplicate by checking the last trigger time. Since
   // we cannot persist memory across callbacks, we need to use the file system
   // to store the last triggered id and time.
   final directory = await getApplicationDocumentsDirectory();

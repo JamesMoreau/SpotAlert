@@ -13,8 +13,8 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
- alarm is being triggered twice
  vibration is failing if the app gets backgrounded
+ are we saving alarms on activate alarm?
 */
 
 class MyHttpOverrides extends HttpOverrides {
