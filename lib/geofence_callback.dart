@@ -19,7 +19,7 @@ import 'package:vibration/vibration.dart';
 
 const geofenceEventPortName = 'geofence_event_port';
 const triggerTimesFilename = 'geofence_trigger_times';
-const deduplicationInterval = Duration(minutes: 1);
+const deduplicationInterval = Duration(seconds: 25);
 
 class TriggeredAlarmEvent {
   final String id;
@@ -79,9 +79,9 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   // Display a notification to the user.
   const title = 'Alarm Triggered';
   const message = 'You have entered the radius of an alarm.';
-  const notificationDetails = NotificationDetails(iOS: .new(interruptionLevel: .active));
+  const details = NotificationDetails(iOS: .new(interruptionLevel: .active));
   try {
-    await FlutterLocalNotificationsPlugin().show(id.hashCode, title, message, notificationDetails);
+    await FlutterLocalNotificationsPlugin().show(id: id.hashCode, title: title, body: message, notificationDetails: details);
   } on Exception catch (_) {
     debugPrintError('Failed to send notification.');
   }

@@ -73,7 +73,7 @@ void main() async {
 
   runApp(const App());
 
-  final success = await FlutterLocalNotificationsPlugin().initialize(const InitializationSettings(iOS: .new()));
+  final success = await FlutterLocalNotificationsPlugin().initialize(settings: const .new(iOS: .new()));
   final didInitialize = success ?? false;
   if (!didInitialize) {
     debugPrintError('Notifications unavailable (permission denied or initialization failed).');
