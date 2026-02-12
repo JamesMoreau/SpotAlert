@@ -21,7 +21,10 @@ import 'package:spot_alert/models/alarm.dart';
 
 const mapTileStoreName = 'mapStore';
 const alarmsFilename = 'alarms.json';
-const geofenceNumberLimit = 20; // This limit comes from Apple's API, restricting the number of geofences per application.
+
+// This limit comes from Apple's API, restricting the number of geofences per application.
+// Adding more that this will replace previously created geofences.
+const geofenceNumberLimit = 20; 
 
 class SpotAlert extends JuneState {
   final List<Alarm> alarms = [];
