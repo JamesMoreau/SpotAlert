@@ -97,7 +97,7 @@ class AlarmsView extends StatelessWidget {
         return true;
 
       case .limitReached:
-        message = 'Maximum number of geofences allowed by iOS reached. Turn off one to add another.';
+        message = 'Maximum number of geofences allowed by iOS reached ($geofenceNumberLimit). Turn off one to add another.';
 
       case .failed:
         message = 'Failed to activate the alarm.';
