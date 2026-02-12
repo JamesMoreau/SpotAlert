@@ -14,7 +14,6 @@ import 'package:uuid/uuid.dart';
 /*
 TODO: 
  vibration is failing if the app gets backgrounded
- are we saving alarms on activate alarm?
 */
 
 class MyHttpOverrides extends HttpOverrides {
