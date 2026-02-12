@@ -61,7 +61,7 @@ class Compass extends StatelessWidget {
 
         return IgnorePointer(
           child: Center(
-            child: Stack(alignment: .center, children: [if (userArrow != null) userArrow, if (alarmArrow != null) alarmArrow]),
+            child: Stack(alignment: .center, children: [ ?userArrow, ?alarmArrow]),
           ),
         );
       },
