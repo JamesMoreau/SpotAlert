@@ -94,6 +94,7 @@ class AlarmsView extends StatelessWidget {
     switch (result) {
       case .success:
         spotAlert.setState();
+        await saveAlarmsToStorage(spotAlert);
         return true;
 
       case .limitReached:
