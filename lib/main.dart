@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/app.dart';
@@ -13,6 +14,7 @@ import 'package:uuid/uuid.dart';
 /*
 TODO: 
  alarm is being triggered twice
+ vibration is failing if the app gets backgrounded
 */
 
 class MyHttpOverrides extends HttpOverrides {
@@ -47,6 +49,8 @@ void main() async {
   }
 
   await SystemChrome.setPreferredOrientations([.portraitUp]);
+
+  await NativeGeofenceManager.instance.initialize();
 
   // Set up http overrides. This is needed to increase the number of concurrent http requests allowed. This helps with the map tiles loading.
   HttpOverrides.global = MyHttpOverrides();

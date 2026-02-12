@@ -10,16 +10,16 @@ import 'package:spot_alert/main.dart';
 import 'package:vibration/vibration.dart';
 
 // Each geofence callback is run in it's own isolate, separated from the main flutter isolate.
-// This means it does not have access to the main isolate memory and application state, that is, 
+// This means it does not have access to the main isolate memory and application state, that is,
 // SpotAlert, the widget tree, nor other instances of the callback.
 //
 // In addition, if the app is running in background, we cannot guarantee any code execution from
-// the main isolate. Therefore any process that must happen when the geofence is triggered must 
+// the main isolate. Therefore any process that must happen when the geofence is triggered must
 // also be completed inside the callback.
 
 const geofenceEventPortName = 'geofence_event_port';
 const triggerTimesFilename = 'geofence_trigger_times';
-const deduplicationInterval = Duration(seconds: 25);
+const deduplicationInterval = Duration(minutes: 1);
 
 class TriggeredAlarmEvent {
   final String id;
@@ -45,9 +45,9 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   final now = DateTime.now();
 
   // Sometimes the same geofence can trigger twice for the same event type.
-  // Therefore, we must de-duplicate the alarms by checking the last trigger time.
-  // Since we cannot persist memory across callbacks, we need to use the file system
-  // to store the last triggered alarm id and time.
+  // Therefore, we must de-duplicate by checking the last trigger time. Since 
+  // we cannot persist memory across callbacks, we need to use the file system
+  // to store the last triggered id and time.
   final directory = await getApplicationDocumentsDirectory();
   final filepath = path.join(directory.path, triggerTimesFilename);
   final file = File(filepath);
@@ -100,7 +100,8 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   final canVibrate = await Vibration.hasVibrator();
   if (canVibrate) {
     const pause = Duration(seconds: 3);
-    for (var i = 0; i < 4; i++) {
+    const rounds = 4;
+    for (var i = 0; i < rounds; i++) {
       await Future<void>.delayed(pause);
       await Vibration.vibrate();
     }

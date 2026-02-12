@@ -140,6 +140,8 @@ Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alar
   }
   spotAlert.setState();
 
+  await saveAlarmsToStorage(spotAlert);
+
   await showGeneralDialog<void>(
     context: globalNavigatorKey.currentContext!,
     pageBuilder: (_, _, _) => Dialog.fullscreen(child: TriggeredAlarmDialog(triggered)),
@@ -147,8 +149,6 @@ Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alar
 }
 
 Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
-  await NativeGeofenceManager.instance.initialize();
-
   final geofenceIds = await () async {
     try {
       return await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
