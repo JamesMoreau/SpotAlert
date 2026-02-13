@@ -2,12 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:alarm/alarm.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/main.dart';
-import 'package:vibration/vibration.dart';
 
 // Each geofence callback is run in it's own isolate, separated from the main flutter isolate.
 // This means it does not have access to the main isolate memory and application state, that is,
@@ -76,16 +75,6 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   triggerMap[id] = now.millisecondsSinceEpoch;
   await file.writeAsString(jsonEncode(triggerMap));
 
-  // Display a notification to the user.
-  const title = 'Alarm Triggered';
-  const message = 'You have entered the radius of an alarm.';
-  const details = NotificationDetails(iOS: .new(interruptionLevel: .active));
-  try {
-    await FlutterLocalNotificationsPlugin().show(id: id.hashCode, title: title, body: message, notificationDetails: details);
-  } on Exception catch (_) {
-    debugPrintError('Failed to send notification.');
-  }
-
   // Notify flutter app to display to display the triggered alarm in the ui.
   final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);
   if (port == null) {
@@ -96,16 +85,25 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
     port.send(event.toMap());
   }
 
-  // Grab to user's attention. Vibrate last because we need to await it.
-  final canVibrate = await Vibration.hasVibrator();
-  if (canVibrate) {
-    const pause = Duration(seconds: 3);
-    const rounds = 4;
-    for (var i = 0; i < rounds; i++) {
-      await Future<void>.delayed(pause);
-      await Vibration.vibrate();
-    }
-  }
+  await Alarm.init();
+
+  final alarmSettings = AlarmSettings(
+    id: 42,
+    dateTime: now,
+    loopAudio: true,
+    vibrate: true,
+    androidFullScreenIntent: true,
+    volumeSettings: .fade(volume: 0.8, fadeDuration: const .new(seconds: 5), volumeEnforced: true),
+    notificationSettings: const .new(
+      title: 'This is the title',
+      body: 'This is the body',
+      stopButton: 'Stop the alarm',
+      icon: 'notification_icon',
+      iconColor: .new(0xff862778),
+    ),
+  );
+
+  await Alarm.set(alarmSettings: alarmSettings);
 
   await Future<void>.delayed(const Duration(seconds: 1));
 }

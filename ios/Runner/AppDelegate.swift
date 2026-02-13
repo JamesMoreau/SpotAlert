@@ -1,6 +1,8 @@
 import UIKit
 import Flutter
 import native_geofence
+import UserNotifications
+import alarm
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -22,5 +24,10 @@ import native_geofence
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
+      
+    if #available(iOS 10.0, *) {
+      UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
+    }
+    SwiftAlarmPlugin.registerBackgroundTasks()
   }
 }

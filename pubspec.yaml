@@ -33,6 +33,7 @@ platforms:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  alarm: ^5.2.1
   app_settings: ^7.0.0
   flutter:
     sdk: flutter
