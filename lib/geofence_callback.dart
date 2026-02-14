@@ -7,7 +7,6 @@ import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/main.dart';
-import 'package:vibration/vibration.dart';
 
 // Each geofence callback is run in it's own isolate, separated from the main flutter isolate.
 // This means it does not have access to the main isolate memory and application state, that is,
@@ -94,17 +93,6 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   } else {
     final event = TriggeredAlarmEvent(id: id, timestamp: now);
     port.send(event.toMap());
-  }
-
-  // Grab to user's attention. Vibrate last because we need to await it.
-  final canVibrate = await Vibration.hasVibrator();
-  if (canVibrate) {
-    const pause = Duration(seconds: 3);
-    const rounds = 4;
-    for (var i = 0; i < rounds; i++) {
-      await Future<void>.delayed(pause);
-      await Vibration.vibrate();
-    }
   }
 
   await Future<void>.delayed(const Duration(seconds: 1));
