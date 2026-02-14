@@ -78,7 +78,7 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   // Display a notification to the user.
   const title = 'Alarm Triggered';
   const message = 'You have entered the radius of an alarm.';
-  const details = NotificationDetails(iOS: .new(interruptionLevel: .active));
+  const details = NotificationDetails(iOS: .new(interruptionLevel: .timeSensitive));
   try {
     await FlutterLocalNotificationsPlugin().show(id: id.hashCode, title: title, body: message, notificationDetails: details);
   } on Exception catch (_) {
