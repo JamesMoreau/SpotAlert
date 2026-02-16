@@ -59,10 +59,4 @@ void main() async {
   await const FMTCStore(mapTileStoreName).manage.create();
 
   runApp(const App());
-
-  final success = await FlutterLocalNotificationsPlugin().initialize(settings: const .new(iOS: .new()));
-  final didInitialize = success ?? false;
-  if (!didInitialize) {
-    debugPrintError('Notifications unavailable (permission denied or initialization failed).');
-  }
 }
