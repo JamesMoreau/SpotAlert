@@ -10,7 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/spot_alert_state.dart';
-import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
@@ -25,19 +24,6 @@ class MyHttpOverrides extends HttpOverrides {
     return client;
   }
 }
-
-const Uuid idGenerator = Uuid();
-
-void debugPrintMessage(String message) {
-  assert(() {
-    debugPrint(message);
-    return true;
-  }());
-}
-
-void debugPrintInfo(String message) => debugPrintMessage('ℹ️ $message');
-void debugPrintWarning(String message) => debugPrintMessage('⚠️ $message');
-void debugPrintError(String message) => debugPrintMessage('❌ $message');
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

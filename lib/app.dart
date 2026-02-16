@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
-import 'package:spot_alert/main.dart';
 import 'package:spot_alert/spot_alert_state.dart';
 import 'package:spot_alert/views/alarms.dart';
 import 'package:spot_alert/views/map.dart';
 import 'package:spot_alert/views/settings.dart';
+import 'package:uuid/uuid.dart';
+
+void debugPrintMessage(String message) {
+  assert(() {
+    debugPrint(message);
+    return true;
+  }());
+}
+
+void debugPrintInfo(String message) => debugPrintMessage('ℹ️ $message');
+void debugPrintWarning(String message) => debugPrintMessage('⚠️ $message');
+void debugPrintError(String message) => debugPrintMessage('❌ $message');
+
+const Uuid idGenerator = Uuid();
 
 GlobalKey<ScaffoldMessengerState> globalScaffoldKey = .new();
 GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
@@ -33,9 +46,9 @@ class App extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: const .only(topLeft: .circular(50), topRight: .circular(50)),
                 child: NavigationBar(
-                  onDestinationSelected: (int index) {
+                  onDestinationSelected: (index) async {
                     final newView = SpotAlertView.values[index];
-                    navigateToView(spotAlert, newView);
+                    await navigateToView(spotAlert, newView);
                   },
                   selectedIndex: spotAlert.view.index,
                   destinations: SpotAlertView.values.map((view) => NavigationDestination(icon: Icon(view.icon), label: view.label)).toList(),

@@ -5,7 +5,7 @@ import 'dart:ui';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:spot_alert/main.dart';
+import 'package:spot_alert/app.dart';
 
 // Each geofence callback is run in it's own isolate, separated from the main flutter isolate.
 // This means it does not have access to the main isolate memory and application state, that is,

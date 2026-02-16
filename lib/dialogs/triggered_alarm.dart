@@ -77,10 +77,11 @@ class _WiggleWidgetState extends State<WiggleWidget> with SingleTickerProviderSt
   late final Animation<double> offset;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
 
-    controller = AnimationController(vsync: this, duration: const .new(milliseconds: 500))..repeat(reverse: true);
+    controller = AnimationController(vsync: this, duration: const .new(milliseconds: 500));
+    await controller.repeat(reverse: true);
     rotation = Tween<double>(begin: -.1, end: .1).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
     offset = Tween<double>(begin: -6, end: 6).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }
