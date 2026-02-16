@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:spot_alert/main.dart';
+import 'package:spot_alert/app.dart';
 
 const minimumAlarmRadius = 1000.0;
 const initialAlarmRadius = 2000.0;

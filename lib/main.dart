@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -9,11 +10,10 @@ import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/spot_alert_state.dart';
-import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
- vibration is failing if the app gets backgrounded
+ setup logging.
 */
 
 class MyHttpOverrides extends HttpOverrides {
@@ -25,19 +25,6 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-const Uuid idGenerator = Uuid();
-
-void debugPrintMessage(String message) {
-  assert(() {
-    debugPrint(message);
-    return true;
-  }());
-}
-
-void debugPrintInfo(String message) => debugPrintMessage('ℹ️ $message');
-void debugPrintWarning(String message) => debugPrintMessage('⚠️ $message');
-void debugPrintError(String message) => debugPrintMessage('❌ $message');
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -46,6 +33,8 @@ void main() async {
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     return;
   }
+
+  await Alarm.init();
 
   await SystemChrome.setPreferredOrientations([.portraitUp]);
 

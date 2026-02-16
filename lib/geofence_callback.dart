@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:spot_alert/main.dart';
+import 'package:spot_alert/app.dart';
+import 'package:spot_alert/models/triggered_alarm_event.dart';
 
 // Each geofence callback is run in it's own isolate, separated from the main flutter isolate.
 // This means it does not have access to the main isolate memory and application state, that is,
@@ -19,18 +19,6 @@ import 'package:spot_alert/main.dart';
 const geofenceEventPortName = 'geofence_event_port';
 const triggerTimesFilename = 'geofence_trigger_times';
 const deduplicationInterval = Duration(seconds: 25);
-
-class TriggeredAlarmEvent {
-  final String id;
-  final DateTime timestamp;
-
-  TriggeredAlarmEvent({required this.id, required this.timestamp});
-
-  Map<String, dynamic> toMap() => {'id': id, 'timestamp': timestamp.millisecondsSinceEpoch};
-
-  factory TriggeredAlarmEvent.fromMap(Map<String, dynamic> map) =>
-      TriggeredAlarmEvent(id: map['id'] as String, timestamp: .fromMillisecondsSinceEpoch(map['timestamp'] as int));
-}
 
 @pragma('vm:entry-point')
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
@@ -74,16 +62,6 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 
   triggerMap[id] = now.millisecondsSinceEpoch;
   await file.writeAsString(jsonEncode(triggerMap));
-
-  // Display a notification to the user.
-  const title = 'Alarm Triggered';
-  const message = 'You have entered the radius of an alarm.';
-  const details = NotificationDetails(iOS: .new(interruptionLevel: .timeSensitive));
-  try {
-    await FlutterLocalNotificationsPlugin().show(id: id.hashCode, title: title, body: message, notificationDetails: details);
-  } on Exception catch (_) {
-    debugPrintError('Failed to send notification.');
-  }
 
   // Notify flutter app to display to display the triggered alarm in the ui.
   final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);

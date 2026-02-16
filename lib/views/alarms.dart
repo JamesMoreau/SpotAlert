@@ -3,7 +3,6 @@ import 'package:june/june.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/dialogs/edit_alarm.dart';
-import 'package:spot_alert/main.dart';
 import 'package:spot_alert/models/alarm.dart';
 import 'package:spot_alert/spot_alert_state.dart';
 import 'package:spot_alert/widgets/alarm_pin.dart';

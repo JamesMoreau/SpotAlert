@@ -1,3 +1,4 @@
+import 'package:alarm/alarm.dart' as alarm_package;
 import 'package:flutter/material.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/models/alarm.dart';
@@ -38,8 +39,10 @@ class TriggeredAlarmDialog extends StatelessWidget {
                   Text(triggered.name, style: const .new(fontSize: 30, fontWeight: .bold)),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Close the dialog
+                    onPressed: () async {
+                      final navigator = Navigator.of(context);
+                      await alarm_package.Alarm.stop(triggered.id.hashCode);
+                      navigator.pop(); // Close the dialog
                     },
                     style: ElevatedButton.styleFrom(
                       elevation: 4,
@@ -75,10 +78,11 @@ class _WiggleWidgetState extends State<WiggleWidget> with SingleTickerProviderSt
   late final Animation<double> offset;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
 
-    controller = AnimationController(vsync: this, duration: const .new(milliseconds: 500))..repeat(reverse: true);
+    controller = AnimationController(vsync: this, duration: const .new(milliseconds: 500));
+    await controller.repeat(reverse: true);
     rotation = Tween<double>(begin: -.1, end: .1).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
     offset = Tween<double>(begin: -6, end: 6).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
   }

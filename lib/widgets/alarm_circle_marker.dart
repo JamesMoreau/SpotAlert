@@ -17,9 +17,10 @@ class _AlarmCircleState extends State<AlarmCircle> with SingleTickerProviderStat
   late final AnimationController controller;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
-    controller = AnimationController(vsync: this, duration: widget.sweepDuration)..repeat();
+    controller = AnimationController(vsync: this, duration: widget.sweepDuration);
+    await controller.repeat();
   }
 
   @override
