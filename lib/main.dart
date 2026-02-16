@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
