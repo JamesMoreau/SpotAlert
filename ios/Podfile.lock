@@ -1,5 +1,9 @@
 PODS:
+  - alarm (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
+  - flutter_fgbg (0.0.1):
+    - Flutter
   - native_geofence (1.0.0):
     - Flutter
   - ObjectBox (4.4.1)
@@ -8,7 +12,9 @@ PODS:
     - ObjectBox (= 4.4.1)
 
 DEPENDENCIES:
+  - alarm (from `.symlinks/plugins/alarm/ios`)
   - Flutter (from `Flutter`)
+  - flutter_fgbg (from `.symlinks/plugins/flutter_fgbg/ios`)
   - native_geofence (from `.symlinks/plugins/native_geofence/ios`)
   - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
 
@@ -17,15 +23,21 @@ SPEC REPOS:
     - ObjectBox
 
 EXTERNAL SOURCES:
+  alarm:
+    :path: ".symlinks/plugins/alarm/ios"
   Flutter:
     :path: Flutter
+  flutter_fgbg:
+    :path: ".symlinks/plugins/flutter_fgbg/ios"
   native_geofence:
     :path: ".symlinks/plugins/native_geofence/ios"
   objectbox_flutter_libs:
     :path: ".symlinks/plugins/objectbox_flutter_libs/ios"
 
 SPEC CHECKSUMS:
+  alarm: 8a8ed4893eb9bd09e7c5a96bf8ab8104f380f65f
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_fgbg: d3da78df78454b1808f0829a5da9cd17dfe16444
   native_geofence: b6b6b2bca9bbf8181e646aab0e41a012089ee905
   ObjectBox: 7da4aceb5013d041bfafdbc6d744a26918b09757
   objectbox_flutter_libs: 09b1dec1b4cd27bf1a5f9bae7ccaa7e43588bf31

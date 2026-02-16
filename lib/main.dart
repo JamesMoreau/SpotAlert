@@ -14,7 +14,7 @@ import 'package:uuid/uuid.dart';
 
 /*
 TODO: 
- vibration is failing if the app gets backgrounded
+ setup logging.
 */
 
 class MyHttpOverrides extends HttpOverrides {

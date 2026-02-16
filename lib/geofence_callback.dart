@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:alarm/alarm.dart';
-import 'package:flutter/material.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -35,10 +33,6 @@ class TriggeredAlarmEvent {
 
 @pragma('vm:entry-point')
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
-  debugPrintWarning('Hello, sailor 1');
-  WidgetsFlutterBinding.ensureInitialized();
-  debugPrintWarning('Hello, sailor 2');
-  
   debugPrintInfo('GeofenceCallbackParams: $params');
   if (params.event != .enter) {
     debugPrintError('Geofence callback received an event other than enter, which should not be possible.');
@@ -79,16 +73,6 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 
   triggerMap[id] = now.millisecondsSinceEpoch;
   await file.writeAsString(jsonEncode(triggerMap));
-
-  // Display a notification to the user.
-  const title = 'Alarm Triggered';
-  const message = 'You have entered the radius of an alarm.';
-  const details = NotificationDetails(iOS: .new(interruptionLevel: .timeSensitive));
-  try {
-    await FlutterLocalNotificationsPlugin().show(id: id.hashCode, title: title, body: message, notificationDetails: details);
-  } on Exception catch (_) {
-    debugPrintError('Failed to send notification.');
-  }
 
   // Notify flutter app to display to display the triggered alarm in the ui.
   final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:alarm/alarm.dart' as alarm_package;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -24,7 +25,7 @@ const alarmsFilename = 'alarms.json';
 
 // This limit comes from Apple's API, restricting the number of geofences per application.
 // Adding more that this will replace previously created geofences.
-const geofenceNumberLimit = 20; 
+const geofenceNumberLimit = 20;
 
 class SpotAlert extends JuneState {
   final List<Alarm> alarms = [];
@@ -132,6 +133,16 @@ Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alar
   }
 
   debugPrintInfo('Alarm id ${triggered.id} triggered at ${event.timestamp}');
+
+  final settings = alarm_package.AlarmSettings(
+    id: triggered.id.hashCode,
+    dateTime: DateTime.now(),
+    warningNotificationOnKill: Platform.isIOS,
+    volumeSettings: .fade(volume: 0.8, fadeDuration: const .new(seconds: 5), volumeEnforced: true),
+    notificationSettings: .new(title: 'Alarm Triggered', body: triggered.name, stopButton: 'Stop the alarm'),
+  );
+
+  await alarm_package.Alarm.set(alarmSettings: settings);
 
   final success = await deactivateAlarm(triggered);
   if (!success) {

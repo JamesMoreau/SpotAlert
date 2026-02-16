@@ -1,3 +1,4 @@
+import 'package:alarm/alarm.dart' as alarm_package;
 import 'package:flutter/material.dart';
 import 'package:spot_alert/app.dart';
 import 'package:spot_alert/models/alarm.dart';
@@ -39,6 +40,7 @@ class TriggeredAlarmDialog extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
+                      alarm_package.Alarm.stop(triggered.id.hashCode);
                       Navigator.pop(context); // Close the dialog
                     },
                     style: ElevatedButton.styleFrom(

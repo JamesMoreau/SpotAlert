@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:alarm/alarm.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -110,33 +109,6 @@ class SettingsView extends StatelessWidget {
                     },
                   ),
                 ),
-                if (kDebugMode)
-                  Padding(
-                    padding: const .all(8),
-                    child: ListTile(
-                      title: const Text('DEBUG: CREATE AND SET ALARM'),
-                      trailing: const Icon(Icons.alarm_rounded),
-                      onTap: () async {
-                        final alarmSettings = AlarmSettings(
-                          id: 42,
-                          dateTime: DateTime.now().add(const .new(seconds: 1)),
-                          loopAudio: true,
-                          vibrate: true,
-                          androidFullScreenIntent: true,
-                          volumeSettings: .fade(volume: 0.8, fadeDuration: const .new(seconds: 5), volumeEnforced: true),
-                          notificationSettings: const .new(
-                            title: 'This is the title',
-                            body: 'This is the body',
-                            stopButton: 'Stop the alarm',
-                            icon: 'notification_icon',
-                            iconColor: .new(0xff862778),
-                          ),
-                        );
-
-                        await Alarm.set(alarmSettings: alarmSettings);
-                      },
-                    ),
-                  ),
                 if (kDebugMode)
                   Padding(
                     padding: const .all(8),
