@@ -18,6 +18,7 @@ import 'package:spot_alert/app.dart';
 import 'package:spot_alert/dialogs/triggered_alarm.dart';
 import 'package:spot_alert/geofence_callback.dart';
 import 'package:spot_alert/models/alarm.dart';
+import 'package:spot_alert/models/triggered_alarm_event.dart';
 
 const mapTileStoreName = 'mapStore';
 const alarmsFilename = 'alarms.json';
