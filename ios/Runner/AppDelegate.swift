@@ -10,6 +10,11 @@ import alarm
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    if #available(iOS 10.0, *) {
+      UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
+    }
+    SwiftAlarmPlugin.registerBackgroundTasks()
+
     // Used by package: native_geofence
     NativeGeofencePlugin.setPluginRegistrantCallback { registry in
         GeneratedPluginRegistrant.register(with: registry)
@@ -24,10 +29,5 @@ import alarm
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
-      
-    if #available(iOS 10.0, *) {
-      UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
-    }
-    SwiftAlarmPlugin.registerBackgroundTasks()
   }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:alarm/alarm.dart';
+import 'package:flutter/material.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -34,6 +35,10 @@ class TriggeredAlarmEvent {
 
 @pragma('vm:entry-point')
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
+  debugPrintWarning('Hello, sailor 1');
+  WidgetsFlutterBinding.ensureInitialized();
+  debugPrintWarning('Hello, sailor 2');
+  
   debugPrintInfo('GeofenceCallbackParams: $params');
   if (params.event != .enter) {
     debugPrintError('Geofence callback received an event other than enter, which should not be possible.');
@@ -89,7 +94,7 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 
   final alarmSettings = AlarmSettings(
     id: 42,
-    dateTime: now,
+    dateTime: now.add(const .new(seconds: 1)),
     loopAudio: true,
     vibrate: true,
     androidFullScreenIntent: true,
