@@ -39,9 +39,10 @@ class TriggeredAlarmDialog extends StatelessWidget {
                   Text(triggered.name, style: const .new(fontSize: 30, fontWeight: .bold)),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      alarm_package.Alarm.stop(triggered.id.hashCode);
-                      Navigator.pop(context); // Close the dialog
+                    onPressed: () async {
+                      final navigator = Navigator.of(context);
+                      await alarm_package.Alarm.stop(triggered.id.hashCode);
+                      navigator.pop(); // Close the dialog
                     },
                     style: ElevatedButton.styleFrom(
                       elevation: 4,
