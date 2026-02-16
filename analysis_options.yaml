@@ -7,7 +7,6 @@
 
 # The following line activates a set of recommended lints for Flutter apps,
 # packages, and plugins designed to encourage good coding practices.
-# include: package:flutter_lints/flutter.yaml
 # include: package:lints/recommended.yaml
 include: package:very_good_analysis/analysis_options.8.0.0.yaml
 
@@ -28,20 +27,11 @@ linter:
     prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
     always_use_package_imports: true
     lines_longer_than_80_chars: false
-    prefer_const_constructors: true
     prefer_const_literals_to_create_immutables: false
-    curly_braces_in_flow_control_structures: false
     prefer_asserts_with_message: false
-    
-    # very good analysis options
+    prefer_const_constructors: true
     public_member_api_docs: false
     sort_constructors_first: false
-    # prefer_final_fields: false
-    # cascade_invocations: false
-    # prefer_final_in_for_each: false
-    # prefer_final_locals: false
-    # unnecessary_lambdas: false
-    # prefer_asserts_with_message: false
 
 # Additional information about this file can be found at
 # https://dart.dev/guides/language/analysis-options
