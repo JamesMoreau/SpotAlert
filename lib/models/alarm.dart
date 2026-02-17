@@ -90,13 +90,13 @@ List<Alarm> detectTriggeredAlarms(LatLng position, List<Alarm> alarms) {
 
 Future<List<Alarm>> loadAlarmsFromFile(File file) async {
   if (!file.existsSync()) {
-    debugPrintWarning('No alarms file found: ${file.path}');
+    logger.w('No alarms file found: ${file.path}');
     return [];
   }
 
   final contents = await file.readAsString();
   if (contents.isEmpty) {
-    debugPrintWarning('No alarms found in file: ${file.path}');
+    logger.w('No alarms found in file: ${file.path}');
     return [];
   }
 
@@ -109,14 +109,14 @@ Future<List<Alarm>> loadAlarmsFromFile(File file) async {
     final alarm = Alarm.fromMap(alarmMap);
 
     if (!seenIds.add(alarm.id)) {
-      debugPrintError('Duplicate alarm id detected while loading: ${alarm.id}. Skipping duplicate.');
+      logger.e('Duplicate alarm id detected while loading: ${alarm.id}. Skipping duplicate.');
       continue;
     }
 
     alarms.add(alarm);
   }
 
-  debugPrintInfo('Loaded ${alarms.length} alarms from ${file.path}.');
+  logger.i('Loaded ${alarms.length} alarms from ${file.path}.');
   return alarms;
 }
 
@@ -126,7 +126,7 @@ Future<void> saveAlarmsToFile(File file, List<Alarm> alarms) async {
 
   for (final alarm in alarms) {
     if (!seenIds.add(alarm.id)) {
-      debugPrintError('Duplicate alarm id detected while saving: ${alarm.id}. Skipping duplicate.');
+      logger.e('Duplicate alarm id detected while saving: ${alarm.id}. Skipping duplicate.');
       continue;
     }
 
@@ -138,5 +138,5 @@ Future<void> saveAlarmsToFile(File file, List<Alarm> alarms) async {
   final json = jsonEncode(alarmJsons);
   await file.writeAsString(json);
 
-  debugPrintInfo('Saved ${alarmJsons.length} alarms to ${file.path}.');
+  logger.i('Saved ${alarmJsons.length} alarms to ${file.path}.');
 }

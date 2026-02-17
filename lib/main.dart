@@ -28,7 +28,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   if (!Platform.isIOS) {
-    debugPrintError('This app is not supported on this platform. Supported platforms: iOS');
+    logger.e('This app is not supported on this platform. Supported platforms: iOS');
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     return;
   }
@@ -47,7 +47,7 @@ void main() async {
   try {
     await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   } on Exception catch (error, stackTrace) {
-    debugPrintInfo('FMTC initialization failed: $error\n$stackTrace');
+    logger.i('FMTC initialization failed: $error\n$stackTrace');
 
     // Attempt to delete the corrupted FMTC directory.
     final fmtcDir = Directory(path.join(documentsDir.path, 'fmtc'));

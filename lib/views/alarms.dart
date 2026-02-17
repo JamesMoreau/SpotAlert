@@ -11,7 +11,7 @@ class AlarmsView extends StatelessWidget {
   const AlarmsView({super.key});
 
   Future<void> handleAlarmEdit(BuildContext context, SpotAlert spotAlert, Alarm alarm) async {
-    debugPrintInfo('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
+    logger.i('Editing alarm: ${alarm.name}, id: ${alarm.id}.');
 
     final result = await showModalBottomSheet<EditAlarmResult>(context: context, isScrollControlled: true, builder: (_) => EditAlarmDialog(alarm));
 
@@ -36,7 +36,7 @@ class AlarmsView extends StatelessWidget {
           if (!success) {
             final message = 'Alarm ${alarm.id} could not be deactivated for deletion.';
 
-            debugPrintError(message);
+            logger.e(message);
 
             showMySnackBar(message);
             return;

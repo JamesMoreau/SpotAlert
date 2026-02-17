@@ -47,7 +47,7 @@ class SettingsView extends StatelessWidget {
                         return;
                       }
 
-                      debugPrintInfo('Opening app store page for feedback.');
+                      logger.i('Opening app store page for feedback.');
                       await launchUrl(uri);
                     },
                   ),
@@ -72,7 +72,7 @@ class SettingsView extends StatelessWidget {
                         _ => '${(sizeKiB / (1024 * 1024)).toStringAsFixed(1)} GB', // ≥ 1 GB
                       };
                       final message = 'Map tile cache cleared. $formattedSize freed.';
-                      debugPrintInfo(message);
+                      logger.i(message);
                       showMySnackBar(message);
                     },
                   ),
@@ -103,7 +103,7 @@ class SettingsView extends StatelessWidget {
                         return;
                       }
 
-                      debugPrintInfo('Opening Ko-fi page.');
+                      logger.i('Opening Ko-fi page.');
                       await launchUrl(uri);
                     },
                   ),
@@ -120,17 +120,17 @@ class SettingsView extends StatelessWidget {
                         final alarmsFile = File(alarmsPath);
 
                         if (!alarmsFile.existsSync()) {
-                          debugPrintWarning('No alarms file found in storage.');
+                          logger.w('No alarms file found in storage.');
                           return;
                         }
 
                         final alarmJsons = await alarmsFile.readAsString();
                         if (alarmJsons.isEmpty) {
-                          debugPrintInfo('No alarms found in storage.');
+                          logger.i('No alarms found in storage.');
                           return;
                         }
 
-                        debugPrintInfo('Alarms found in storage: $alarmJsons');
+                        logger.i('Alarms found in storage: $alarmJsons');
                       },
                     ),
                   ),

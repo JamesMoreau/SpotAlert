@@ -76,7 +76,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
   }
 
   if (permission == .denied || permission == .deniedForever) {
-    debugPrintWarning('Location permissions are denied');
+    logger.w('Location permissions are denied');
     showLocationUnavailableSnackbar(messenger);
     return;
   }
@@ -108,7 +108,7 @@ Future<void> onMapReady(SpotAlert spotAlert) async {
 
 void showLocationUnavailableSnackbar(ScaffoldMessengerState? messenger) {
   if (messenger == null) {
-    debugPrintError('Could not show snackbar because scaffold messenger was null');
+    logger.e('Could not show snackbar because scaffold messenger was null');
     return;
   }
 
@@ -247,9 +247,9 @@ class Overlay extends StatelessWidget {
         spotAlert.alarmPlacementRadius = initialAlarmRadius;
         spotAlert.setState();
       case ActivateAlarmResult.limitReached:
-        debugPrintWarning('Newly placed alarm could not be activated due to the limit on the number of geofences.');
+        logger.w('Newly placed alarm could not be activated due to the limit on the number of geofences.');
       case ActivateAlarmResult.failed:
-        debugPrintError('Could not activate newly placed alarm.');
+        logger.e('Could not activate newly placed alarm.');
     }
 
     await saveAlarmsToStorage(spotAlert);

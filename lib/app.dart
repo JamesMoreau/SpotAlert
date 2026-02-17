@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:june/june.dart';
+import 'package:logger/logger.dart';
 import 'package:spot_alert/spot_alert_state.dart';
 import 'package:spot_alert/views/alarms.dart';
 import 'package:spot_alert/views/map.dart';
 import 'package:spot_alert/views/settings.dart';
 import 'package:uuid/uuid.dart';
 
-void debugPrintMessage(String message) {
-  assert(() {
-    debugPrint(message);
-    return true;
-  }());
-}
-
-void debugPrintInfo(String message) => debugPrintMessage('ℹ️ $message');
-void debugPrintWarning(String message) => debugPrintMessage('⚠️ $message');
-void debugPrintError(String message) => debugPrintMessage('❌ $message');
+Logger logger = Logger(printer: PrettyPrinter(colors: false, methodCount: 0, noBoxingByDefault: true));
 
 const Uuid idGenerator = Uuid();
 
@@ -122,7 +114,7 @@ List<Shadow> solidOutlineShadows({required Color color, int radius = 1}) {
 void showMySnackBar(String message) {
   final messenger = globalScaffoldKey.currentState;
   if (messenger == null) {
-    debugPrintError('Could not show snackbar because scaffold messenger is null');
+    logger.e('Could not show snackbar because scaffold messenger is null');
     return;
   }
 
@@ -156,5 +148,5 @@ Future<void> navigateToView(SpotAlert spotAlert, SpotAlertView view) async {
     ..setState();
   await spotAlert.pageController.animateToPage(view.index, duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
 
-  debugPrintInfo('Navigating to $view.');
+  logger.i('Navigating to $view.');
 }

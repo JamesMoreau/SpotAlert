@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -17,10 +19,10 @@ class _AlarmCircleState extends State<AlarmCircle> with SingleTickerProviderStat
   late final AnimationController controller;
 
   @override
-  Future<void> initState() async {
+  void initState() {
     super.initState();
     controller = AnimationController(vsync: this, duration: widget.sweepDuration);
-    await controller.repeat();
+    unawaited(controller.repeat());
   }
 
   @override

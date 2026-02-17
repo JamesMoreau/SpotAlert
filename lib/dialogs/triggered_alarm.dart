@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:alarm/alarm.dart' as alarm_package;
 import 'package:flutter/material.dart';
 import 'package:spot_alert/app.dart';
@@ -78,13 +80,15 @@ class _WiggleWidgetState extends State<WiggleWidget> with SingleTickerProviderSt
   late final Animation<double> offset;
 
   @override
-  Future<void> initState() async {
+  void initState() {
     super.initState();
 
     controller = AnimationController(vsync: this, duration: const .new(milliseconds: 500));
-    await controller.repeat(reverse: true);
+
     rotation = Tween<double>(begin: -.1, end: .1).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
     offset = Tween<double>(begin: -6, end: 6).animate(CurvedAnimation(parent: controller, curve: Curves.easeInOut));
+    
+    unawaited(controller.repeat(reverse: true));
   }
 
   @override

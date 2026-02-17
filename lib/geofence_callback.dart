@@ -22,9 +22,9 @@ const deduplicationInterval = Duration(seconds: 25);
 
 @pragma('vm:entry-point')
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
-  debugPrintInfo('GeofenceCallbackParams: $params');
+  logger.i('GeofenceCallbackParams: $params');
   if (params.event != .enter) {
-    debugPrintError('Geofence callback received an event other than enter, which should not be possible.');
+    logger.e('Geofence callback received an event other than enter, which should not be possible.');
     return;
   }
 
@@ -55,7 +55,7 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
     final lastTime = DateTime.fromMillisecondsSinceEpoch(lastTimestampMillis);
 
     if (now.difference(lastTime) < deduplicationInterval) {
-      debugPrintInfo('Duplicate trigger ignored for $id');
+      logger.i('Duplicate trigger ignored for $id');
       return;
     }
   }
@@ -66,7 +66,7 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   // Notify flutter app to display to display the triggered alarm in the ui.
   final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);
   if (port == null) {
-    debugPrintError('Unable to resolve callback port.');
+    logger.e('Unable to resolve callback port.');
     return;
   } else {
     final event = TriggeredAlarmEvent(id: id, timestamp: now);

@@ -100,7 +100,7 @@ Future<void> saveAlarmsToStorage(SpotAlert spotAlert) async {
     final file = File(alarmsPath);
     await saveAlarmsToFile(file, spotAlert.alarms);
   } on MissingPlatformDirectoryException catch (e) {
-    debugPrintError('Failed to save alarms: $e');
+    logger.e('Failed to save alarms: $e');
   }
 }
 
@@ -128,11 +128,11 @@ Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alar
 
   final triggered = alarms.findById(event.id);
   if (triggered == null) {
-    debugPrintError('Unable to retrieve triggered alarm given by id: ${event.id}');
+    logger.e('Unable to retrieve triggered alarm given by id: ${event.id}');
     return;
   }
 
-  debugPrintInfo('Alarm id ${triggered.id} triggered at ${event.timestamp}');
+  logger.i('Alarm id ${triggered.id} triggered at ${event.timestamp}');
 
   final settings = alarm_package.AlarmSettings(
     id: triggered.id.hashCode,
@@ -146,7 +146,7 @@ Future<void> handleGeofenceEvent(dynamic message, SpotAlert spotAlert, List<Alar
 
   final success = await deactivateAlarm(triggered);
   if (!success) {
-    debugPrintError('Unable to deactive triggered alarm: ${triggered.id}');
+    logger.e('Unable to deactive triggered alarm: ${triggered.id}');
     return;
   }
   spotAlert.setState();
@@ -164,7 +164,7 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
     try {
       return await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
     } on NativeGeofenceException catch (e) {
-      debugPrintError(
+      logger.e(
         'Unable to retrieve geofences (${e.code.name}): '
         'message=${e.message}, '
         'detail=${e.details}, '
@@ -186,9 +186,9 @@ Future<void> loadGeofencesForAlarms(List<Alarm> alarms) async {
 
     try {
       await NativeGeofenceManager.instance.removeGeofenceById(geofenceId);
-      debugPrintWarning('Found and removed orphan geofence $geofenceId');
+      logger.w('Found and removed orphan geofence $geofenceId');
     } on NativeGeofenceException catch (e) {
-      debugPrintError(
+      logger.e(
         'Unable to remove orphaned geofence (${e.code.name}): '
         'message=${e.message}, '
         'detail=${e.details}, '
@@ -207,14 +207,14 @@ Future<bool> followOrUnfollowUser(SpotAlert spotAlert) async {
 
     final position = await Geolocator.getLastKnownPosition();
     if (position == null) {
-      debugPrintInfo('Cannot follow the user since there is no known position.');
+      logger.i('Cannot follow the user since there is no known position.');
       return false;
     }
 
     final latlng = LatLng(position.latitude, position.longitude);
     final success = tryMoveMap(spotAlert, latlng);
     if (!success) {
-      debugPrintWarning('Could not follow user since the map is not ready.');
+      logger.w('Could not follow user since the map is not ready.');
       return false;
     }
   }
@@ -240,7 +240,7 @@ Future<ActivateAlarmResult> activateAlarm(Alarm alarm) async {
     try {
       return await NativeGeofenceManager.instance.getRegisteredGeofenceIds();
     } on NativeGeofenceException catch (e) {
-      debugPrintError(
+      logger.e(
         'Unable to retrieve geofences (${e.code.name}): '
         'message=${e.message}, '
         'detail=${e.details}, '
@@ -274,20 +274,20 @@ Future<ActivateAlarmResult> activateAlarm(Alarm alarm) async {
     await NativeGeofenceManager.instance.createGeofence(geofence, geofenceTriggered);
     alarm.active = true;
 
-    debugPrintInfo('Added geofence for alarm: ${alarm.id}');
+    logger.i('Added geofence for alarm: ${alarm.id}');
     return .success;
   } on NativeGeofenceException catch (e) {
     if (e.code == .missingLocationPermission || e.code == .missingBackgroundLocationPermission) {
-      debugPrintError('Error creating geofence. Did the user grant us the location permission yet?');
+      logger.e('Error creating geofence. Did the user grant us the location permission yet?');
     } else if (e.code == .pluginInternal) {
-      debugPrintError(
+      logger.e(
         'Internal geofence error: '
         'message=${e.message}, '
         'detail=${e.details}, '
         'stackTrace=${e.stacktrace}',
       );
     } else {
-      debugPrintError(
+      logger.e(
         'Error creating geofence (${e.code.name}): '
         'message=${e.message}, '
         'detail=${e.details}, '
@@ -303,7 +303,7 @@ Future<bool> deactivateAlarm(Alarm alarm) async {
   try {
     await NativeGeofenceManager.instance.removeGeofenceById(alarm.id);
   } on NativeGeofenceException catch (e) {
-    debugPrintError(
+    logger.e(
       'Unable to remove geofence (${e.code.name}): '
       'message=${e.message}, '
       'detail=${e.details}, '
@@ -314,7 +314,7 @@ Future<bool> deactivateAlarm(Alarm alarm) async {
   }
 
   alarm.active = false;
-  debugPrintInfo('Removed geofence for alarm: ${alarm.id}.');
+  logger.i('Removed geofence for alarm: ${alarm.id}.');
 
   return true;
 }
