@@ -12,7 +12,7 @@ import 'package:spot_alert/spot_alert_state.dart';
 
 /*
 TODO: 
- setup logging.
+  add "approximate arrival time" indicator.
 */
 
 class MyHttpOverrides extends HttpOverrides {
