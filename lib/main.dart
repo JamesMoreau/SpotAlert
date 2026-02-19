@@ -13,6 +13,7 @@ import 'package:spot_alert/spot_alert_state.dart';
 /*
 TODO: 
   test on physical device
+  try sound alarm on main isolate.
   have alarm dialog clear the alarm.
   should i instantiate FlutterAlarmkit() every time?
   change dynamic island color different.
