@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -32,8 +31,6 @@ void main() async {
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     return;
   }
-
-  await Alarm.init();
 
   await SystemChrome.setPreferredOrientations([.portraitUp]);
 

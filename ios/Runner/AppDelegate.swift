@@ -2,7 +2,6 @@ import UIKit
 import Flutter
 import native_geofence
 import UserNotifications
-import alarm
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -10,12 +9,7 @@ import alarm
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    if #available(iOS 10.0, *) {
-      UNUserNotificationCenter.current().delegate = self as UNUserNotificationCenterDelegate
-    }
-    SwiftAlarmPlugin.registerBackgroundTasks()
-
-    // Used by package: native_geofence
+    // Used by native_geofence plugin.
     NativeGeofencePlugin.setPluginRegistrantCallback { registry in
         GeneratedPluginRegistrant.register(with: registry)
     }
@@ -26,6 +20,7 @@ import alarm
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
+    // Used by flutter_local_notifications plugin.
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
     }
