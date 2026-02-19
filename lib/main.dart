@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_alarmkit/flutter_alarmkit.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
@@ -11,6 +12,10 @@ import 'package:spot_alert/spot_alert_state.dart';
 
 /*
 TODO: 
+  test on physical device
+  have alarm dialog clear the alarm.
+  should i instantiate FlutterAlarmkit() every time?
+  change dynamic island color different.
   add "approximate arrival time" indicator.
 */
 
@@ -56,4 +61,15 @@ void main() async {
   await const FMTCStore(mapTileStoreName).manage.create();
 
   runApp(const App());
+
+  try {
+    final isAuthorized = await FlutterAlarmkit().requestAuthorization();
+    if (isAuthorized) {
+      logger.i('Alarm authorization granted');
+    } else {
+      logger.w('Alarm authorization denied or not determined');
+    }
+  } on Exception catch (e) {
+    logger.e('Error requesting authorization: $e');
+  }
 }

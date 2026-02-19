@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter_alarmkit/flutter_alarmkit.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -62,6 +63,18 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
 
   triggerMap[id] = now.millisecondsSinceEpoch;
   await file.writeAsString(jsonEncode(triggerMap));
+
+  try {
+    await FlutterAlarmkit().setCountdownAlarm(
+      countdownDurationInSeconds: 1,
+      repeatDurationInSeconds: 5,
+      tintColor: '#0000FF',
+      label: 'You have triggered an alarm.',
+      soundPath: 'assets/radar.wav'
+    );
+  } on Exception catch (e) {
+    logger.e('Error scheduling alarm: $e');
+  }
 
   // Notify flutter app to display to display the triggered alarm in the ui.
   final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);

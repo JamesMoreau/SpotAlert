@@ -35,6 +35,12 @@ target 'Runner' do
   target 'RunnerTests' do
     inherit! :search_paths
   end
+
+  target 'AlarmkitWidgetExtension' do
+    inherit! :search_paths
+    use_frameworks!
+    pod 'flutter_alarmkit', :path => '.symlinks/plugins/flutter_alarmkit/ios'
+  end
 end
 
 post_install do |installer|

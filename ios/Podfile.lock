@@ -1,5 +1,7 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_alarmkit (0.0.1):
+    - Flutter
   - native_geofence (1.0.0):
     - Flutter
   - ObjectBox (4.4.1)
@@ -9,6 +11,7 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - flutter_alarmkit (from `.symlinks/plugins/flutter_alarmkit/ios`)
   - native_geofence (from `.symlinks/plugins/native_geofence/ios`)
   - objectbox_flutter_libs (from `.symlinks/plugins/objectbox_flutter_libs/ios`)
 
@@ -19,6 +22,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  flutter_alarmkit:
+    :path: ".symlinks/plugins/flutter_alarmkit/ios"
   native_geofence:
     :path: ".symlinks/plugins/native_geofence/ios"
   objectbox_flutter_libs:
@@ -26,10 +31,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_alarmkit: fcec41c9c26868e0d9d01272e8d781fb876813ae
   native_geofence: b6b6b2bca9bbf8181e646aab0e41a012089ee905
   ObjectBox: 7da4aceb5013d041bfafdbc6d744a26918b09757
   objectbox_flutter_libs: 09b1dec1b4cd27bf1a5f9bae7ccaa7e43588bf31
 
-PODFILE CHECKSUM: 1959d098c91d8a792531a723c4a9d7e9f6a01e38
+PODFILE CHECKSUM: 2347966df67168a32caae8fde6774aa754b4789d
 
 COCOAPODS: 1.16.2
