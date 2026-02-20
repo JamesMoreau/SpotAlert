@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
@@ -12,6 +13,7 @@ import 'package:spot_alert/spot_alert_state.dart';
 /*
 TODO: 
   add "approximate arrival time" indicator.
+  update ios/ folder by generating and copying new project. then re add the necessary info.
 */
 
 class MyHttpOverrides extends HttpOverrides {
@@ -56,4 +58,10 @@ void main() async {
   await const FMTCStore(mapTileStoreName).manage.create();
 
   runApp(const App());
+
+  // Request notification permissions before-hand so that the triggered alarm 
+  // notification will fire successfully.
+  final plugin = FlutterLocalNotificationsPlugin();
+  const iosSettings = IOSInitializationSettings();
+  await plugin.initialize(settings: const .new(iOS: iosSettings));
 }

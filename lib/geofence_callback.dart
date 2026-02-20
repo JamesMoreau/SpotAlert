@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -22,6 +24,8 @@ const deduplicationInterval = Duration(seconds: 25);
 
 @pragma('vm:entry-point')
 Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   logger.i('GeofenceCallbackParams: $params');
   if (params.event != .enter) {
     logger.e('Geofence callback received an event other than enter, which should not be possible.');
@@ -58,6 +62,19 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
       logger.i('Duplicate trigger ignored for $id');
       return;
     }
+  }
+
+  // Send a notification to grab the user's attention.
+  try {
+    final plugin = FlutterLocalNotificationsPlugin();
+    const details = DarwinNotificationDetails(sound: 'chime_notification_alert.wav', interruptionLevel: .timeSensitive);
+    await plugin.show(
+      id: id.hashCode,
+      title: 'Alarm Triggered',
+      notificationDetails: const .new(iOS: details),
+    );
+  } on Exception catch (e) {
+    logger.e('Failed to send the user a notification for the triggered alarm: $e');
   }
 
   triggerMap[id] = now.millisecondsSinceEpoch;
