@@ -28,25 +28,20 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>We use your location in the background to alert you when you have triggered an alarm.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>We use your location to alert you when you have triggered an alarm.</string>
-	<!-- Required: AlarmKit usage description -->
 	<key>NSAlarmKitUsageDescription</key>
 	<string>This app uses alarms to notify you even when your device is locked.</string>
-
-	<!-- Required: Enable Live Activities -->
 	<key>NSSupportsLiveActivities</key>
 	<true/>
-
-	<!-- Required for AlarmKit local network communication -->
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_alarmkit._tcp</string>
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This app needs access to the local network to discover and connect to alarm devices.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We use your location in the background to alert you when you have triggered an alarm.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location to alert you when you have triggered an alarm.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -70,6 +65,13 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+		<string>audio</string>
+		<string>processing</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

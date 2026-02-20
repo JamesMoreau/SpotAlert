@@ -61,16 +61,16 @@ void main() async {
   }
   await const FMTCStore(mapTileStoreName).manage.create();
 
-  runApp(const App());
+  // try {
+  //   final isAuthorized = await FlutterAlarmkit().requestAuthorization();
+  //   if (isAuthorized) {
+  //     logger.i('Alarm authorization granted');
+  //   } else {
+  //     logger.w('Alarm authorization denied or not determined');
+  //   }
+  // } on Exception catch (e) {
+  //   logger.e('Error requesting authorization: $e');
+  // }
 
-  try {
-    final isAuthorized = await FlutterAlarmkit().requestAuthorization();
-    if (isAuthorized) {
-      logger.i('Alarm authorization granted');
-    } else {
-      logger.w('Alarm authorization denied or not determined');
-    }
-  } on Exception catch (e) {
-    logger.e('Error requesting authorization: $e');
-  }
+  runApp(const App());
 }

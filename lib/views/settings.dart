@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_alarmkit/flutter_alarmkit.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:path/path.dart' as path;
@@ -108,6 +109,28 @@ class SettingsView extends StatelessWidget {
                     },
                   ),
                 ),
+                if (kDebugMode) ...[
+                  Padding(
+                    padding: const .all(8),
+                    child: ListTile(
+                      title: const Text('DEBUG: Request AlarmKit permission.'),
+                      trailing: const Icon(Icons.alarm_rounded),
+                      onTap: () async {
+                        try {
+                          await FlutterAlarmkit().setCountdownAlarm(
+                            countdownDurationInSeconds: 1,
+                            repeatDurationInSeconds: 5,
+                            tintColor: '#0000FF',
+                            label: 'You have triggered an alarm.',
+                            soundPath: 'assets/radar.caf',
+                          );
+                        } on Exception catch (e) {
+                          logger.e('Error scheduling alarm: $e');
+                        }
+                      },
+                    ),
+                  ),
+                ],
                 if (kDebugMode)
                   Padding(
                     padding: const .all(8),
