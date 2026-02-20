@@ -12,8 +12,8 @@ import 'package:spot_alert/spot_alert_state.dart';
 
 /*
 TODO: 
+  remove flutter_launcher_icons.yaml
   add "approximate arrival time" indicator.
-  update ios/ folder by generating and copying new project. then re add the necessary info.
 */
 
 class MyHttpOverrides extends HttpOverrides {
