@@ -4,6 +4,8 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -64,10 +66,12 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
     }
   }
 
-  // Send a notification to grab the user's attention.
+  triggerMap[id] = now.millisecondsSinceEpoch;
+  await file.writeAsString(jsonEncode(triggerMap));
+
   try {
     final plugin = FlutterLocalNotificationsPlugin();
-    const details = DarwinNotificationDetails(sound: 'chime_notification_alert.wav', interruptionLevel: .timeSensitive);
+    const details = DarwinNotificationDetails(interruptionLevel: .timeSensitive);
     await plugin.show(
       id: id.hashCode,
       title: 'Alarm Triggered',
@@ -77,8 +81,15 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
     logger.e('Failed to send the user a notification for the triggered alarm: $e');
   }
 
-  triggerMap[id] = now.millisecondsSinceEpoch;
-  await file.writeAsString(jsonEncode(triggerMap));
+  // Play a jingle to grab the user's attention.
+  final player = AudioPlayer();
+  await player.setAudioSource(
+    AudioSource.uri(
+      Uri.parse('asset:///assets/soft_alarm.wav'),
+      tag: MediaItem(id: id, title: ''),
+    ),
+  );
+  await player.play();
 
   // Notify flutter app to display to display the triggered alarm in the ui.
   final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);

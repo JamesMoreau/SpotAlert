@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:june/june.dart';
 import 'package:path/path.dart' as path;
@@ -109,28 +108,6 @@ class SettingsView extends StatelessWidget {
                     },
                   ),
                 ),
-                Padding(
-                    padding: const .all(8),
-                    child: ListTile(
-                      title: const Text('DEBUG: Alarm notification.'),
-                      trailing: const Icon(Icons.alarm_rounded),
-                      onTap: () async {
-                        // Send a notification with sound to grab the user's attention.
-                        try {
-                          final plugin = FlutterLocalNotificationsPlugin();
-                          const details = DarwinNotificationDetails(sound: 'chime_notification_alert.wav', interruptionLevel: .timeSensitive);
-                          await plugin.show(
-                            id: 42,
-                            title: 'Alarm Triggered',
-                            notificationDetails: const .new(iOS: details),
-                          );
-                        } on Exception catch (e) {
-                          logger.e('Failed to send the user a notification for the triggered alarm: $e');
-                        }
-                      },
-                    ),
-                  ),
-
                 if (kDebugMode)
                   Padding(
                     padding: const .all(8),

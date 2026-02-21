@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:native_geofence/native_geofence.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -12,7 +13,9 @@ import 'package:spot_alert/spot_alert_state.dart';
 
 /*
 TODO: 
+  make notification silent
   add "approximate arrival time" indicator.
+  add "silent mode is on"
   use platform channels to manually start vibrating.
 */
 
@@ -56,6 +59,8 @@ void main() async {
     await FMTCObjectBoxBackend().initialise(rootDirectory: documentsDir.path);
   }
   await const FMTCStore(mapTileStoreName).manage.create();
+
+  await JustAudioBackground.init();
 
   runApp(const App());
 
