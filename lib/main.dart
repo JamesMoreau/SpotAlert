@@ -13,10 +13,7 @@ import 'package:spot_alert/spot_alert_state.dart';
 
 /*
 TODO: 
-  make notification silent
   add "approximate arrival time" indicator.
-  add "silent mode is on"
-  use platform channels to manually start vibrating.
 */
 
 class MyHttpOverrides extends HttpOverrides {

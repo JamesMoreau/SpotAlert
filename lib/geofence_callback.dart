@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -69,9 +70,19 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   triggerMap[id] = now.millisecondsSinceEpoch;
   await file.writeAsString(jsonEncode(triggerMap));
 
+  // Notify flutter app to display to display the triggered alarm in the ui.
+  final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);
+  if (port == null) {
+    logger.e('Unable to resolve callback port.');
+    return;
+  } else {
+    final event = TriggeredAlarmEvent(id: id, timestamp: now);
+    port.send(event.toMap());
+  }
+
   try {
     final plugin = FlutterLocalNotificationsPlugin();
-    const details = DarwinNotificationDetails(interruptionLevel: .timeSensitive);
+    const details = DarwinNotificationDetails(sound: 'blank.wav', interruptionLevel: .timeSensitive);
     await plugin.show(
       id: id.hashCode,
       title: 'Alarm Triggered',
@@ -82,6 +93,8 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
   }
 
   // Play a jingle to grab the user's attention.
+  // We must await here otherwise the callback completes and the player is destructed.
+  // This is also why we do it last, in order to not block the other code.
   final player = AudioPlayer();
   await player.setAudioSource(
     AudioSource.uri(
@@ -89,17 +102,7 @@ Future<void> geofenceTriggered(GeofenceCallbackParams params) async {
       tag: MediaItem(id: id, title: ''),
     ),
   );
-  await player.play();
-
-  // Notify flutter app to display to display the triggered alarm in the ui.
-  final port = IsolateNameServer.lookupPortByName(geofenceEventPortName);
-  if (port == null) {
-    logger.e('Unable to resolve callback port.');
-    return;
-  } else {
-    final event = TriggeredAlarmEvent(id: id, timestamp: now);
-    port.send(event.toMap());
-  }
+  await player.play(); 
 
   await Future<void>.delayed(const Duration(seconds: 1));
 }

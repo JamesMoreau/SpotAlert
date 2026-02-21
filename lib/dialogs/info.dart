@@ -14,14 +14,27 @@ class InfoDialog extends StatelessWidget {
             mainAxisSize: .min,
             mainAxisAlignment: .center,
             children: [
-              Icon(Icons.info_outline_rounded, size: 40, color: Theme.of(context).colorScheme.primary),
-              const Text(
-                'Here you can place new alarms by tapping the marker button. You can also follow / unfollow your location by tapping the lock button.',
-                textAlign: .center,
+              Icon(
+                Icons.info_outline_rounded,
+                size: 40,
+                color: Theme.of(context).colorScheme.primary,
               ),
-              const Text('Staying on the map view for long periods of time may drain your battery.', textAlign: .center),
-              const Text('Set location permissions to "While Using" or "Always" and enable notifications to use the app when running in background.', textAlign: .center),
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+              const Text(
+                'Place alarms by tapping the marker button. Use the lock button to follow or unfollow your location.',
+                textAlign: TextAlign.center,
+              ),
+              const Text(
+                'Staying on the map for long periods may drain your battery.',
+                textAlign: TextAlign.center,
+              ),
+              const Text(
+                'To use the app in the background: set location access to "While Using" or "Always", enable notifications, and make sure Silent Mode is off.',
+                textAlign: TextAlign.center,
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
             ],
           ),
         ),
